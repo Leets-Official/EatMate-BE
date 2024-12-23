@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@Builder
 public class Member {
 
     @Id
@@ -43,8 +44,11 @@ public class Member {
     @Column(nullable = false)
     private Gender gender;
 
-    @Builder
-    public Member(Long memberId, String email, String name, String nickname, String studentNumber, String mbti, String phoneNumber, int birthYear, Boolean isActive, Gender gender) {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    public Member(Long memberId, String email, String name, String nickname, String studentNumber, String mbti, String phoneNumber, int birthYear, Boolean isActive, Gender gender, Role role) {
         this.memberId = memberId;
         this.email = email;
         this.name = name;
@@ -55,6 +59,6 @@ public class Member {
         this.birthYear = birthYear;
         this.isActive = isActive;
         this.gender = gender;
+        this.role = role;
     }
-
 }
