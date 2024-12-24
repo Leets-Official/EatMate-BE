@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Member {
-
+//OAuth로 받을 수 있는거만 false 해놓기
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
@@ -28,7 +28,7 @@ public class Member {
     @Column(nullable = false)
     private String studentNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String mbti;
 
     @Column(nullable = false)
@@ -48,6 +48,8 @@ public class Member {
     @Column(nullable = false)
     private Role role;
 
+    private String refreshToken;
+
     public Member(Long memberId, String email, String name, String nickname, String studentNumber, String mbti, String phoneNumber, int birthYear, Boolean isActive, Gender gender, Role role) {
         this.memberId = memberId;
         this.email = email;
@@ -60,5 +62,9 @@ public class Member {
         this.isActive = isActive;
         this.gender = gender;
         this.role = role;
+    }
+
+    public void updateRefreshToken(String updateRefreshToken) {
+        this.refreshToken = updateRefreshToken;
     }
 }
