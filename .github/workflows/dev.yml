@@ -64,8 +64,8 @@ jobs:
               sudo docker rm $EXISTING_CONTAINER_ID
             fi
 
-            sudo docker pull ${{ secrets.DEV_DOCKER_USER_NAME }}/eatmate
-            sudo docker run --name spring -d -p 8080:8080 --env-file ./eatmate-dev.env -e TZ=Asia/Seoul ${{ secrets.DEV_DOCKER_USER_NAME }}/eatmate
+            sudo docker pull ${{ secrets.DOCKER_USER_NAME }}/eatmate
+            sudo docker run --name spring -d -p 8080:8080 --env-file ./eatmate-dev.env -e TZ=Asia/Seoul ${{ secrets.DOCKER_USER_NAME }}/eatmate
             sudo docker image prune -a -f
           debug: true  # Enable debugging output
   
