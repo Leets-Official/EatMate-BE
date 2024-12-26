@@ -44,7 +44,7 @@ jobs:
       # 환경별 yml 파일 생성(1) - application.yml
       - name: make application.yml
         if: |
-          contains(github.ref, 'develop')
+          contains(github.ref, 'dev')
         run: |
           cd ./src/main/resources # resources 폴더로 이동
           touch ./application.yml # application.yml 생성
@@ -53,7 +53,7 @@ jobs:
 
       # 환경별 yml 파일 생성(2) - dev
       - name: make application-dev.yml
-        if: contains(github.ref, 'develop')
+        if: contains(github.ref, 'dev')
         run: |
           cd ./src/main/resources
           touch ./application-dev.yml
