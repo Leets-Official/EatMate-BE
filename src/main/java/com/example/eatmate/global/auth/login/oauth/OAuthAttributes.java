@@ -3,6 +3,7 @@ package com.example.eatmate.global.auth.login.oauth;
 
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.Role;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.Map;
@@ -13,7 +14,7 @@ public class OAuthAttributes {
     private final String nameAttributeKey;
     private final GoogleOAuthUserInfo googleOAuthUserInfo;
 
-
+    @Builder
     private OAuthAttributes(String nameAttributeKey, GoogleOAuthUserInfo googleOAuthUserInfo) {
         this.nameAttributeKey = nameAttributeKey;
         this.googleOAuthUserInfo = googleOAuthUserInfo;
