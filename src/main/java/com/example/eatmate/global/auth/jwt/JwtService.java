@@ -56,6 +56,15 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey)); /*application-jwt.yml 파일에  secret 키로 지정 필요*/
     }
 
+    //재발급 토큰 생성
+    public String createRefreshToken() {
+        Date now = new Date();
+        return JWT.create()
+                .withSubject(REFRESH_TOKEN_SUBJECT)
+                .withExpiresAt(new Date(now.getTime() + refreshTokenExpirationPeriod))
+                .sign(Algorithm.HMAC512(secretKey));
+    }
+
     // Access토큰 헤더에 실어서 보내기
     public void sendAccessToken(HttpServletResponse response, String accessToken) {
         response.setStatus(HttpServletResponse.SC_OK);
