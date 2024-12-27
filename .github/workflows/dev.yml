@@ -76,11 +76,11 @@ jobs:
         id: publicip
         run: |
           response=$(curl -s canhazip.com)
-          echo "ip=$response" >> "$GITHUB_OUTPUT"
+          echo "ip=$response" >> GITHUB_ENV
 
       - name: Add GitHub Actions IP to Security Group
         run: |
-          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ env.IP }}/32
       
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
