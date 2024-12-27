@@ -4,6 +4,7 @@ package com.example.eatmate.global.auth.jwt;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.rmi.server.ServerCloneException;
@@ -25,7 +28,8 @@ import java.rmi.server.ServerCloneException;
  */
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationProcessingFilter {
+@Component
+public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private static final String NO_CHECK_URL = "/login"; //로그인으로 들어오는 요청은 필터 작동 x
 
@@ -35,10 +39,10 @@ public class JwtAuthenticationProcessingFilter {
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServerCloneException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         if (request.getRequestURI().equals(NO_CHECK_URL)) {
-            filterChain.doFilter((request,response)); // 로그인 요청들어오면 다음의 필터 호출
+            filterChain.doFilter(request,response); // 로그인 요청들어오면 다음의 필터 호출
             return; // 현재 필터 진행 막기
         }
 
@@ -94,7 +98,7 @@ public class JwtAuthenticationProcessingFilter {
      *  그 후 다음 인증 필터로 진행
      */
 
-    public void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServerCloneException, IOException {
+    public void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("checkAccessTokenAndAuthentication() 호출");
         jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
