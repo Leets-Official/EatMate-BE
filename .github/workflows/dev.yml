@@ -78,7 +78,7 @@ jobs:
 
       - name: Add GitHub Actions IP to Security Group
         run: |
-          IP="${{ steps.ip.outputs.ip }}"
+          IP="${{ steps.ip.outputs.ipv4 }}"
           echo "GitHub Actions IP: ${IP}"
           aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr "${IP}/32"
       
