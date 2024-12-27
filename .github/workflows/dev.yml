@@ -65,6 +65,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: build 
     steps:
+      - name: Get Github Actions IP Addresses
+        id: publicip
+        run: |
+          response=$(curl -s canhazip.com)
+          echo "ip=$response" >> "$GITHUB_OUTPUT"
+
+      - name: Add GitHub Actions IP to Security Group
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+      
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -88,4 +98,7 @@ jobs:
             sudo docker run --name spring -d -p 8080:8080 -e SPRING_PROFILES_ACTIVE=dev -e TZ=Asia/Seoul ${{ secrets.DOCKER_USER_NAME }}/eatmate
             sudo docker image prune -a -f
           debug: true  # Enable debugging output
-  
+      - name: Remove GitHub Actions IP From Security Group
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+    
