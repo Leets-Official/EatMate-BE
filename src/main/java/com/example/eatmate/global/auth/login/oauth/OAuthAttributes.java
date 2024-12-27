@@ -46,10 +46,15 @@ public class OAuthAttributes {
 
     public Member toEntity() {
         return Member.builder()
-                .email(getEmail()) // 이메일
-                .name(getName()) // 이름
-                .role(Role.USER) // 기본 권한 설정
+                .email(getEmail()) // 구글에서 얻어온 이메일
+                .name(getName() != null ? getName() : "Unnamed") // 이름이 없다면 기본값 설정
+                .nickname("default_nickname") // 기본 닉네임 설정
+                .phoneNumber("010-0000-0000") // 기본 전화번호 설정
+                .studentNumber("default_student") // 기본 학번 설정
+                .role(Role.GUEST) // 기본 Role 설정
+                .isActive(false) // 비활성화 상태로 설정
                 .build();
     }
+
 
 }
