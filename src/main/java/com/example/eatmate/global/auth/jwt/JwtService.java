@@ -2,13 +2,14 @@ package com.example.eatmate.global.auth.jwt;
 
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,7 @@ public class JwtService {
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
     private static final String BEARER = "Bearer";
+    private final MemberRepository memberRepository;
 
     // AccessToken 생성메소드
     public String createAccessToken(String email) {
@@ -111,17 +113,24 @@ public class JwtService {
      * 유효하지 않다면 빈 Optional 객체 반환
      */
      public Optional<String> extractEmail(String accessToken) {
-         try{
-             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey)))
-                     .build() // yml파일이 설정되어있지않아서 아직
-                     .verify(accessToken)
+         try {
+             // Algorithm 객체 생성
+             Algorithm algorithm = Algorithm.HMAC512(secretKey);
+
+             // JWTVerifier 생성
+             JWTVerifier verifier = JWT.require(algorithm)
+                     .build(); // build()는 Verification 객체의 메서드
+
+             // AccessToken 검증 및 이메일 클레임 추출
+             return Optional.ofNullable(verifier.verify(accessToken)
                      .getClaim(EMAIL_CLAIM)
-                     .asString();
+                     .asString());
          } catch (Exception e) {
-             log.error("엑세스 토큰이 유효하지 않습니다.");
+             log.error("엑세스 토큰이 유효하지 않습니다: {}", e.getMessage());
              return Optional.empty();
          }
      }
+
 
 
     /**
@@ -142,7 +151,7 @@ public class JwtService {
      * RefreshToken DB 저장(업데이트)
      */
     public void updateRefreshToken(String email, String refreshToken) {
-        MemberRepository.findByEmail(email)
+        memberRepository.findByEmail(email)
                 .ifPresentOrElse(
                         member -> member.updateRefreshToken(refreshToken),
                         () -> new Exception("일치하는 회원이 없습니다.")
