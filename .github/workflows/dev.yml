@@ -20,6 +20,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # 환경별 yml 파일 생성(1) - application.yml
+      - name: make application.yml
+        if: |
+          contains(github.ref, 'dev')
+        run: |
+          mkdir ./src/main/resources # resources 폴더 생성
+          cd ./src/main/resources # resources 폴더로 이동
+          touch ./application.yml # application.yml 생성
+          echo "${{ secrets.YML }}" > ./application.yml # github actions에서 설정한 값을 application.yml 파일에 쓰기
+        shell: bash
+
+      # 환경별 yml 파일 생성(2) - dev
+      - name: make application-dev.yml
+        if: contains(github.ref, 'dev')
+        run: |
+          cd ./src/main/resources
+          touch ./application-dev.yml
+          echo "${{ secrets.YML_DEV }}" > ./application-dev.yml
+        shell: bash
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -40,26 +59,6 @@ jobs:
 
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USER_NAME }}/eatmate
-
-      # 환경별 yml 파일 생성(1) - application.yml
-      - name: make application.yml
-        if: |
-          contains(github.ref, 'dev')
-        run: |
-          mkdir ./src/main/resources # resources 폴더 생성
-          cd ./src/main/resources # resources 폴더로 이동
-          touch ./application.yml # application.yml 생성
-          echo "${{ secrets.YML }}" > ./application.yml # github actions에서 설정한 값을 application.yml 파일에 쓰기
-        shell: bash
-
-      # 환경별 yml 파일 생성(2) - dev
-      - name: make application-dev.yml
-        if: contains(github.ref, 'dev')
-        run: |
-          cd ./src/main/resources
-          touch ./application-dev.yml
-          echo "${{ secrets.YML_DEV }}" > ./application-dev.yml
-        shell: bash
 
   deploy:
     runs-on: ubuntu-latest
