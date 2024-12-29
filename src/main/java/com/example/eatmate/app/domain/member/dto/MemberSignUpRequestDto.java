@@ -2,6 +2,7 @@ package com.example.eatmate.app.domain.member.dto;
 
 
 import com.example.eatmate.app.domain.member.domain.Gender;
+import com.example.eatmate.app.domain.member.domain.Mbti;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,8 +17,8 @@ public class MemberSignUpRequestDto {
     private int Day;
     private Gender gender;
     private String phoneNumber;
-    private String mbti;
-    private String StudentNumber;
+    private Mbti mbti;
+    private Long StudentNumber;
     private String nickname;
 
 
