@@ -1,5 +1,8 @@
 package com.example.eatmate.app.domain.member.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum Role {
     USER("사용자"),
     ADMIN("관리자"),
@@ -9,10 +12,6 @@ public enum Role {
 
     Role(String roleType) {
         this.RoleType = roleType;
-    }
-
-    public String getRoleType() {
-        return RoleType;
     }
 
 }

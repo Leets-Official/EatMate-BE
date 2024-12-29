@@ -1,5 +1,8 @@
 package com.example.eatmate.app.domain.member.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum Gender {
     MALE("남자"),
     FEMALE("여성");
@@ -11,7 +14,4 @@ public enum Gender {
         this.genderType = genderType;
     }
 
-    public String getGenderType() {
-        return genderType;
-    }
 }
