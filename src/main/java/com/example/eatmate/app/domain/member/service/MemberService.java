@@ -4,6 +4,7 @@ package com.example.eatmate.app.domain.member.service;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
+import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.custom.MemberAlreadyExistsException;
 import com.example.eatmate.global.config.error.exception.custom.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
