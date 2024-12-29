@@ -27,8 +27,9 @@ public class Member {
     @Column(nullable = true)
     private String studentNumber;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = true)
-    private String mbti;
+    private Mbti mbti;
 
     @Column(nullable = true)
     private String phoneNumber;
@@ -49,7 +50,7 @@ public class Member {
     private BirthDate birthDate;   // yyyy-mm-dd 형식으로 받아야함
 
 
-    public Member(Long memberId, String email, String name, String nickname, String studentNumber, String mbti, String phoneNumber, BirthDate birthDate, Boolean isActive, Gender gender, Role role, String refreshToken) {
+    public Member(Long memberId, String email, String name, String nickname, String studentNumber, Mbti mbti, String phoneNumber, BirthDate birthDate, Boolean isActive, Gender gender, Role role, String refreshToken) {
         this.memberId = memberId;
         this.email = email;
         this.name = name;
@@ -68,11 +69,14 @@ public class Member {
         // BirthDate 객체 생성
         BirthDate birthDate = BirthDate.of(year, month, day);
 
+        //Mbti 문자열 -> Enum으로 변환
+        Mbti mbtiEnum = Mbti.valueOf(mbti.toUpperCase());
+
         // Member 객체 생성
         return Member.builder()
                 .email(email)
                 .nickname(nickname)
-                .mbti(mbti)
+                .mbti(mbtiEnum)
                 .phoneNumber(phoneNumber)
                 .birthDate(birthDate) // BirthDate 설정
                 .gender(gender)
