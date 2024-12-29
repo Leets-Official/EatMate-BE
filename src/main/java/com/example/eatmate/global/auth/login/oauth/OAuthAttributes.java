@@ -21,8 +21,11 @@ public class OAuthAttributes {
     }
 
     public static OAuthAttributes of(String nameAttributeKey, Map<String, Object> attributes) {
-        GoogleOAuthUserInfo googleOAuthUserInfo = new GoogleOAuthUserInfo(attributes);
-        return new OAuthAttributes(nameAttributeKey, googleOAuthUserInfo);
+
+        return OAuthAttributes.builder()
+                .nameAttributeKey(nameAttributeKey) // nameAttributeKey 설정
+                .googleOAuthUserInfo(new GoogleOAuthUserInfo(attributes)) // GoogleOAuthUserInfo 설정
+                .build(); // 빌더로 OAuthAttributes 객체 생성
     }
 
     /**
