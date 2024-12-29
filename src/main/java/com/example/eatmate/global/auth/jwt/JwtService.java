@@ -5,6 +5,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
+import com.example.eatmate.global.config.error.exception.custom.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
@@ -154,7 +155,7 @@ public class JwtService {
         memberRepository.findByEmail(email)
                 .ifPresentOrElse(
                         member -> member.updateRefreshToken(refreshToken),
-                        () -> new Exception("일치하는 회원이 없습니다.")
+                        () -> {throw new UserNotFoundException(); }
                 );
     }
 
