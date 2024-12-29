@@ -4,8 +4,7 @@ package com.example.eatmate.app.domain.member.service;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
-import com.example.eatmate.app.domain.member.exception.MemberAlreadyExistsException;
-import com.example.eatmate.global.config.error.ErrorCode;
+import com.example.eatmate.global.config.error.exception.custom.MemberAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,7 @@ public class MemberService {
 
     public String register(MemberSignUpRequestDto memberSignUpRequestDto) {
         if (memberRepository.findByEmail(memberSignUpRequestDto.getEmail()).isPresent()) {
-            throw new MemberAlreadyExistsException(ErrorCode.MEMBER_ALREADY_EXISTS);
+            throw new MemberAlreadyExistsException();
         }
 
         Member member = Member.create(

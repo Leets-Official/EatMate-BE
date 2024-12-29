@@ -16,6 +16,9 @@ public enum ErrorCode {
 	//유효하지 않은 토큰
 	INVALID_TOKEN(401, "INVALID_TOKEN",  "유효하지 않은 토큰입니다."),
 
+	//유효하지 않은 Mbti
+	INVALID_MBTI(404, "INVALID_MBTI" , "유효하지 않은 MBTI입니다."),
+
 	//회원
 	USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다.");
 
