@@ -1,13 +1,15 @@
 package com.example.eatmate.app.domain.member.domain;
 
-import com.example.eatmate.global.common.BaseTimeEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
+import com.example.eatmate.global.common.BaseTimeEntity;
+
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+public class Member extends BaseTimeEntity {
 //OAuth로 받을 수 있는거만 false 해놓기
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
