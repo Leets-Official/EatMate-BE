@@ -1,29 +1,33 @@
 package com.example.eatmate.global.common;
 
-mport jakarta.persistence.EntityListeners;
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
+import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-public abstract class BaseTimeEntity {
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
+@Getter
+@EntityListeners(AuditingEntityListener.class)
+@MappedSuperclass
+public class BaseTimeEntity {
     @CreatedDate
-    private LocalDateTime createdAt; // 생성 시간
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    private LocalDateTime updatedAt; // 수정 시간
+    @Column
+    private LocalDateTime updatedAt;
 
-    // Getters
     public LocalDateTime getCreatedAt() {
-        return createdAt;
+        return createdAt.atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime();
     }
 
     public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+        return updatedAt.atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime();
     }
 }
