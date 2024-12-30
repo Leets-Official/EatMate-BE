@@ -5,8 +5,8 @@ import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
 import com.example.eatmate.global.config.error.ErrorCode;
+import com.example.eatmate.global.config.error.exception.CommonException;
 import com.example.eatmate.global.config.error.exception.custom.MemberAlreadyExistsException;
-import com.example.eatmate.global.config.error.exception.custom.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +22,7 @@ public class MemberService {
     public void completeRegistration(MemberSignUpRequestDto signUpRequestDto) {
         // 이메일로 기존 사용자 조회
         Member member = memberRepository.findByEmail(signUpRequestDto.getEmail())
-                .orElseThrow(UserNotFoundException::new);
-        // 추가 정보 업데이트
+                .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));   // 추가 정보 업데이트
         updateMemberDetails(member, signUpRequestDto);
         // 변경된 정보 저장
         memberRepository.save(member);
@@ -32,7 +31,7 @@ public class MemberService {
 
     public String register(MemberSignUpRequestDto memberSignUpRequestDto) {
         if (memberRepository.findByEmail(memberSignUpRequestDto.getEmail()).isPresent()) {
-            throw new MemberAlreadyExistsException();
+            throw new CommonException(ErrorCode.MEMBER_ALREADY_EXISTS);
         }
 
         Member member = Member.create(
