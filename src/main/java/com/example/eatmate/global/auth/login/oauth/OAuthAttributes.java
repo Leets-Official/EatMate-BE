@@ -18,7 +18,7 @@ public class OAuthAttributes {
     private static final String DEFAULT_NAME = "Unnamed";
     private static final String DEFAULT_NICKNAME = "default_nickname";
     private static final String DEFAULT_PHONE_NUMBER = "010-0000-0000";
-    private static final String DEFAULT_STUDENT_NUMBER = "default_student";
+    private static final Long DEFAULT_STUDENT_NUMBER = 123456789L;
     private static final Role DEFAULT_ROLE = Role.GUEST;
     private static final boolean DEFAULT_IS_ACTIVE = false;
 
