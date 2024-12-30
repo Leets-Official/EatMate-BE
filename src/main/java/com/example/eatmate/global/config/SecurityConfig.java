@@ -42,7 +42,6 @@ public class SecurityConfig {
 					// 기본 페이지, css, image, js 하위 폴더에 있는 자료들은 모두 접근 가능, h2-console에 접근 가능
 								.requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
 								.requestMatchers("/v3/api-docs", "/v3/api-docs/", "/swagger-ui.html", "/swagger-ui/", "/swagger/**").permitAll()
-								.requestMatchers("/api/users/login").permitAll()
 								.requestMatchers("/register").permitAll()
 								.anyRequest().authenticated()
 				)
