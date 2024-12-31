@@ -40,10 +40,10 @@ public class SecurityConfig {
 						authorize -> authorize
 						// 아이콘, css, js 관련
 					// 기본 페이지, css, image, js 하위 폴더에 있는 자료들은 모두 접근 가능, h2-console에 접근 가능
-								.requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
-								.requestMatchers("/v3/api-docs", "/v3/api-docs/", "/swagger-ui.html", "/swagger-ui/", "/swagger/**").permitAll()
-								.requestMatchers("/register").permitAll()
-								.anyRequest().authenticated()
+					// 			.requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
+					// 			.requestMatchers("/v3/api-docs", "/v3/api-docs/", "/swagger-ui.html", "/swagger-ui/", "/swagger/**").permitAll()
+					// 			.requestMatchers("/register").permitAll()
+								.anyRequest().permitAll()
 				)
 				//== 소셜 로그인 설정 ==//
 				.oauth2Login(oauth2 -> oauth2.successHandler(oAuthLoginSuccessHandler)
