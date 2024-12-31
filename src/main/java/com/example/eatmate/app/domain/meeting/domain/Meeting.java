@@ -5,21 +5,27 @@ import java.time.LocalDateTime;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.example.eatmate.app.domain.member.domain.Gender;
+import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +39,7 @@ import lombok.experimental.SuperBuilder;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn
 @SuperBuilder
+@EntityListeners(AuditingEntityListener.class)
 public abstract class Meeting {
 
 	@Id
@@ -50,9 +57,12 @@ public abstract class Meeting {
 	private GenderRestriction genderRestriction;
 
 	@Column
-	@Range(min = 2, max = 10)
 	@Embedded
 	private ParticipantLimit participantLimit;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "created_by_id", nullable = false)
+	private Member createdBy;
 
 	@CreatedDate
 	@Column(updatable = false)
