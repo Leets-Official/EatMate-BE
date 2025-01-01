@@ -93,7 +93,7 @@ public class MeetingService {
 	}
 
 	// 모임 참가 메소드
-	public void joinDeliveryMeeting(Long meetingId, Long memberId) {
+	public void joinMeeting(Long meetingId, Long memberId) {
 		Member member = getMember(memberId);
 		Meeting meeting = deliveryMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));

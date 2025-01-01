@@ -54,7 +54,7 @@ public class MeetingController {
 	public ResponseEntity<GlobalResponseDto<Void>> joinDeliveryMeeting(
 		@PathVariable Long meetingId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		meetingService.joinDeliveryMeeting(meetingId, userDetails.getMemberId());
+		meetingService.joinMeeting(meetingId, userDetails.getMemberId());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
