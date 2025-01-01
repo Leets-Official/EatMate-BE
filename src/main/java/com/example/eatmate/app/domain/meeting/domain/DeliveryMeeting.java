@@ -2,8 +2,6 @@ package com.example.eatmate.app.domain.meeting.domain;
 
 import java.time.LocalDateTime;
 
-import com.example.eatmate.app.domain.member.domain.Member;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,25 +36,25 @@ public class DeliveryMeeting extends Meeting {
 	@Column(nullable = false)
 	private String accountHolder;
 
-	public static DeliveryMeeting createDeliveryMeeting(String meetingName, String description,
-		GenderRestriction genderRestriction, boolean isUnlimited, Long maxParticipants, FoodCategory foodCategory,
-		String storeName, String pickupLocation, LocalDateTime orderDeadline, String accountNumber,
-		String accountHolder, Member member) {
-		return DeliveryMeeting.builder()
-			.meetingName(meetingName)
-			.description(description)
-			.genderRestriction(genderRestriction)
-			.participantLimit(ParticipantLimit.builder()
-				.isUnlimited(isUnlimited)
-				.maxParticipants(maxParticipants)
-				.build())
-			.foodCategory(foodCategory)
-			.storeName(storeName)
-			.pickupLocation(pickupLocation)
-			.orderDeadline(orderDeadline)
-			.accountNumber(accountNumber)
-			.accountHolder(accountHolder)
-			.createdBy(member)
-			.build();
-	}
+	// public static DeliveryMeeting createDeliveryMeeting(String meetingName, String description,
+	// 	GenderRestriction genderRestriction, boolean isUnlimited, Long maxParticipants, FoodCategory foodCategory,
+	// 	String storeName, String pickupLocation, LocalDateTime orderDeadline, String accountNumber,
+	// 	String accountHolder, Member member) {
+	// 	return DeliveryMeeting.builder()
+	// 		.meetingName(meetingName)
+	// 		.description(description)
+	// 		.genderRestriction(genderRestriction)
+	// 		.participantLimit(ParticipantLimit.builder()
+	// 			.isUnlimited(isUnlimited)
+	// 			.maxParticipants(maxParticipants)
+	// 			.build())
+	// 		.foodCategory(foodCategory)
+	// 		.storeName(storeName)
+	// 		.pickupLocation(pickupLocation)
+	// 		.orderDeadline(orderDeadline)
+	// 		.accountNumber(accountNumber)
+	// 		.accountHolder(accountHolder)
+	// 		.createdBy(member)
+	// 		.build();
+	// }
 }
