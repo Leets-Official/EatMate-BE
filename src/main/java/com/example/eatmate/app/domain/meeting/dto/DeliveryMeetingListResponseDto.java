@@ -1,6 +1,5 @@
 package com.example.eatmate.app.domain.meeting.dto;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
@@ -16,7 +15,8 @@ public class DeliveryMeetingListResponseDto {
 	private Long maxParticipants;
 
 	@Builder
-	private DeliveryMeetingListResponseDto(String meetingName, String meetingDescription, String storeName, LocalDateTime orderDeadLine, Long participantCount, Long maxParticipants) {
+	private DeliveryMeetingListResponseDto(String meetingName, String meetingDescription, String storeName,
+		LocalDateTime orderDeadLine, Long participantCount, Long maxParticipants) {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
 		this.storeName = storeName;

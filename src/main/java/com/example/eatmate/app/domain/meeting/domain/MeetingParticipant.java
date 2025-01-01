@@ -1,9 +1,5 @@
 package com.example.eatmate.app.domain.meeting.domain;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
-
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.BaseTimeEntity;
 

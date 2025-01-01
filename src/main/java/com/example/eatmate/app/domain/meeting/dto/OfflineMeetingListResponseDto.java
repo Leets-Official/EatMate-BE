@@ -12,7 +12,8 @@ public class OfflineMeetingListResponseDto {
 	private Long maxParticipants;
 
 	@Builder
-	private OfflineMeetingListResponseDto(String meetingName, String meetingDescription, String meetingPlace, Long participantCount, Long maxParticipants) {
+	private OfflineMeetingListResponseDto(String meetingName, String meetingDescription, String meetingPlace,
+		Long participantCount, Long maxParticipants) {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
 		this.meetingPlace = meetingPlace;
