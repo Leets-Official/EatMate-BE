@@ -42,6 +42,28 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # 환경별 yml 파일 생성(3) - oauth
+      - name: make application-oauth.yml
+        if: contains(github.ref, 'dev')
+        run: |
+          cd ./src/main/resources
+          touch ./application-dev.yml
+          echo "${{ secrets.YML_OAUTH }}" > ./application-oauth.yml
+        shell: bash
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 환경별 yml 파일 생성(3) - jwt
+      - name: make application-jwt.yml
+        if: contains(github.ref, 'dev')
+        run: |
+          cd ./src/main/resources
+          touch ./application-dev.yml
+          echo "${{ secrets.YML_JWT }}" > ./application-jwt.yml
+        shell: bash
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       # Gradle Build (test는 제외)
       - name: Build with Gradle
         run: ./gradlew build -x test
