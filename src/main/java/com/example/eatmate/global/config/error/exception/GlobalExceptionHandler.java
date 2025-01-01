@@ -1,19 +1,29 @@
 package com.example.eatmate.global.config.error.exception;
 
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.View;
 
 import com.example.eatmate.global.config.error.ErrorCode;
-import com.example.eatmate.global.response.GlobalResponseDto;
 import com.example.eatmate.global.config.error.ErrorResponse;
+import com.example.eatmate.global.response.GlobalResponseDto;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+	private final View error;
+
+	public GlobalExceptionHandler(View error) {
+		this.error = error;
+	}
 
 	private static void showErrorLog(ErrorCode errorCode) {
 		log.error("errorCode: {}, message: {}", errorCode.getCode(), errorCode.getMessage());
@@ -37,4 +47,21 @@ public class GlobalExceptionHandler {
 			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
 	}
 
+	@ExceptionHandler(MethodArgumentNotValidException.class) // Valid 검증 실패시 예외처리
+	public ResponseEntity<GlobalResponseDto<String>> handleValidationExceptions(
+		MethodArgumentNotValidException ex) {
+		ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
+
+		// 모든 검증 오류를 하나의 문자열로 결합
+		String errorMessage = ex.getBindingResult()
+			.getAllErrors()
+			.stream()
+			.map(error -> error.getDefaultMessage())
+			.collect(Collectors.joining(", "));
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
 }
+

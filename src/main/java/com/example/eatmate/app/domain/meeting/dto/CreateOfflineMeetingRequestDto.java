@@ -2,7 +2,6 @@ package com.example.eatmate.app.domain.meeting.dto;
 
 import java.time.LocalDateTime;
 
-import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 
 import jakarta.validation.constraints.Future;
@@ -10,12 +9,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class CreateDeliveryMeetingRequestDto {
+public class CreateOfflineMeetingRequestDto {
 	@NotBlank(message = "모임 이름은 필수입니다")
 	@Size(max = 30, message = "모임 이름은 30자 이하여야 합니다")
 	private String meetingName;
@@ -33,23 +31,10 @@ public class CreateDeliveryMeetingRequestDto {
 	@Max(value = 10, message = "참여 인원은 최대 10명까지 가능합니다")
 	private Long maxParticipants;
 
-	@NotNull(message = "음식 카테고리는 필수입니다")
-	private FoodCategory foodCategory;
+	@NotBlank(message = "모임 장소는 필수입니다")
+	private String meetingPlace;
 
-	@NotBlank(message = "가게 이름은 필수입니다")
-	private String storeName;
-
-	@NotBlank(message = "픽업 위치는 필수입니다")
-	private String pickupLocation;
-
-	@NotNull(message = "주문 마감 시간은 필수입니다")
+	@NotNull(message = "주문 시간은 필수입니다")
 	@Future(message = "주문 마감 시간은 현재 시간 이후여야 합니다")
-	private LocalDateTime orderDeadline;
-
-	@NotBlank(message = "계좌번호는 필수입니다")
-	@Pattern(regexp = "^[0-9-]*$", message = "올바른 계좌번호 형식이 아닙니다")
-	private String accountNumber;
-
-	@NotBlank(message = "예금주명은 필수입니다")
-	private String accountHolder;
+	private LocalDateTime meetingDate;
 }
