@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
 			.map(error -> error.getDefaultMessage())
 			.collect(Collectors.joining(", "));
 
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
 	}
 
