@@ -8,13 +8,13 @@ public class CreateOfflineMeetingResponseDto {
 	private Long meetingId;
 
 	@Builder
-	private CreateOfflineMeetingResponseDto(OfflineMeeting offlineMeeting) {
-		this.meetingId = offlineMeeting.getId();
+	private CreateOfflineMeetingResponseDto(Long meetingId) {
+		this.meetingId = meetingId;
 	}
 
-	public static CreateOfflineMeetingResponseDto of(OfflineMeeting offlineMeeting) {
+	public static CreateOfflineMeetingResponseDto from(OfflineMeeting offlineMeeting) {
 		return CreateOfflineMeetingResponseDto.builder()
-			.offlineMeeting(offlineMeeting)
+			.meetingId(offlineMeeting.getId())
 			.build();
 	}
 }

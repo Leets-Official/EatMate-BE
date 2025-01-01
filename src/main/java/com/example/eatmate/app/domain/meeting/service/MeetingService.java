@@ -2,12 +2,17 @@ package com.example.eatmate.app.domain.meeting.service;
 
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
+import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
+import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
@@ -16,6 +21,8 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -61,7 +68,7 @@ public class MeetingService {
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
 
 		MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, PARTICIPANT); // 참여 등록
-		return CreateDeliveryMeetingResponseDto.of(deliveryMeeting);
+		return CreateDeliveryMeetingResponseDto.from(deliveryMeeting);
 	}
 
 	// 밥, 술 모임 생성
@@ -90,7 +97,7 @@ public class MeetingService {
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
 		MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST); // 참여 등록
 
-		return CreateOfflineMeetingResponseDto.of(offlineMeeting);
+		return CreateOfflineMeetingResponseDto.from(offlineMeeting);
 	}
 
 	// 모임 참가 메소드
@@ -112,6 +119,31 @@ public class MeetingService {
 
 		MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT);
 
+	}
+
+	// 밥, 술 모임 목록 조회 메소드
+	public List<OfflineMeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory offlineMeetingCategory) {
+		List<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategory(
+			offlineMeetingCategory);
+
+		return meetings.stream()
+			.map(meeting -> {
+				Long participantCount = meetingParticipantRepository.countByMeetingId(meeting.getId());
+				return OfflineMeetingListResponseDto.of(meeting, participantCount);
+			})
+			.collect(Collectors.toList());
+	}
+
+	// 배달 모임 목록 조회 메소드
+	public List<DeliveryMeetingListResponseDto> getDeliveryMeetingList(FoodCategory foodCategory) {
+		List<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategory(foodCategory);
+
+		return meetings.stream()
+			.map(meeting -> {
+				Long participantCount = meetingParticipantRepository.countByMeetingId(meeting.getId());
+				return DeliveryMeetingListResponseDto.of(meeting, participantCount);
+			})
+			.collect(Collectors.toList());
 	}
 
 	// 참여 인원 제한 검증 로직

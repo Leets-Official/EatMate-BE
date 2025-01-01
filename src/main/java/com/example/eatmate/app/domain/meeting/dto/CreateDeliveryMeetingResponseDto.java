@@ -11,13 +11,13 @@ public class CreateDeliveryMeetingResponseDto {
 	private Long meetingId;
 
 	@Builder
-	public CreateDeliveryMeetingResponseDto(DeliveryMeeting deliveryMeeting) {
-		this.meetingId = deliveryMeeting.getId();
+	public CreateDeliveryMeetingResponseDto(Long meetingId) {
+		this.meetingId = meetingId;
 	}
 
-	public static CreateDeliveryMeetingResponseDto of(DeliveryMeeting deliveryMeeting) {
+	public static CreateDeliveryMeetingResponseDto from(DeliveryMeeting deliveryMeeting) {
 		return CreateDeliveryMeetingResponseDto.builder()
-			.deliveryMeeting(deliveryMeeting)
+			.meetingId(deliveryMeeting.getId())
 			.build();
 	}
 }

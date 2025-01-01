@@ -7,11 +7,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Future;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Entity
+@Getter
 @NoArgsConstructor
 public class OfflineMeeting extends Meeting {
 	@Column(nullable = false)
