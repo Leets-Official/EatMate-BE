@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ParticipantLimit {
 
-	private boolean isUnlimited;
+	private boolean isLimited;
 
 	@Column(nullable = true)
 	@Range(min = 2, max = 10)
 	private Long maxParticipants;
 
 	@Builder
-	private ParticipantLimit(boolean isUnlimited, Long maxParticipants) {
-		this.isUnlimited = isUnlimited;
+	private ParticipantLimit(boolean isLimited, Long maxParticipants) {
+		this.isLimited = isLimited;
 		this.maxParticipants = maxParticipants;
 	}
 }

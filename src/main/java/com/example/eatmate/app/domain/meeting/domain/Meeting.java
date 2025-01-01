@@ -2,14 +2,11 @@ package com.example.eatmate.app.domain.meeting.domain;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.validator.constraints.Range;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.example.eatmate.app.domain.member.domain.Gender;
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -21,17 +18,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
 
 @Entity
 @Getter
@@ -50,7 +45,7 @@ public abstract class Meeting {
 	private String meetingName;
 
 	@Column(length = 100)
-	private String description;
+	private String meetingDescription;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
