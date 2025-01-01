@@ -20,7 +20,7 @@ public class DeliveryMeetingListResponseDto {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
 		this.storeName = storeName;
-		this.orderDeadline = orderDeadline;
+		this.orderDeadline = orderDeadLine;
 		this.participantCount = participantCount;
 		this.maxParticipants = maxParticipants;
 	}

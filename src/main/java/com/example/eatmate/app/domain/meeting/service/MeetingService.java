@@ -114,7 +114,7 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
 		}
 
-		meetingParticipantRepository.findByMeetingIdAndUserId(meetingId, memberId) // 이미 참여 중인 경우
+		meetingParticipantRepository.findByMeetingIdAndMember(meetingId, member) // 이미 참여 중인 경우
 			.orElseThrow(() -> new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS));
 
 		MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT);

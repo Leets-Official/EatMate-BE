@@ -46,16 +46,6 @@ public class MeetingController {
 				HttpStatus.CREATED.value()));
 	}
 
-	@PostMapping("/delivery")
-	@Operation(summary = "배달 모임 생성", description = "배달 모임을 생성합니다.")
-	public ResponseEntity<GlobalResponseDto<CreateOfflineMeetingResponseDto>> createOfflineMeeting(
-		@RequestBody @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(GlobalResponseDto.success(
-				meetingService.createOfflineMeeting(createOfflineMeetingRequestDto, userDetails.getMemberId()),
-				HttpStatus.CREATED.value()));
-	}
 
 	@PostMapping("/{meetingId}/delivery")
 	@Operation(summary = "모임 참가", description = "모임에 참가합니다.")
@@ -67,7 +57,7 @@ public class MeetingController {
 			.body(GlobalResponseDto.success());
 	}
 
-	@GetMapping("offline")
+	@GetMapping("/offline")
 	@Operation(summary = "오프라인 모임 목록 조회", description = "오프라인 모임 목록을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<List<OfflineMeetingListResponseDto>>> getOfflineMeetingList(@RequestParam(required = true) OfflineMeetingCategory category) {
 		return ResponseEntity.status(HttpStatus.OK)
@@ -75,7 +65,7 @@ public class MeetingController {
 				meetingService.getOfflineMeetingList(category)));
 	}
 
-	@GetMapping("delivery")
+	@GetMapping("/delivery")
 	@Operation(summary = "배달 모임 목록 조회", description = "배달 모임 목록을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<List<DeliveryMeetingListResponseDto>>> getDeliveryMeetingList(@RequestParam(required = true) FoodCategory foodCategory) {
 		return ResponseEntity.status(HttpStatus.OK)
