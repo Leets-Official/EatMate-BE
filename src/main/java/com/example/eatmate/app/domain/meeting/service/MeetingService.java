@@ -84,6 +84,7 @@ public class MeetingService {
 				.build())
 			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
+			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
 			.build();
 
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);

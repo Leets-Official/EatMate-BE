@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.meeting.dto;
 import java.time.LocalDateTime;
 
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
+import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Max;
@@ -37,4 +38,7 @@ public class CreateOfflineMeetingRequestDto {
 	@NotNull(message = "주문 시간은 필수입니다")
 	@Future(message = "주문 마감 시간은 현재 시간 이후여야 합니다")
 	private LocalDateTime meetingDate;
+
+	@NotNull(message = "오프라인 모임 종류는 필수입니다")
+	private OfflineMeetingCategory offlineMeetingCategory;
 }
