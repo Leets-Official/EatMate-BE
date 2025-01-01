@@ -55,10 +55,6 @@ public abstract class Meeting {
 	@Embedded
 	private ParticipantLimit participantLimit;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "created_by_id", nullable = false)
-	private Member createdBy;
-
 	@CreatedDate
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
