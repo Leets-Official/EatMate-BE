@@ -1,11 +1,16 @@
 package com.example.eatmate.app.domain.meeting.service;
 
+import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
+
 import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
+import com.example.eatmate.app.domain.meeting.domain.Meeting;
+import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
+import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.OfflineMeetingRepository;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
@@ -21,13 +26,15 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class MeetingService {
+
 	private final DeliveryMeetingRepository deliveryMeetingRepository;
 	private final MemberRepository memberRepository;
 	private final OfflineMeetingRepository offlineMeetingRepository;
+	private final MeetingParticipantRepository meetingParticipantRepository;
 
+	// 배달 모임 생성
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, Long memberId) {
-
 		Member member = getMember(memberId);
 
 		validateParticipantLimit(
@@ -49,12 +56,15 @@ public class MeetingService {
 			.orderDeadline(createDeliveryMeetingRequestDto.getOrderDeadline())
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
-			.createdBy(member)
 			.build();
 
-		return CreateDeliveryMeetingResponseDto.of(deliveryMeetingRepository.save(deliveryMeeting));
+		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
+
+		MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, PARTICIPANT); // 참여 등록
+		return CreateDeliveryMeetingResponseDto.of(deliveryMeeting);
 	}
 
+	// 밥, 술 모임 생성
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, Long memberId) {
 		Member member = getMember(memberId);
@@ -74,10 +84,33 @@ public class MeetingService {
 				.build())
 			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
-			.createdBy(member)
 			.build();
 
-		return CreateOfflineMeetingResponseDto.of(offlineMeetingRepository.save(offlineMeeting));
+		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
+		MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST); // 참여 등록
+
+		return CreateOfflineMeetingResponseDto.of(offlineMeeting);
+	}
+
+	// 모임 참가 메소드
+	public void joinDeliveryMeeting(Long meetingId, Long memberId) {
+		Member member = getMember(memberId);
+		Meeting meeting = deliveryMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		Long meetingCount = meetingParticipantRepository.countByMeetingId(meetingId); // 현재 참여 인원 수
+		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants(); // 참여 인원 제한 수
+		Boolean isLimited = meeting.getParticipantLimit().isLimited(); // 인원 제한여부
+
+		if (!isLimited && meetingCount >= participantLimit) { // 인원 제한이 있으면서 참여 인원이 제한을 초과한 경우
+			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
+		}
+
+		meetingParticipantRepository.findByMeetingIdAndUserId(meetingId, memberId) // 이미 참여 중인 경우
+			.orElseThrow(() -> new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS));
+
+		MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT);
+
 	}
 
 	// 참여 인원 제한 검증 로직
@@ -89,8 +122,8 @@ public class MeetingService {
 
 		// isLimited가 true(제한있음)인 경우의 검증
 		if (isLimited) {
-			// participantLimit가 null이거나 2~10 범위를 벗어나는 경우
-			if (participantLimit == null || participantLimit < 2 || participantLimit > 10) {
+			// participantLimit가 null일 경우
+			if (participantLimit == null) {
 				throw new CommonException(ErrorCode.INVALID_PARTICIPANT_LIMIT);
 			}
 		}
