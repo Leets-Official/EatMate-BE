@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.meeting.domain;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Entity
 @Getter
+@DiscriminatorValue("OFFLINE")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OfflineMeeting extends Meeting {
 	@Column(nullable = false)

@@ -27,7 +27,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn
+@DiscriminatorColumn(name = "meeting_type")
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
 public abstract class Meeting {
