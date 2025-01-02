@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.meeting.service;
 import static com.example.eatmate.app.domain.meeting.domain.GenderRestriction.*;
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,7 +64,7 @@ public class MeetingService {
 			.foodCategory(createDeliveryMeetingRequestDto.getFoodCategory())
 			.storeName(createDeliveryMeetingRequestDto.getStoreName())
 			.pickupLocation(createDeliveryMeetingRequestDto.getPickupLocation())
-			.orderDeadline(createDeliveryMeetingRequestDto.getOrderDeadline())
+			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
 			.build();

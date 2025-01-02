@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
@@ -42,9 +43,10 @@ public class CreateDeliveryMeetingRequestDto {
 	@NotBlank(message = "픽업 위치는 필수입니다")
 	private String pickupLocation;
 
-	@NotNull(message = "주문 마감 시간은 필수입니다")
-	@Future(message = "주문 마감 시간은 현재 시간 이후여야 합니다")
-	private LocalDateTime orderDeadline;
+	@NotNull(message = "마감 시간은 필수입니다")
+	@Positive(message = "마감 시간은 양수여야 합니다")
+	@Max(value = 180, message = "모임은 최대 3시간까지만 가능합니다")
+	private Long orderDeadline;
 
 	@NotBlank(message = "계좌번호는 필수입니다")
 	@Pattern(regexp = "^[0-9-]*$", message = "올바른 계좌번호 형식이 아닙니다")

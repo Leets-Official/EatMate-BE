@@ -35,8 +35,8 @@ public class CreateOfflineMeetingRequestDto {
 	@NotBlank(message = "모임 장소는 필수입니다")
 	private String meetingPlace;
 
-	@NotNull(message = "주문 시간은 필수입니다")
-	@Future(message = "주문 마감 시간은 현재 시간 이후여야 합니다")
+	@NotNull(message = "모임 시간은 필수입니다")
+	@Future(message = "모임 시간은 현재 시간 이후여야 합니다")
 	private LocalDateTime meetingDate;
 
 	@NotNull(message = "오프라인 모임 종류는 필수입니다")
