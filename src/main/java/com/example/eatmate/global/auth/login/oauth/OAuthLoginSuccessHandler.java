@@ -75,8 +75,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // USER 사용자는 메인 페이지로 리다이렉트
         response.sendRedirect("https://develop.d4u0qurydeei4.amplifyapp.com/home");
-        // TODO: 주영이가 바꿔놈
-           // 여까지
-       // response.sendRedirect("http://localhost:8080");
+        // response.sendRedirect("http://localhost:8080");
     }
 }
