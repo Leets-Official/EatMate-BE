@@ -4,6 +4,7 @@ package com.example.eatmate.global.auth.login.oauth;
 
 
 import com.example.eatmate.app.domain.member.domain.Member;
+import com.example.eatmate.app.domain.member.domain.Role;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,10 +53,13 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         // 사용자 정보를 CustomOAuth2User로 반환
         return new CustomOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRoleType())), // 권한 설정
+                Collections.singleton(new SimpleGrantedAuthority(member.getRole() != null
+                        ? member.getRole().getRoleType() : Role.GUEST.getRoleType())), // 권한 설정
                 attributes, // 사용자 속성
-                extractAttributes.getNameAttributeKey() // 기본 식별자 키
+                extractAttributes.getNameAttributeKey(), // 기본 식별자 키
+                member.getRole() != null ? member.getRole() : Role.GUEST // Role 전달
         );
+
 
     }
     // 가천 도메인 필터링
