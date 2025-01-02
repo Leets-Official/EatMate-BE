@@ -171,11 +171,11 @@ public class MeetingService {
 		Member member = meetingParticipantRepository.findByMeetingAndRole(offlinemeeting, HOST)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 확인
 
-		Long HostedMeetings = meetingParticipantRepository.countByMemberAndRole(member, HOST); // 주인이 개최한 모임 수 확인
+		Long hostedMeetings = meetingParticipantRepository.countByMemberAndRole(member, HOST); // 주인이 개최한 모임 수 확인
 
 		Long participantCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 참여 인원 수
 
-		return OfflineMeetingDetailResponseDto.of(offlinemeeting, participantCount, member, HostedMeetings);
+		return OfflineMeetingDetailResponseDto.of(offlinemeeting, participantCount, member, hostedMeetings);
 	}
 
 	@Transactional(readOnly = true)
@@ -186,11 +186,11 @@ public class MeetingService {
 		Member member = meetingParticipantRepository.findByMeetingAndRole(deliveryMeeting, HOST)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 확인
 
-		Long HostedMeetings = meetingParticipantRepository.countByMemberAndRole(member, HOST); // 주인이 개최한 모임 수 확인
+		Long hostedMeetings = meetingParticipantRepository.countByMemberAndRole(member, HOST); // 주인이 개최한 모임 수 확인
 
 		Long participantCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 참여 인원 수
 
-		return DeliveryMeetingDetailResponseDto.of(deliveryMeeting, participantCount, member, HostedMeetings);
+		return DeliveryMeetingDetailResponseDto.of(deliveryMeeting, participantCount, member, hostedMeetings);
 	}
 
 	// 참여 인원 제한 검증 로직
