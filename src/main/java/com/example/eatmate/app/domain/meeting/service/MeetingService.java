@@ -1,11 +1,13 @@
 package com.example.eatmate.app.domain.meeting.service;
 
+import static com.example.eatmate.app.domain.meeting.domain.GenderRestriction.*;
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
@@ -40,6 +42,7 @@ public class MeetingService {
 	private final MeetingParticipantRepository meetingParticipantRepository;
 
 	// 배달 모임 생성
+	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, Long memberId) {
 		Member member = getMember(memberId);
@@ -72,6 +75,7 @@ public class MeetingService {
 	}
 
 	// 밥, 술 모임 생성
+	@Transactional
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, Long memberId) {
 		Member member = getMember(memberId);
@@ -101,6 +105,7 @@ public class MeetingService {
 	}
 
 	// 모임 참가 메소드
+	@Transactional
 	public void joinMeeting(Long meetingId, Long memberId) {
 		Member member = getMember(memberId);
 		Meeting meeting = deliveryMeetingRepository.findById(meetingId)
@@ -114,6 +119,10 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
 		}
 
+		if (meeting.getGenderRestriction() != ALL && meeting.getGenderRestriction().equals(member.getGender())) {
+			throw new CommonException(ErrorCode.GENDER_RESTRICTED_MEETING);
+		}
+
 		meetingParticipantRepository.findByMeetingIdAndMember(meetingId, member) // 이미 참여 중인 경우
 			.orElseThrow(() -> new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS));
 
@@ -122,6 +131,7 @@ public class MeetingService {
 	}
 
 	// 밥, 술 모임 목록 조회 메소드
+	@Transactional(readOnly = true)
 	public List<OfflineMeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory offlineMeetingCategory) {
 		List<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategory(
 			offlineMeetingCategory);
@@ -135,6 +145,7 @@ public class MeetingService {
 	}
 
 	// 배달 모임 목록 조회 메소드
+	@Transactional(readOnly = true)
 	public List<DeliveryMeetingListResponseDto> getDeliveryMeetingList(FoodCategory foodCategory) {
 		List<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategory(foodCategory);
 
@@ -168,3 +179,6 @@ public class MeetingService {
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 }
+
+
+
