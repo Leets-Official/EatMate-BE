@@ -28,7 +28,12 @@ public class MemberService {
         String email = userDetails.getUsername();
         // 이메일로 기존 사용자 조회
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));   // 추가 정보 업데이트
+                .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+        if (memberRepository.existsByNickname(signUpRequestDto.getNickname())) {
+            throw new CommonException(ErrorCode.DUPLICATE_NICKNAME); // 닉네임 중복 예외 발생
+        }
+
         member.updateMemberDetails(signUpRequestDto.getNickname(), signUpRequestDto.getPhoneNumber(), signUpRequestDto.getStudentNumber(), signUpRequestDto.getGender(), BirthDate.of(signUpRequestDto.getYear(), signUpRequestDto.getMonth(), signUpRequestDto.getDay()), signUpRequestDto.getMbti());
         return null;
     }
