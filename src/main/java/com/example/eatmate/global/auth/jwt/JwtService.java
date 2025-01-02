@@ -4,6 +4,9 @@ package com.example.eatmate.global.auth.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.exception.custom.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
@@ -80,8 +84,10 @@ public class JwtService {
     public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
         response.setStatus(HttpServletResponse.SC_OK);
 
+
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
+        // 여까지
         log.info("Access Token Refresh Token 헤더 설정 완료");
     }
 
@@ -103,11 +109,12 @@ public class JwtService {
      */
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(accessHeader))
-                .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                .map(refreshToken -> refreshToken.replace(BEARER, ""));
+                .filter(token -> token.startsWith(BEARER))
+                .map(token -> token.replace(BEARER + " ", "")); // "Bearer " 뒤 공백 처리
     }
 
-     /** AccessToken에서 Email 추출
+
+    /** AccessToken에서 Email 추출
      * 추출 전에 JWT.require()로 검증기 생성
      * verify로 AceessToken 검증 후
      * 유효하다면 getClaim()으로 이메일 추출
@@ -151,23 +158,35 @@ public class JwtService {
     /**
      * RefreshToken DB 저장(업데이트)
      */
+    @Transactional
     public void updateRefreshToken(String email, String refreshToken) {
+
         memberRepository.findByEmail(email)
                 .ifPresentOrElse(
-                        member -> member.updateRefreshToken(refreshToken),
+                        member -> {
+                            member.updateRefreshToken(refreshToken);
+                            memberRepository.save(member);},
                         () -> {throw new UserNotFoundException(); }
                 );
-    }
 
+    }
+// 수정
     public boolean isTokenValid(String token) {
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
             return true;
+        } catch (JWTDecodeException e) {
+            log.error("토큰 디코딩 실패: {}", e.getMessage());
+        } catch (SignatureVerificationException e) {
+            log.error("서명 검증 실패: {}", e.getMessage());
+        } catch (TokenExpiredException e) {
+            log.error("토큰 만료: {}", e.getMessage());
         } catch (Exception e) {
-            log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
-            return false;
+            log.error("알 수 없는 토큰 검증 오류: {}", e.getMessage());
         }
+        return false;
     }
+
 }
 
 
