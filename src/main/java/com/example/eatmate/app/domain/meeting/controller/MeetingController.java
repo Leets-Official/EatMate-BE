@@ -17,7 +17,11 @@ import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
 import com.example.eatmate.global.auth.login.service.CustomUserDetails;
@@ -41,6 +45,17 @@ public class MeetingController {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(GlobalResponseDto.success(
 				meetingService.createDeliveryMeeting(createDeliveryMeetingRequestDto, userDetails.getMemberId()),
+				HttpStatus.CREATED.value()));
+	}
+
+	@PostMapping("/offline")
+	@Operation(summary = "오프라인 모임 생성", description = "오프라인 모임을 생성합니다.")
+	public ResponseEntity<GlobalResponseDto<CreateOfflineMeetingResponseDto>> createOfflineMeeting(
+		@RequestBody @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		return ResponseEntity.status(HttpStatus.CREATED)
+			.body(GlobalResponseDto.success(
+				meetingService.createOfflineMeeting(createOfflineMeetingRequestDto, userDetails.getMemberId()),
 				HttpStatus.CREATED.value()));
 	}
 
@@ -70,5 +85,23 @@ public class MeetingController {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
 				meetingService.getDeliveryMeetingList(foodCategory)));
+	}
+
+	@GetMapping("/offline/{meetingId}")
+	@Operation(summary = "오프라인 모임 상세 조회", description = "오프라인 모임 상세 정보를 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<OfflineMeetingDetailResponseDto>> getOfflineMeetingDetail(
+		@PathVariable Long meetingId) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success(
+				meetingService.getOfflineMeetingDetail(meetingId)));
+	}
+
+	@GetMapping("/delivery/{meetingId}")
+	@Operation(summary = "배달 모임 상세 조회", description = "배달 모임 상세 정보를 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<DeliveryMeetingDetailResponseDto>> getDeliveryMeetingDetail(
+		@PathVariable Long meetingId) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success(
+				meetingService.getDeliveryMeetingDetail(meetingId)));
 	}
 }

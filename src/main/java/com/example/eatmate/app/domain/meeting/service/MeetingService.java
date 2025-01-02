@@ -24,7 +24,9 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
@@ -112,7 +114,7 @@ public class MeetingService {
 		Meeting meeting = deliveryMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
-		Long meetingCount = meetingParticipantRepository.countByMeetingId(meetingId); // 현재 참여 인원 수
+		Long meetingCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 현재 참여 인원 수
 		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants(); // 참여 인원 제한 수
 		Boolean isLimited = meeting.getParticipantLimit().isLimited(); // 인원 제한여부
 
@@ -124,8 +126,9 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.GENDER_RESTRICTED_MEETING);
 		}
 
-		meetingParticipantRepository.findByMeetingIdAndMember(meetingId, member) // 이미 참여 중인 경우
-			.orElseThrow(() -> new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS));
+		if (meetingParticipantRepository.existsByMeetingAndMember(meeting, member)) {
+			throw new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS);
+		}
 
 		MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT);
 
@@ -139,7 +142,7 @@ public class MeetingService {
 
 		return meetings.stream()
 			.map(meeting -> {
-				Long participantCount = meetingParticipantRepository.countByMeetingId(meeting.getId());
+				Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
 				return OfflineMeetingListResponseDto.of(meeting, participantCount);
 			})
 			.collect(Collectors.toList());
@@ -152,10 +155,42 @@ public class MeetingService {
 
 		return meetings.stream()
 			.map(meeting -> {
-				Long participantCount = meetingParticipantRepository.countByMeetingId(meeting.getId());
+				Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
 				return DeliveryMeetingListResponseDto.of(meeting, participantCount);
 			})
 			.collect(Collectors.toList());
+	}
+
+	// 오프라인 모임 상세 조회 메소드
+	@Transactional(readOnly = true)
+	public OfflineMeetingDetailResponseDto getOfflineMeetingDetail(Long meetingId) {
+
+		OfflineMeeting offlinemeeting = offlineMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		Member member = meetingParticipantRepository.findByMeetingAndRole(offlinemeeting, HOST)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 확인
+
+		Long HostedMeetings = meetingParticipantRepository.countByMemberAndAndRole(member, HOST); // 주인이 개최한 모임 수 확인
+
+		Long participantCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 참여 인원 수
+
+		return OfflineMeetingDetailResponseDto.of(offlinemeeting, participantCount, member, HostedMeetings);
+	}
+
+	@Transactional(readOnly = true)
+	public DeliveryMeetingDetailResponseDto getDeliveryMeetingDetail(Long meetingId) {
+		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		Member member = meetingParticipantRepository.findByMeetingAndRole(deliveryMeeting, HOST)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 확인
+
+		Long HostedMeetings = meetingParticipantRepository.countByMemberAndAndRole(member, HOST); // 주인이 개최한 모임 수 확인
+
+		Long participantCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 참여 인원 수
+
+		return DeliveryMeetingDetailResponseDto.of(deliveryMeeting, participantCount, member, HostedMeetings);
 	}
 
 	// 참여 인원 제한 검증 로직
