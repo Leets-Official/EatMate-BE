@@ -61,6 +61,9 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             checkAccessTokenAndAuthentication(request, response, filterChain);
             // 토큰이 유효하다면 다음 필터로, 아니라면 403에러 발생
         }
+
+        // http 요청 -> (/api/v1/members/login)엔드포인트에 맞는 컨트롤러
+        // http 요청 -> JwtAuthenticationProcessingFilter (요기서 jwt검증, 파싱 유저를 생성) 가로챔 -> 컨트롤러
     }
 
     /**
