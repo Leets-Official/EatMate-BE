@@ -15,7 +15,7 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
 	Optional<Member> findByMeetingAndRole(Meeting meeting, ParticipantRole role);
 
-	Long countByMemberAndAndRole(Member member, ParticipantRole role);
+	Long countByMemberAndRole(Member member, ParticipantRole role);
 
 	boolean existsByMeetingAndMember(Meeting meeting, Member member);
 }
