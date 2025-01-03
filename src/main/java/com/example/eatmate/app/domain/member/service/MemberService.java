@@ -66,8 +66,6 @@ public class MemberService {
             throw new CommonException(ErrorCode.DUPLICATE_NICKNAME);
         }
 
-        // MBTI 검증
-        Mbti.fromString(signUpRequestDto.getMbti().name()); // fromString에서 검증 처리
     }
 
 

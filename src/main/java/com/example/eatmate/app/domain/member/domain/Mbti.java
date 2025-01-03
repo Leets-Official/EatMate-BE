@@ -3,20 +3,20 @@ package com.example.eatmate.app.domain.member.domain;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.Getter;
 
+
+@Getter
 public enum Mbti {
-    ISTJ, ISFJ, INFJ, INTJ,
-    ISTP, ISFP, INFP, INTP,
-    ESTP, ESFP, ENFP, ENTP,
-    ESTJ, ESFJ, ENFJ, ENTJ;
+    ISTJ("ISTJ"), ISFJ("ISFJ"), INFJ("INFJ"), INTJ("INTJ"),
+    ISTP("ISTP"), ISFP("ISFP"), INFP("INFP"), INTP("INTP"),
+    ESTP("ESTP"), ESFP("ESFP"), ENFP("ENFP"), ENTP("ENTP"),
+    ESTJ("ESTJ"), ESFJ("ESFJ"), ENFJ("ENFJ"), ENTJ("ENTJ");
 
-    @JsonCreator
-    public static Mbti fromString(String mbti) {
+    private final String mbtiType;
 
-        try {
-            return Mbti.valueOf(mbti.toUpperCase().trim());
-        } catch (IllegalArgumentException e) {
-            throw new CommonException(ErrorCode.INVALID_MBTI);
-        }
+    Mbti(String mbtiType) {
+        this.mbtiType = mbtiType;
     }
+
 }
