@@ -13,17 +13,17 @@ import java.util.Map;
 //Spring Security의 DefaultOAuth2User를 상속받아, 사용자 정보를 커스터마이징.
 
 @Getter
-public class CustomOAuth2User extends DefaultOAuth2User { // 역할이나 권한 나타냄 즉, 사용자 속성 저장
+public class CustomOAuth2User extends DefaultOAuth2User {
 
     private String email;
     private Role role;
 
     public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
                             Map<String, Object> attributes,
-                            String nameAttributeKey) {
-        super(authorities, attributes, nameAttributeKey); // 부모 클래스의 생성자 호출
-        this.email = attributes.get("email").toString(); // attributes에서 이메일 추출
-        this.role = Role.USER; // 기본 Role 설정
+                            String nameAttributeKey,
+                            Role role) {
+        super(authorities, attributes, nameAttributeKey);
+        this.email = attributes.get("email").toString();
+        this.role = role; // DB에서 전달된 Role 값을 사용
     }
-
 }
