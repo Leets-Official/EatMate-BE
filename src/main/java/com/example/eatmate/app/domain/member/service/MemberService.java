@@ -39,27 +39,16 @@ public class MemberService {
     }
 
     private void validateSignUpData(MemberSignUpRequestDto signUpRequestDto) {
-        // 성별 필수 선택 검증
-        if (signUpRequestDto.getGender() == null) {
-            throw new CommonException(ErrorCode.INVALID_GENDER);
-        }
 
-        // 전화번호 유효성 검증
-        if (!signUpRequestDto.getPhoneNumber().matches("^\\d{10,11}$")) {
-            throw new CommonException(ErrorCode.INVALID_PHONE_NUMBER);
-        }
+        // 전화번호 중복 검증
         if (memberRepository.existsByPhoneNumber(signUpRequestDto.getPhoneNumber())) {
             throw new CommonException(ErrorCode.DUPLICATE_PHONE_NUMBER); // 전화번호 중복 예외 발생
         }
 
-        // 학번 유효성 검증
-        if (signUpRequestDto.getStudentNumber() == null || String.valueOf(signUpRequestDto.getStudentNumber()).length() != 9) {
-            throw new CommonException(ErrorCode.INVALID_STUDENT_NUMBER);
-        }
+        // 학번 중복 검증
         if (memberRepository.existsByStudentNumber(signUpRequestDto.getStudentNumber())) {
             throw new CommonException(ErrorCode.DUPLICATE_STUDENT_NUMBER); // 학번 중복 예외 발생
         }
-
 
         // 닉네임 중복 확인
         if (memberRepository.existsByNickname(signUpRequestDto.getNickname())) {
