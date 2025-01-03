@@ -6,7 +6,9 @@ import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.member.domain.Member;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class OfflineMeetingDetailResponseDto {
 	private String meetingName;
 	private String meetingDescription;
