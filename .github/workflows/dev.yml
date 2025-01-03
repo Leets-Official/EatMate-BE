@@ -23,7 +23,8 @@ jobs:
       # 환경별 yml 파일 생성(1) - application.yml
       - name: make application.yml
         if: |
-          contains(github.ref, 'dev')
+          contains(github.ref, 'dev') || 
+          (github.event_name == 'pull_request')
         run: |
           mkdir ./src/main/resources # resources 폴더 생성
           cd ./src/main/resources # resources 폴더로 이동
@@ -33,14 +34,36 @@ jobs:
 
       # 환경별 yml 파일 생성(2) - dev
       - name: make application-dev.yml
-        if: contains(github.ref, 'dev')
+        if: |
+          contains(github.ref, 'dev') || 
+          (github.event_name == 'pull_request')
         run: |
           cd ./src/main/resources
           touch ./application-dev.yml
           echo "${{ secrets.YML_DEV }}" > ./application-dev.yml
         shell: bash
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+
+      # 환경별 yml 파일 생성(3) - oauth
+      - name: make application-oauth.yml
+        if: |
+          contains(github.ref, 'dev') || 
+          (github.event_name == 'pull_request')
+        run: |
+          cd ./src/main/resources
+          touch ./application-oauth.yml
+          echo "${{ secrets.YML_OAUTH }}" > ./application-oauth.yml
+        shell: bash
+
+      # 환경별 yml 파일 생성(3) - jwt
+      - name: make application-jwt.yml
+        if: |
+          contains(github.ref, 'dev') || 
+          (github.event_name == 'pull_request')
+        run: |
+          cd ./src/main/resources
+          touch ./application-jwt.yml
+          echo "${{ secrets.YML_JWT }}" > ./application-jwt.yml
+        shell: bash
 
       # Gradle Build (test는 제외)
       - name: Build with Gradle
@@ -62,7 +85,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build 
+    needs: build
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -70,7 +93,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
-      
+
       - name: Get Public IP
         id: ip
         uses: haythem/public-ip@v1.3
@@ -78,7 +101,7 @@ jobs:
       - name: Add GitHub Actions IP to Security Group
         run: |
           aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
-      
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
