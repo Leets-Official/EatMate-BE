@@ -5,6 +5,7 @@ import com.example.eatmate.app.domain.member.service.MemberService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class AuthController {
     //회원가입
     @PostMapping("/signup") //매핑 경로 수정
     @Operation(summary = "회원가입", description = "회원가입을 합니다.")
-    public ResponseEntity<GlobalResponseDto<Void>> register(@RequestBody MemberSignUpRequestDto memberSignUpRequestDto, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<GlobalResponseDto<Void>> register(@RequestBody @Valid MemberSignUpRequestDto memberSignUpRequestDto, @AuthenticationPrincipal UserDetails userDetails) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(GlobalResponseDto.success(memberService.completeRegistration(memberSignUpRequestDto, userDetails) , HttpStatus.CREATED.value()));
     }

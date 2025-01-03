@@ -2,6 +2,7 @@ package com.example.eatmate.app.domain.member.service;
 
 
 import com.example.eatmate.app.domain.member.domain.BirthDate;
+import com.example.eatmate.app.domain.member.domain.Mbti;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
@@ -30,11 +31,12 @@ public class MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
+
         if (memberRepository.existsByNickname(signUpRequestDto.getNickname())) {
             throw new CommonException(ErrorCode.DUPLICATE_NICKNAME); // 닉네임 중복 예외 발생
         }
 
-        member.updateMemberDetails(signUpRequestDto.getNickname(), signUpRequestDto.getPhoneNumber(), signUpRequestDto.getStudentNumber(), signUpRequestDto.getGender(), BirthDate.of(signUpRequestDto.getYear(), signUpRequestDto.getMonth(), signUpRequestDto.getDay()), signUpRequestDto.getMbti());
+        member.updateMemberDetails(signUpRequestDto.getNickname(), signUpRequestDto.getPhoneNumber(), signUpRequestDto.getStudentNumber(), signUpRequestDto.getGender(), BirthDate.of(signUpRequestDto.getYear(), signUpRequestDto.getMonth(), signUpRequestDto.getDay()), Mbti.fromString(signUpRequestDto.getMbti().name()));
         return null;
     }
 
