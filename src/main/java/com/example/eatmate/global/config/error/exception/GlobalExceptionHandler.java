@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
 		log.error(ex.getMessage());
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
-			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
+				.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
 	}
 
 	@ExceptionHandler(CommonException.class) // Custom Exception을 포괄적으로 처리
@@ -44,24 +44,23 @@ public class GlobalExceptionHandler {
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
 		showErrorLog(errorCode);
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
-			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
+				.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class) // Valid 검증 실패시 예외처리
 	public ResponseEntity<GlobalResponseDto<String>> handleValidationExceptions(
-		MethodArgumentNotValidException ex) {
+			MethodArgumentNotValidException ex) {
 		ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
 
 		// 모든 검증 오류를 하나의 문자열로 결합
 		String errorMessage = ex.getBindingResult()
-			.getAllErrors()
-			.stream()
-			.map(error -> error.getDefaultMessage())
-			.collect(Collectors.joining(", "));
+				.getAllErrors()
+				.stream()
+				.map(error -> error.getDefaultMessage())
+				.collect(Collectors.joining(", "));
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
-			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+				.body(GlobalResponseDto.fail(errorCode, errorMessage));
 	}
 
 }
-
