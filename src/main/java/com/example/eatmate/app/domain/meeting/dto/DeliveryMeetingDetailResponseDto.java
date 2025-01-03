@@ -33,7 +33,7 @@ public class DeliveryMeetingDetailResponseDto {
 		this.storeName = storeName;
 		this.pickupLocation = pickupLocation;
 		this.orderDeadline = orderDeadline;
-		this.meetingLeaderName = meetingLeader.getName();
+		this.meetingLeaderName = meetingLeader.getNickname();
 		this.meetingLeaderHostedMeetingCount = meetingLeaderHostedMeetingCount;
 	}
 
