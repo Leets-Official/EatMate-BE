@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,8 +48,8 @@ public class MeetingService {
 	// 배달 모임 생성
 	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
-		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, Long memberId) {
-		Member member = getMember(memberId);
+		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
+		Member member = getMember(userDetails);
 
 		validateParticipantLimit(
 			createDeliveryMeetingRequestDto.getMaxParticipants(),
@@ -80,8 +81,8 @@ public class MeetingService {
 	// 밥, 술 모임 생성
 	@Transactional
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
-		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, Long memberId) {
-		Member member = getMember(memberId);
+		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
+		Member member = getMember(userDetails);
 
 		validateParticipantLimit(
 			createOfflineMeetingRequestDto.getMaxParticipants(),
@@ -109,8 +110,8 @@ public class MeetingService {
 
 	// 모임 참가 메소드
 	@Transactional
-	public void joinMeeting(Long meetingId, Long memberId) {
-		Member member = getMember(memberId);
+	public void joinMeeting(Long meetingId, UserDetails userDetails) {
+		Member member = getMember(userDetails);
 		Meeting meeting = deliveryMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
@@ -210,8 +211,8 @@ public class MeetingService {
 	}
 
 	// 회원 정보 조회 메소드
-	private Member getMember(Long memberId) {
-		return memberRepository.findById(memberId)
+	private Member getMember(UserDetails userDetails) {
+		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 }
