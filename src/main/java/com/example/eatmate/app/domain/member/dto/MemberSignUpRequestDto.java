@@ -24,10 +24,10 @@ public class MemberSignUpRequestDto {
     @NotNull(message = "성별 선택은 필수 항목입니다.")
     private Gender gender;
 
+    @NotNull(message = "전화번호 입력은 필수입니다.")
     @Pattern(regexp = "^010\\d{8}$", message = "전화번호는 010으로 시작하며 11자리 숫자여야 합니다.")
     private String phoneNumber;
 
-    @NotNull(message = "MBTI는 선택 입력값입니다.")
     private Mbti mbti;
 
     @NotNull(message = "학번 입력은 필수입니다.")
