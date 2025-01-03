@@ -74,7 +74,8 @@ public class MeetingService {
 
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
 
-		MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, PARTICIPANT); // 참여 등록
+		meetingParticipantRepository.save(
+			MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, HOST)); // 참여 등록
 		return CreateDeliveryMeetingResponseDto.from(deliveryMeeting);
 	}
 
@@ -103,7 +104,8 @@ public class MeetingService {
 			.build();
 
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
-		MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST); // 참여 등록
+		meetingParticipantRepository.save(
+			MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST)); // 참여 등록
 
 		return CreateOfflineMeetingResponseDto.from(offlineMeeting);
 	}
@@ -169,10 +171,13 @@ public class MeetingService {
 		OfflineMeeting offlinemeeting = offlineMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
-		Member member = meetingParticipantRepository.findByMeetingAndRole(offlinemeeting, HOST)
-			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 확인
+		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndRole(offlinemeeting, HOST)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 컬럼 확인
 
-		Long hostedMeetings = meetingParticipantRepository.countByMemberAndRole(member, HOST); // 주인이 개최한 모임 수 확인
+		Member member = meetingParticipant.getMember(); // 모임 주인 확인
+
+		Long hostedMeetings = meetingParticipantRepository.countByMemberAndRole(meetingParticipant.getMember(),
+			HOST); // 주인이 개최한 모임 수 확인
 
 		Long participantCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 참여 인원 수
 
@@ -184,8 +189,10 @@ public class MeetingService {
 		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
-		Member member = meetingParticipantRepository.findByMeetingAndRole(deliveryMeeting, HOST)
-			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 확인
+		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndRole(deliveryMeeting, HOST)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 컬럼 확인
+
+		Member member = meetingParticipant.getMember(); // 모임 주인 확인
 
 		Long hostedMeetings = meetingParticipantRepository.countByMemberAndRole(member, HOST); // 주인이 개최한 모임 수 확인
 
