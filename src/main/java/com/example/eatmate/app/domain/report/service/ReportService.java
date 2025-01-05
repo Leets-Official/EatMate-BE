@@ -9,6 +9,7 @@ import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.report.domain.Report;
 import com.example.eatmate.app.domain.report.domain.repository.ReportRepository;
+import com.example.eatmate.app.domain.report.dto.ReportAdminResponseDto;
 import com.example.eatmate.app.domain.report.dto.ReportRequestDto;
 import com.example.eatmate.app.domain.report.dto.ReportResponseDto;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -49,6 +50,24 @@ public class ReportService {
 		return myReports.stream()
 			.map(report -> new ReportResponseDto(
 				report.getReported().getName(),
+				report.getReportTypes(),
+				report.getReportingReasonDescription(),
+				report.getCreatedAt(),
+				report.isProcessed()
+			))
+			.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<ReportAdminResponseDto> getAllReportsByAdmin() {
+
+		List<Report> myReports = reportRepository.findAll();
+		return myReports.stream()
+			.map(report -> new ReportAdminResponseDto(
+				report.getReporter().getName(),
+				report.getReporter().getEmail(),
+				report.getReported().getName(),
+				report.getReported().getEmail(),
 				report.getReportTypes(),
 				report.getReportingReasonDescription(),
 				report.getCreatedAt(),
