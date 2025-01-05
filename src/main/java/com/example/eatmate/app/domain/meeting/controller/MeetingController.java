@@ -60,11 +60,21 @@ public class MeetingController {
 	}
 
 	@PostMapping("/{meetingId}/delivery")
-	@Operation(summary = "모임 참가", description = "모임에 참가합니다.")
+	@Operation(summary = "배달 모임 참가", description = "배달 모임에 참가합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> joinDeliveryMeeting(
 		@PathVariable Long meetingId,
 		@AuthenticationPrincipal UserDetails userDetails) {
-		meetingService.joinMeeting(meetingId, userDetails);
+		meetingService.joinDeliveryMeeting(meetingId, userDetails);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success());
+	}
+
+	@PostMapping("/{meetingId}/offline")
+	@Operation(summary = "오프라인 모임 참가", description = "오프라인 모임에 참가합니다.")
+	public ResponseEntity<GlobalResponseDto<Void>> joinOfflineMeeting(
+		@PathVariable Long meetingId,
+		@AuthenticationPrincipal UserDetails userDetails) {
+		meetingService.joinOfflineMeeting(meetingId, userDetails);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}

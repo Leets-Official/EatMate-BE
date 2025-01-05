@@ -110,9 +110,9 @@ public class MeetingService {
 		return CreateOfflineMeetingResponseDto.from(offlineMeeting);
 	}
 
-	// 모임 참가 메소드
+	// 배달 모임 참가 메소드
 	@Transactional
-	public void joinMeeting(Long meetingId, UserDetails userDetails) {
+	public void joinDeliveryMeeting(Long meetingId, UserDetails userDetails) {
 		Member member = getMember(userDetails);
 		Meeting meeting = deliveryMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
@@ -125,7 +125,9 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
 		}
 
-		if (meeting.getGenderRestriction() != ALL && meeting.getGenderRestriction().equals(member.getGender())) {
+		if (meeting.getGenderRestriction() != ALL && !meeting.getGenderRestriction()
+			.toString()
+			.equals(member.getGender().toString())) {
 			throw new CommonException(ErrorCode.GENDER_RESTRICTED_MEETING);
 		}
 
@@ -133,7 +135,36 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS);
 		}
 
-		MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT);
+		meetingParticipantRepository.save(MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT));
+
+	}
+
+	// 오프라인 모임 참가 메소드
+	@Transactional
+	public void joinOfflineMeeting(Long meetingId, UserDetails userDetails) {
+		Member member = getMember(userDetails);
+		Meeting meeting = offlineMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		Long meetingCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 현재 참여 인원 수
+		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants(); // 참여 인원 제한 수
+		Boolean isLimited = meeting.getParticipantLimit().isLimited(); // 인원 제한여부
+
+		if (isLimited && meetingCount >= participantLimit) { // 인원 제한이 있으면서 참여 인원이 제한을 초과한 경우
+			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
+		}
+
+		if (meeting.getGenderRestriction() != ALL && !meeting.getGenderRestriction()
+			.toString()
+			.equals(member.getGender().toString())) {
+			throw new CommonException(ErrorCode.GENDER_RESTRICTED_MEETING);
+		}
+
+		if (meetingParticipantRepository.existsByMeetingAndMember(meeting, member)) {
+			throw new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS);
+		}
+
+		meetingParticipantRepository.save(MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT));
 
 	}
 
