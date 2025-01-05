@@ -51,6 +51,13 @@ public class MeetingService {
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
 		Member member = getMember(userDetails);
 
+		if (createDeliveryMeetingRequestDto.getGenderRestriction() != ALL
+			&& !createDeliveryMeetingRequestDto.getGenderRestriction()
+			.toString()
+			.equals(member.getGender().toString())) {
+			throw new CommonException(ErrorCode.INVALID_GENDER_RESTRICTION);
+		}
+
 		validateParticipantLimit(
 			createDeliveryMeetingRequestDto.getMaxParticipants(),
 			createDeliveryMeetingRequestDto.getIsLimited()
@@ -84,6 +91,13 @@ public class MeetingService {
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
 		Member member = getMember(userDetails);
+
+		if (createOfflineMeetingRequestDto.getGenderRestriction() != ALL
+			&& !createOfflineMeetingRequestDto.getGenderRestriction()
+			.toString()
+			.equals(member.getGender().toString())) {
+			throw new CommonException(ErrorCode.INVALID_GENDER_RESTRICTION);
+		}
 
 		validateParticipantLimit(
 			createOfflineMeetingRequestDto.getMaxParticipants(),
