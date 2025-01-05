@@ -45,6 +45,17 @@ public class MeetingService {
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
 
+	// 참여자와 모임 성별제한 일치 여부 확인 메소드
+	private static void validateGenderRestriction(CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
+		Member member) {
+		if (createOfflineMeetingRequestDto.getGenderRestriction() != ALL
+			&& !createOfflineMeetingRequestDto.getGenderRestriction()
+			.toString()
+			.equals(member.getGender().toString())) {
+			throw new CommonException(ErrorCode.INVALID_GENDER_RESTRICTION);
+		}
+	}
+
 	// 배달 모임 생성
 	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
@@ -92,12 +103,7 @@ public class MeetingService {
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
 		Member member = getMember(userDetails);
 
-		if (createOfflineMeetingRequestDto.getGenderRestriction() != ALL
-			&& !createOfflineMeetingRequestDto.getGenderRestriction()
-			.toString()
-			.equals(member.getGender().toString())) {
-			throw new CommonException(ErrorCode.INVALID_GENDER_RESTRICTION);
-		}
+		validateGenderRestriction(createOfflineMeetingRequestDto, member);
 
 		validateParticipantLimit(
 			createOfflineMeetingRequestDto.getMaxParticipants(),
@@ -229,6 +235,7 @@ public class MeetingService {
 		return OfflineMeetingDetailResponseDto.of(offlinemeeting, participantCount, member, hostedMeetings);
 	}
 
+	// 배달 모임 상세 조회 메소드
 	@Transactional(readOnly = true)
 	public DeliveryMeetingDetailResponseDto getDeliveryMeetingDetail(Long meetingId) {
 		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)

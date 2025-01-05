@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
@@ -108,6 +110,17 @@ class MeetingServiceTest {
 	@Test
 	@DisplayName("동시에 마지막 자리 참여 시도 테스트")
 	void concurrentJoinTest() throws InterruptedException {
+
+		UserDetails member2Details = User.withUsername(member2.getEmail())
+			.password("")
+			.roles("USER")
+			.build();
+
+		UserDetails member3Details = User.withUsername(member3.getEmail())
+			.password("")
+			.roles("USER")
+			.build();
+		
 		// 동시에 실행할 스레드 개수 설정 (2개: member2, member3의 요청)
 		int numberOfThreads = 2;
 
@@ -127,7 +140,7 @@ class MeetingServiceTest {
 		executorService.submit(() -> {
 			try {
 				// member2가 모임 참여 시도
-				meetingService.joinMeeting(testMeeting.getId(), member2.getMemberId());
+				meetingService.joinDeliveryMeeting(testMeeting.getId(), member2Details);
 				// 참여 성공시 successCount 증가
 				successCount.incrementAndGet();
 			} catch (CommonException e) {
@@ -144,7 +157,7 @@ class MeetingServiceTest {
 		// member3의 참여 요청을 스레드 풀에 제출 (member2와 동일한 로직)
 		executorService.submit(() -> {
 			try {
-				meetingService.joinMeeting(testMeeting.getId(), member3.getMemberId());
+				meetingService.joinDeliveryMeeting(testMeeting.getId(), member3Details);
 				successCount.incrementAndGet();
 			} catch (CommonException e) {
 				if (e.getErrorCode() == ErrorCode.PARTICIPANT_LIMIT_EXCEEDED) {
