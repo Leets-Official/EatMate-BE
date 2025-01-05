@@ -18,6 +18,7 @@ import com.example.eatmate.app.domain.report.service.ReportService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +33,7 @@ public class ReportController {
 	@PostMapping("")
 	@Operation(summary = "유저 신고하기", description = "해당 유저를 신고합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> reportUser(
-		@RequestBody ReportRequestDto reportRequestDto,
+		@RequestBody @Valid ReportRequestDto reportRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		reportService.createReport(reportRequestDto, userDetails.getUsername());
 		return ResponseEntity.status(HttpStatus.OK)
