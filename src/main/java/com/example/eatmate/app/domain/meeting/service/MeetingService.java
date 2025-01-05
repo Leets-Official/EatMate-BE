@@ -141,7 +141,7 @@ public class MeetingService {
 		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants(); // 참여 인원 제한 수
 		Boolean isLimited = meeting.getParticipantLimit().isLimited(); // 인원 제한여부
 
-		if (isLimited && meetingCount >= participantLimit) { // 인원 제한이 있으면서 참여 인원이 제한을 초과한 경우
+		if (isLimited && meetingCount > participantLimit) { // 인원 제한이 있으면서 참여 인원이 제한을 초과한 경우
 			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
 		}
 
