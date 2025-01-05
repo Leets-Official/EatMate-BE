@@ -76,7 +76,6 @@ jobs:
           username: ${{ secrets.DOCKER_USER_NAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USER_NAME }}/eatmate .
 
@@ -127,6 +126,7 @@ jobs:
             sudo docker run --name spring -d -p 8080:8080 -e  TZ=Asia/Seoul ${{ secrets.DOCKER_USER_NAME }}/eatmate
             sudo docker image prune -a -f
           debug: true  # Enable debugging output
+      
       - name: Remove GitHub Actions IP From Security Group
         run: |
           aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
