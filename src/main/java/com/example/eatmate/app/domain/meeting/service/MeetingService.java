@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
+import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
@@ -46,12 +47,16 @@ public class MeetingService {
 	private final MeetingParticipantRepository meetingParticipantRepository;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
-	private static void validateGenderRestriction(CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
-		Member member) {
-		if (createOfflineMeetingRequestDto.getGenderRestriction() != ALL
-			&& !createOfflineMeetingRequestDto.getGenderRestriction()
-			.toString()
-			.equals(member.getGender().toString())) {
+	private static void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
+		validateGenderRestrictionCommon(requestDto.getGenderRestriction(), member);
+	}
+
+	private static void validateGenderRestriction(CreateDeliveryMeetingRequestDto requestDto, Member member) {
+		validateGenderRestrictionCommon(requestDto.getGenderRestriction(), member);
+	}
+
+	private static void validateGenderRestrictionCommon(GenderRestriction genderRestriction, Member member) {
+		if (genderRestriction != ALL && !genderRestriction.toString().equals(member.getGender().toString())) {
 			throw new CommonException(ErrorCode.INVALID_GENDER_RESTRICTION);
 		}
 	}
@@ -62,12 +67,7 @@ public class MeetingService {
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
 		Member member = getMember(userDetails);
 
-		if (createDeliveryMeetingRequestDto.getGenderRestriction() != ALL
-			&& !createDeliveryMeetingRequestDto.getGenderRestriction()
-			.toString()
-			.equals(member.getGender().toString())) {
-			throw new CommonException(ErrorCode.INVALID_GENDER_RESTRICTION);
-		}
+		validateGenderRestriction(createDeliveryMeetingRequestDto, member);
 
 		validateParticipantLimit(
 			createDeliveryMeetingRequestDto.getMaxParticipants(),
