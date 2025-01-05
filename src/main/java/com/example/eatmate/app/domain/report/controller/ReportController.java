@@ -39,7 +39,7 @@ public class ReportController {
 			.body(GlobalResponseDto.success());
 	}
 
-	@GetMapping("")
+	@GetMapping("/all")
 	@Operation(summary = "신고 내역 불러오기", description = "신고 내역을 불러옵니다.")
 	public ResponseEntity<GlobalResponseDto<List<ReportResponseDto>>> getMyReports(
 		@AuthenticationPrincipal UserDetails userDetails) {
