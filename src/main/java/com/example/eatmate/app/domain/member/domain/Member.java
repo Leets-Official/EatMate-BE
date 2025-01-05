@@ -103,6 +103,7 @@ public class Member extends BaseTimeEntity {
 			.name(name)
 			.gender(gender)
 			.nickname(nickname)
+			.role(USER)
 			.build();
 	}
 
