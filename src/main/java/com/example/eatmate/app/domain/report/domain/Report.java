@@ -3,7 +3,7 @@ package com.example.eatmate.app.domain.report.domain;
 import java.util.List;
 
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.app.domain.report.converter.ReportListConverter;
+import com.example.eatmate.app.domain.report.converter.ReportTypeListConverter;
 import com.example.eatmate.app.domain.report.dto.ReportRequestDto;
 import com.example.eatmate.global.common.BaseTimeEntity;
 
@@ -39,7 +39,7 @@ public class Report extends BaseTimeEntity {
 	private Member reported;
 
 	// 신고 유형 목록
-	@Convert(converter = ReportListConverter.class)
+	@Convert(converter = ReportTypeListConverter.class)
 	private List<ReportType> reportTypes;
 
 	// 구체적인 신고 사유
