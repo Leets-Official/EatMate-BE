@@ -14,11 +14,16 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-public class OAuthLoginFailureHandler  implements AuthenticationFailureHandler {
+public class OAuthLoginFailureHandler implements AuthenticationFailureHandler {
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.getWriter().write("소셜 로그인 실패 ! 서버 로그를 확인해주세요.");
-        log.info("소셜 로그인에 실패했습니다. 에러 메시지 : {}" , exception.getMessage());
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
+        // 상태 코드 설정
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        // 에러 메시지를 헤더에 추가
+        response.setHeader("Error-Message", "소셜 로그인 실패");
+        response.setHeader("Error-Detail", exception.getMessage());
+
+        log.error("소셜 로그인 실패: {}", exception.getMessage());
     }
 }
