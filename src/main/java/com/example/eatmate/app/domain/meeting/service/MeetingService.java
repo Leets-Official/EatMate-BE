@@ -130,62 +130,36 @@ public class MeetingService {
 		return CreateOfflineMeetingResponseDto.from(offlineMeeting);
 	}
 
-	// 배달 모임 참가 메소드
-	@Transactional
-	public void joinDeliveryMeeting(Long meetingId, UserDetails userDetails) {
+	// 모임 참여 메소드 (공통)
+	private void joinMeeting(Long meetingId, UserDetails userDetails, boolean isDeliveryMeeting) {
 		Member member = getMember(userDetails);
-		Meeting meeting = deliveryMeetingRepository.findById(meetingId)
-			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+		Meeting meeting;
 
-		Long meetingCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 현재 참여 인원 수
-		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants(); // 참여 인원 제한 수
-		Boolean isLimited = meeting.getParticipantLimit().isLimited(); // 인원 제한여부
-
-		if (isLimited && meetingCount > participantLimit) { // 인원 제한이 있으면서 참여 인원이 제한을 초과한 경우
-			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
+		if (isDeliveryMeeting) {
+			meeting = deliveryMeetingRepository.findById(meetingId)
+				.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+		} else {
+			meeting = offlineMeetingRepository.findById(meetingId)
+				.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 		}
 
-		if (meeting.getGenderRestriction() != ALL && !meeting.getGenderRestriction()
-			.toString()
-			.equals(member.getGender().toString())) {
-			throw new CommonException(ErrorCode.GENDER_RESTRICTED_MEETING);
-		}
-
-		if (meetingParticipantRepository.existsByMeetingAndMember(meeting, member)) {
-			throw new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS);
-		}
+		validateParticipantLimit(meeting);
+		validateGenderRestriction(meeting, member);
+		validateDuplicateParticipant(meeting, member);
 
 		meetingParticipantRepository.save(MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT));
-
 	}
 
-	// 오프라인 모임 참가 메소드
+	// 배달 모임 참여
+	@Transactional
+	public void joinDeliveryMeeting(Long meetingId, UserDetails userDetails) {
+		joinMeeting(meetingId, userDetails, true);
+	}
+
+	// 밥, 술 모임 참여
 	@Transactional
 	public void joinOfflineMeeting(Long meetingId, UserDetails userDetails) {
-		Member member = getMember(userDetails);
-		Meeting meeting = offlineMeetingRepository.findById(meetingId)
-			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
-
-		Long meetingCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 현재 참여 인원 수
-		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants(); // 참여 인원 제한 수
-		Boolean isLimited = meeting.getParticipantLimit().isLimited(); // 인원 제한여부
-
-		if (isLimited && meetingCount >= participantLimit) { // 인원 제한이 있으면서 참여 인원이 제한을 초과한 경우
-			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
-		}
-
-		if (meeting.getGenderRestriction() != ALL && !meeting.getGenderRestriction()
-			.toString()
-			.equals(member.getGender().toString())) {
-			throw new CommonException(ErrorCode.GENDER_RESTRICTED_MEETING);
-		}
-
-		if (meetingParticipantRepository.existsByMeetingAndMember(meeting, member)) {
-			throw new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS);
-		}
-
-		meetingParticipantRepository.save(MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT));
-
+		joinMeeting(meetingId, userDetails, false);
 	}
 
 	// 밥, 술 모임 목록 조회 메소드
@@ -266,6 +240,32 @@ public class MeetingService {
 			if (participantLimit == null) {
 				throw new CommonException(ErrorCode.INVALID_PARTICIPANT_LIMIT);
 			}
+		}
+	}
+
+	// 참여 인원 제한 검증
+	private void validateParticipantLimit(Meeting meeting) {
+		Long meetingCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
+		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants();
+		Boolean isLimited = meeting.getParticipantLimit().isLimited();
+
+		if (isLimited && meetingCount >= participantLimit) {
+			throw new CommonException(ErrorCode.PARTICIPANT_LIMIT_EXCEEDED);
+		}
+	}
+
+	// 성별 제한 검증
+	private void validateGenderRestriction(Meeting meeting, Member member) {
+		if (meeting.getGenderRestriction() != ALL
+			&& !meeting.getGenderRestriction().toString().equals(member.getGender().toString())) {
+			throw new CommonException(ErrorCode.GENDER_RESTRICTED_MEETING);
+		}
+	}
+
+	// 중복 참가 검증
+	private void validateDuplicateParticipant(Meeting meeting, Member member) {
+		if (meetingParticipantRepository.existsByMeetingAndMember(meeting, member)) {
+			throw new CommonException(ErrorCode.PARTICIPANT_ALREADY_EXISTS);
 		}
 	}
 
