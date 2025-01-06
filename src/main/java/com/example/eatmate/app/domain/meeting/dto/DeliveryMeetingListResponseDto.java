@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class DeliveryMeetingListResponseDto {
 	private String meetingName;
 	private String meetingDescription;
