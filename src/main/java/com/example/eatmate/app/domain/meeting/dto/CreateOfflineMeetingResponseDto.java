@@ -3,7 +3,9 @@ package com.example.eatmate.app.domain.meeting.dto;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class CreateOfflineMeetingResponseDto {
 	private Long meetingId;
 

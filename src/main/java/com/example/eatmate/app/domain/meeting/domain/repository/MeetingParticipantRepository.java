@@ -13,7 +13,7 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
 	Long countByMeeting_Id(Long meetingId);
 
-	Optional<Member> findByMeetingAndRole(Meeting meeting, ParticipantRole role);
+	Optional<MeetingParticipant> findByMeetingAndRole(Meeting meeting, ParticipantRole role);
 
 	Long countByMemberAndRole(Member member, ParticipantRole role);
 

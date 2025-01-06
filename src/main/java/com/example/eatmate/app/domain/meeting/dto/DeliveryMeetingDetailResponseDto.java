@@ -3,16 +3,19 @@ package com.example.eatmate.app.domain.meeting.dto;
 import java.time.LocalDateTime;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
+import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.member.domain.Member;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class DeliveryMeetingDetailResponseDto {
 	private String meetingName;
 	private String meetingDescription;
 	private Long participantCount;
 	private Long maxParticipants;
-	private String genderRestriction;
+	private GenderRestriction genderRestriction;
 	private String storeName;
 	private String pickupLocation;
 	private LocalDateTime orderDeadline;
@@ -21,7 +24,7 @@ public class DeliveryMeetingDetailResponseDto {
 
 	@Builder
 	private DeliveryMeetingDetailResponseDto(String meetingName, String meetingDescription, Long participantCount,
-		Long maxParticipants, String genderRestriction, String storeName, String pickupLocation,
+		Long maxParticipants, GenderRestriction genderRestriction, String storeName, String pickupLocation,
 		LocalDateTime orderDeadline, Member meetingLeader, Long meetingLeaderHostedMeetingCount) {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
@@ -31,7 +34,7 @@ public class DeliveryMeetingDetailResponseDto {
 		this.storeName = storeName;
 		this.pickupLocation = pickupLocation;
 		this.orderDeadline = orderDeadline;
-		this.meetingLeaderName = meetingLeader.getName();
+		this.meetingLeaderName = meetingLeader.getNickname();
 		this.meetingLeaderHostedMeetingCount = meetingLeaderHostedMeetingCount;
 	}
 
@@ -42,7 +45,7 @@ public class DeliveryMeetingDetailResponseDto {
 			.meetingDescription(deliveryMeeting.getMeetingDescription())
 			.participantCount(participantCount)
 			.maxParticipants(deliveryMeeting.getParticipantLimit().getMaxParticipants())
-			.genderRestriction(deliveryMeeting.getGenderRestriction().getDescription())
+			.genderRestriction(deliveryMeeting.getGenderRestriction())
 			.storeName(deliveryMeeting.getStoreName())
 			.pickupLocation(deliveryMeeting.getPickupLocation())
 			.orderDeadline(deliveryMeeting.getOrderDeadline())
