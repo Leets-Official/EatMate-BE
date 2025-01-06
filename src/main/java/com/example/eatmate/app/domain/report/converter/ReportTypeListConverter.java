@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import com.example.eatmate.app.domain.report.domain.ReportType;
+import com.example.eatmate.global.config.error.ErrorCode;
+import com.example.eatmate.global.config.error.exception.CommonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -21,7 +23,7 @@ public class ReportTypeListConverter implements AttributeConverter<List<ReportTy
 		try {
 			return mapper.writeValueAsString(attribute);
 		} catch (JsonProcessingException e) {
-			throw new IllegalArgumentException();
+			throw new CommonException(ErrorCode.INVALID_REPORT_TYPE_LIST);
 		}
 	}
 

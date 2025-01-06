@@ -31,7 +31,8 @@ public enum ErrorCode {
 	GENDER_RESTRICTED_MEETING(403, "GENDER_RESTRICTED_MEETING", "성별 제한으로 인해 참여할 수 없는 모임입니다."),
 
 	// 신고
-	SELF_REPORT_NOT_ALLOWED(400, "SELF_REPORT_NOT_ALLOWED", "자기 자신을 신고할 수 없습니다.");
+	SELF_REPORT_NOT_ALLOWED(400, "SELF_REPORT_NOT_ALLOWED", "자기 자신을 신고할 수 없습니다."),
+	INVALID_REPORT_TYPE_LIST(400, "INVALID_REPORT_TYPE_LIST", "올바르지 않은 신고 사유 리스트입니다.");
 
 	private final int status;
 	private final String code;
