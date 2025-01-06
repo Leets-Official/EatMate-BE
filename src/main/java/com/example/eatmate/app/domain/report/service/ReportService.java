@@ -37,6 +37,14 @@ public class ReportService {
 			throw new CommonException(ErrorCode.SELF_REPORT_NOT_ALLOWED);
 		}
 
+		List<Report> reports = reportRepository.findAllByReporterMemberIdAndReportedMemberId(member.getMemberId(),
+			reported.getMemberId());
+
+		// 이미 신고한 유저이며, 처리가 안됐을 경우 신고 불가
+		if (reports.stream().anyMatch(report -> !report.isProcessed())) {
+			throw new CommonException(ErrorCode.DUPLICATE_REPORT_NOT_ALLOWED);
+		}
+
 		Report report = Report.createReport(reportRequestDto, member, reported);
 		reportRepository.save(report);
 	}

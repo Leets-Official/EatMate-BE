@@ -48,7 +48,7 @@ public class Report extends BaseTimeEntity {
 
 	// 처리 여부
 	@Column(nullable = false)
-	private boolean processed = false;
+	private boolean isProcessed = false;
 
 	@Builder
 	public Report(Member reporter, Member reported, List<ReportType> reportTypes, String reportingReasonDescription) {
@@ -56,7 +56,7 @@ public class Report extends BaseTimeEntity {
 		this.reported = reported;
 		this.reportTypes = reportTypes;
 		this.reportingReasonDescription = reportingReasonDescription;
-		this.processed = false;
+		this.isProcessed = false;
 	}
 
 	public static Report createReport(ReportRequestDto reportRequestDto, Member reporter, Member reported) {
