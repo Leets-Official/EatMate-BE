@@ -30,7 +30,7 @@ public class ReportController {
 
 	private final ReportService reportService;
 
-	@PostMapping("")
+	@PostMapping
 	@Operation(summary = "유저 신고하기", description = "해당 유저를 신고합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> reportUser(
 		@RequestBody @Valid ReportRequestDto reportRequestDto,
