@@ -12,13 +12,16 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.example.eatmate.global.auth.jwt.JwtAuthenticationProcessingFilter;
 import com.example.eatmate.global.auth.login.oauth.OAuthLoginFailureHandler;
 import com.example.eatmate.global.auth.login.oauth.OAuthLoginSuccessHandler;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -29,6 +32,7 @@ public class SecurityConfig {
 
 	private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
 	private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
+	private final JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,6 +44,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(
 				authorize -> authorize
+					.requestMatchers("/api/admin/**").hasRole("ADMIN")
 					// 아이콘, css, js 관련
 					// 기본 페이지, css, image, js 하위 폴더에 있는 자료들은 모두 접근 가능, h2-console에 접근 가능
 					// 			.requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
@@ -47,6 +52,16 @@ public class SecurityConfig {
 					// 			.requestMatchers("/register").permitAll()
 					.anyRequest().permitAll()
 			)
+			.exceptionHandling(exceptionHandling ->
+				exceptionHandling
+					.authenticationEntryPoint((request, response, authException) -> {
+						response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+					})
+					.accessDeniedHandler((request, response, accessDeniedException) -> {
+						response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+					})
+			)
+			.addFilterBefore(jwtAuthenticationProcessingFilter, UsernamePasswordAuthenticationFilter.class)  // 필터 순서 확인
 			//== 소셜 로그인 설정 ==//
 			.oauth2Login(oauth2 -> oauth2.successHandler(oAuthLoginSuccessHandler)
 				.failureHandler(oAuthLoginFailureHandler)); // 소셜 로그인 실패 시 핸들러 설정
@@ -69,5 +84,4 @@ public class SecurityConfig {
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
-
 }

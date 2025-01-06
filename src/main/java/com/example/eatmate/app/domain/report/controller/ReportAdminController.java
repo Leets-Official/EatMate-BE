@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +25,6 @@ public class ReportAdminController {
 	private final ReportService reportService;
 
 	@GetMapping("/all")
-	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "어드민만 볼수있는 전체 신고 내역", description = "관리자가 신고 내역을 불러옵니다.")
 	public ResponseEntity<GlobalResponseDto<List<ReportAdminResponseDto>>> getAllReports() {
 		return ResponseEntity.status(HttpStatus.OK)
