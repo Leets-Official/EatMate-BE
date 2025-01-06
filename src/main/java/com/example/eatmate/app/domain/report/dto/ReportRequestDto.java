@@ -10,10 +10,14 @@ import lombok.Getter;
 
 @Getter
 public class ReportRequestDto {
+
 	@NotEmpty
 	private List<ReportType> reportTypes;
+
 	@NotBlank
 	private String reportingReasonDescription;    // 구체적인 신고 사유
+
 	@NotBlank
 	private String reportedMemberEmail;
+
 }

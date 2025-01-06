@@ -11,9 +11,15 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class ReportResponseDto {
+
 	private String reportedUserName;
+
 	private List<ReportType> reportTypes;
+
 	private String reportingReasonDescription;
+
 	private LocalDateTime time;
+
 	private boolean isProcessed;
+
 }
