@@ -14,7 +14,6 @@ import com.example.eatmate.app.domain.report.dto.ReportRequestDto;
 import com.example.eatmate.app.domain.report.dto.ReportResponseDto;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
-import com.example.eatmate.global.config.error.exception.custom.SelfReportingNotAllowedException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +34,7 @@ public class ReportService {
 		Member reported = findMemberByEmail(reportRequestDto.getReportedMemberEmail());
 
 		if (member.equals(reported)) {
-			throw new SelfReportingNotAllowedException();
+			throw new CommonException(ErrorCode.SELF_REPORT_NOT_ALLOWED);
 		}
 
 		Report report = Report.createReport(reportRequestDto, member, reported);
