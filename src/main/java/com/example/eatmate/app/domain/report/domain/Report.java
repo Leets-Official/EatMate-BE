@@ -15,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,6 +40,7 @@ public class Report extends BaseTimeEntity {
 	private Member reported;
 
 	// 신고 유형 목록
+	@NotEmpty
 	@Convert(converter = ReportTypeListConverter.class)
 	private List<ReportType> reportTypes;
 
@@ -51,7 +53,7 @@ public class Report extends BaseTimeEntity {
 	private boolean isProcessed = false;
 
 	@Builder
-	public Report(Member reporter, Member reported, List<ReportType> reportTypes, String reportingReasonDescription) {
+	private Report(Member reporter, Member reported, List<ReportType> reportTypes, String reportingReasonDescription) {
 		this.reporter = reporter;
 		this.reported = reported;
 		this.reportTypes = reportTypes;
