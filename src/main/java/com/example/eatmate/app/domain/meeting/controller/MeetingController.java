@@ -119,7 +119,7 @@ public class MeetingController {
 	}
 
 	@GetMapping("/my/created")
-	@Operation(summary = "내가 생성한 모임 목록 조회", description = "내가 생성한 모임 목록(과거 포함)을 조회합니다.")
+	@Operation(summary = "내가 생성한 모임 목록 조회", description = "마이페이지에서 내가 생성한 모임 목록(과거 포함)을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>> getMyCreatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
@@ -128,12 +128,21 @@ public class MeetingController {
 	}
 
 	@GetMapping("/my/participated")
-	@Operation(summary = "내가 참여한 모임 목록 조회", description = "내가 참여한 모임 목록(과거 포함)을 조회합니다.")
+	@Operation(summary = "내가 참여한 모임 목록 조회", description = "마이페이지에서 내가 참여한 모임 목록(과거 포함)을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>> getMyParticipatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
 				meetingService.getMyMeetingList(userDetails, PARTICIPANT)));
+	}
+
+	@GetMapping("my/active")
+	@Operation(summary = "내가 참여 중인 모임 목록 조회", description = "내가 참여중인 활성화된 모임 목록을 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>>
+	getMyActiveMeetingList(@AuthenticationPrincipal UserDetails userDetails) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success(
+				meetingService.getMyActiveMeetingList(userDetails, null)));
 	}
 
 }
