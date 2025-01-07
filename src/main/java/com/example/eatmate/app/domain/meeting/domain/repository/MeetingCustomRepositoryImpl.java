@@ -25,7 +25,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<CreatedMeetingListResponseDto> findAllHostMeetings(Long memberId) {
+	public List<CreatedMeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role) {
 		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
 
 		return queryFactory
@@ -69,7 +69,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			.join(meetingParticipant).on(
 				meetingParticipant.meeting.id.eq(meeting.id),
 				meetingParticipant.member.memberId.eq(memberId),
-				meetingParticipant.role.eq(ParticipantRole.HOST)
+				meetingParticipant.role.eq(role)
 			)
 			.orderBy(
 				meeting.meetingStatus.asc(),
