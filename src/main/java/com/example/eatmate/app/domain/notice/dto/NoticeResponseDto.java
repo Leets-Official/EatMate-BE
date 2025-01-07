@@ -9,10 +9,15 @@ import lombok.Getter;
 
 @Getter
 public class NoticeResponseDto {
+
 	Long noticeId;
+
 	String title;
+
 	String content;
+
 	LocalDateTime createdAt;
+
 	LocalDateTime updatedAt;
 
 	@Builder

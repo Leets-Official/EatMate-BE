@@ -35,7 +35,6 @@ public class NoticeController {
 	public ResponseEntity<GlobalResponseDto<Slice<NoticeResponseDto>>> getNotices(
 		@RequestParam int pageNumber,
 		@RequestParam int pageSize) {
-
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(noticeService.findNotices(pageNumber, pageSize)));
 	}
