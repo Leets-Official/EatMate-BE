@@ -5,6 +5,7 @@ import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.rmi.server.ServerCloneException;
+import java.util.Arrays;
 
 /**
  * "/login" 이외의 URI 요청이 왔을 때 처리하는 필터
@@ -40,23 +42,34 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.info("Processing request URI: {}", request.getRequestURI());
+
         if (request.getRequestURI().equals(NO_CHECK_URL)) {
             filterChain.doFilter(request, response); // /login 요청은 필터 제외
             return;
         }
 
+        // 요청에서 쿠키 추출 및 디버깅 로그
+        log.info("Request Cookies: {}", Arrays.toString(request.getCookies()));
+
         // Refresh Token 처리
-        String refreshToken = jwtService.extractRefreshToken(request)
+        String refreshToken = jwtService.extractRefreshTokenFromCookie(request)
                 .filter(jwtService::isTokenValid)
                 .orElse(null);
 
         if (refreshToken != null) {
+            log.info("Valid RefreshToken found. Processing token renewal...");
             handleRefreshToken(response, refreshToken);
             return; // 토큰 재발급 후 필터 종료
         }
 
         // Access Token 처리
-        handleAccessToken(request, response, filterChain);
+        try {
+            handleAccessToken(request, response, filterChain);
+        } catch (Exception e) {
+            log.error("Error while handling Access Token: {}", e.getMessage(), e);
+            sendErrorResponse(response, "Invalid Access Token");
+        }
     }
 
     /**
@@ -71,9 +84,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                             member.updateRefreshToken(newRefreshToken);
                             memberRepository.saveAndFlush(member);
 
-                            // 헤더에 토큰 설정
-                            response.setHeader("Authorization", "Bearer " + newAccessToken);
-                            response.setHeader("Authorization-Refresh", "Bearer " + newRefreshToken);
+                            // 쿠키에 토큰 설정
+                            setTokenInCookie(response, "AccessToken", newAccessToken, jwtService.getAccessTokenExpirationPeriod());
+                            setTokenInCookie(response, "RefreshToken", newRefreshToken, jwtService.getRefreshTokenExpirationPeriod());
+
                             log.info("Refresh Token 유효. Access Token 및 Refresh Token 재발급 완료.");
                         },
                         () -> sendErrorResponse(response, "Invalid Refresh Token")
@@ -84,14 +98,22 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      * Access Token 처리 및 SecurityContext 설정
      */
     private void handleAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        jwtService.extractAccessToken(request)
-                .filter(jwtService::isTokenValid)
-                .flatMap(jwtService::extractEmail)
-                .flatMap(memberRepository::findByEmail)
-                .ifPresent(this::setAuthentication);
+        jwtService.extractAccessTokenFromCookie(request)
+                .filter(jwtService::isTokenValid) // AccessToken 유효성 검증
+                .flatMap(jwtService::extractEmail) // 유효한 AccessToken에서 Email 추출
+                .flatMap(memberRepository::findByEmail) // 이메일로 Member 조회
+                .ifPresentOrElse(
+                        member -> {
+                            log.info("Authentication successful for user: {}", member.getEmail());
+                            setAuthentication(member); // 인증 정보 SecurityContext에 저장
+                        },
+                        () -> log.warn("Failed to authenticate user. Either token is invalid or member not found.")
+                );
 
         filterChain.doFilter(request, response);
     }
+
+
 
     /**
      * 인증 정보 SecurityContext에 저장
@@ -121,5 +143,18 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error("에러 응답 전송 중 오류 발생", e);
         }
+    }
+
+    /**
+     * 쿠키에 토큰 설정
+     */
+    private void setTokenInCookie(HttpServletResponse response, String name, String token, long maxAge) {
+        Cookie cookie = new Cookie(name, token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (maxAge / 1000)); // maxAge는 초 단위로 설정
+        response.addCookie(cookie);
+        log.info("{} 쿠키 설정 완료", name);
     }
 }
