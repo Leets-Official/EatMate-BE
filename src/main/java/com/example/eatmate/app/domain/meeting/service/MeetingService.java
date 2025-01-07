@@ -172,8 +172,8 @@ public class MeetingService {
 	// 밥, 술 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
 	public List<OfflineMeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory offlineMeetingCategory) {
-		List<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategory(
-			offlineMeetingCategory);
+		List<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategoryAndMeetingStatus(
+			offlineMeetingCategory, MeetingStatus.ACTIVE);
 
 		return meetings.stream()
 			.map(meeting -> {
@@ -186,7 +186,8 @@ public class MeetingService {
 	// 배달 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
 	public List<DeliveryMeetingListResponseDto> getDeliveryMeetingList(FoodCategory foodCategory) {
-		List<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategory(foodCategory);
+		List<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategoryAndMeetingStatus(foodCategory,
+			MeetingStatus.ACTIVE);
 
 		return meetings.stream()
 			.map(meeting -> {
@@ -202,6 +203,10 @@ public class MeetingService {
 
 		OfflineMeeting offlinemeeting = offlineMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (offlinemeeting.getMeetingStatus() == MeetingStatus.INACTIVE) {
+			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
+		}
 
 		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndRole(offlinemeeting, HOST)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 컬럼 확인
@@ -221,6 +226,10 @@ public class MeetingService {
 	public DeliveryMeetingDetailResponseDto getDeliveryMeetingDetail(Long meetingId) {
 		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (deliveryMeeting.getMeetingStatus() == MeetingStatus.INACTIVE) {
+			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
+		}
 
 		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndRole(deliveryMeeting, HOST)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 컬럼 확인
