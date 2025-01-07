@@ -22,13 +22,11 @@ import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
-import com.example.eatmate.app.domain.meeting.domain.repository.MeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.OfflineMeetingRepository;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.CreatedMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
@@ -48,7 +46,6 @@ public class MeetingService {
 	private final MemberRepository memberRepository;
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
-	private final MeetingRepository meetingRepository;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
 	private static void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
@@ -288,19 +285,11 @@ public class MeetingService {
 		}
 	}
 
-	// 내가 생성한 모임 조회
-	@Transactional
-	public List<CreatedMeetingListResponseDto> getMyCreatedMeetingList(UserDetails userDetails) {
-		Member member = getMember(userDetails);
-		return meetingRepository.findAllHostMeetings(member.getMemberId());
-	}
-
 	// 회원 정보 조회 메소드
 	private Member getMember(UserDetails userDetails) {
 		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
-
 }
 
 

@@ -20,7 +20,6 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.CreatedMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
@@ -114,14 +113,5 @@ public class MeetingController {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
 				meetingService.getDeliveryMeetingDetail(meetingId)));
-	}
-
-	@GetMapping("/my/created")
-	@Operation(summary = "내가 생성한 모임 목록 조회", description = "내가 생성한 모임 목록을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<CreatedMeetingListResponseDto>>> getMyCreatedMeetingList(
-		@AuthenticationPrincipal UserDetails userDetails) {
-		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(
-				meetingService.getMyCreatedMeetingList(userDetails)));
 	}
 }
