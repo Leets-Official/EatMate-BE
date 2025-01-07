@@ -29,9 +29,7 @@ public class NoticeAdminController {
 	@Operation(summary = "관리자 공지사항 작성", description = "관리자가 공지사항을 작성합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> save(
 		@RequestBody @Valid NoticeAdminRequestDto noticeAdminRequestDto) {
-
 		noticeService.createNotice(noticeAdminRequestDto);
-
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 
@@ -41,9 +39,7 @@ public class NoticeAdminController {
 	@Operation(summary = "관리자 공지사항 수정", description = "관리자가 공지사항을 수정합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> update(@PathVariable Long noticeId,
 		@RequestBody @Valid NoticeAdminRequestDto noticeAdminRequestDto) {
-
 		noticeService.updateNotice(noticeId, noticeAdminRequestDto);
-
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
@@ -52,7 +48,6 @@ public class NoticeAdminController {
 	@Operation(summary = "관리자 공지사항 삭제", description = "관리자가 공지사항을 삭제합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> delete(@PathVariable Long noticeId) {
 		noticeService.deleteNotice(noticeId);
-
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
