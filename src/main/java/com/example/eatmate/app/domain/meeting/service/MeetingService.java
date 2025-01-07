@@ -16,6 +16,7 @@ import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
+import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
@@ -82,6 +83,7 @@ public class MeetingService {
 				.isLimited(createDeliveryMeetingRequestDto.getIsLimited())
 				.maxParticipants(createDeliveryMeetingRequestDto.getMaxParticipants())
 				.build())
+			.meetingStatus(MeetingStatus.ACTIVE)
 			.foodCategory(createDeliveryMeetingRequestDto.getFoodCategory())
 			.storeName(createDeliveryMeetingRequestDto.getStoreName())
 			.pickupLocation(createDeliveryMeetingRequestDto.getPickupLocation())
@@ -118,6 +120,7 @@ public class MeetingService {
 				.isLimited(createOfflineMeetingRequestDto.getIsLimited())
 				.maxParticipants(createOfflineMeetingRequestDto.getMaxParticipants())
 				.build())
+			.meetingStatus(MeetingStatus.ACTIVE)
 			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
 			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
@@ -141,6 +144,10 @@ public class MeetingService {
 		} else {
 			meeting = offlineMeetingRepository.findById(meetingId)
 				.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+		}
+
+		if (meeting.getMeetingStatus() == MeetingStatus.INACTIVE) {
+			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
 		}
 
 		validateParticipantLimit(meeting);
