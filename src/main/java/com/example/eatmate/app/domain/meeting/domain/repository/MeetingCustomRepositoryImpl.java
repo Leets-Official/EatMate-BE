@@ -7,7 +7,6 @@ import static com.example.eatmate.app.domain.meeting.domain.QOfflineMeeting.*;
 
 import java.util.List;
 
-import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.querydsl.core.types.ExpressionUtils;
@@ -26,15 +25,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<MeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role,
-		MeetingStatus meetingStatus) {
+	public List<MeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role) {
 		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
-
-		BooleanExpression statusCondition = meetingStatus != null ?
-			meeting.meetingStatus.eq(meetingStatus) : null;
-
-		BooleanExpression roleCondition = role != null ?
-			meetingParticipant.role.eq(role) : null;
 
 		return queryFactory
 			.select(Projections.constructor(MeetingListResponseDto.class,
@@ -77,9 +69,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			.join(meetingParticipant).on(
 				meetingParticipant.meeting.id.eq(meeting.id),
 				meetingParticipant.member.memberId.eq(memberId),
-				roleCondition
+				meetingParticipant.role.eq(role)
 			)
-			.where(statusCondition)
 			.orderBy(
 				meeting.meetingStatus.asc(),
 				new OrderSpecifier<>(Order.ASC,
@@ -97,5 +88,4 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			)
 			.fetch();
 	}
-
 }
