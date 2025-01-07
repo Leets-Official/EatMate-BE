@@ -45,4 +45,14 @@ public class NoticeService {
 
 		return notices.map(NoticeResponseDto::createNoticeResponseDto);
 	}
+
+	public void updateNotice(Long noticeId, NoticeAdminRequestDto noticeAdminRequestDto) {
+
+		Notice notice = noticeRepository.findById(noticeId)
+			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
+
+		notice.update(noticeAdminRequestDto);
+
+		noticeRepository.save(notice);
+	}
 }

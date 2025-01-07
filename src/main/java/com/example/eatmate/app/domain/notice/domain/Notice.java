@@ -39,4 +39,9 @@ public class Notice extends BaseTimeEntity {
 			.build();
 	}
 
+	public void update(NoticeAdminRequestDto noticeAdminRequestDto) {
+		this.title = noticeAdminRequestDto.getTitle();
+		this.content = noticeAdminRequestDto.getContent();
+	}
+
 }
