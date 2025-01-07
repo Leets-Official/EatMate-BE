@@ -1,5 +1,9 @@
 package com.example.eatmate.app.domain.notice.service;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.notice.domain.Notice;
@@ -27,5 +31,18 @@ public class NoticeService {
 			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
 
 		return NoticeResponseDto.createNoticeResponseDto(notice);
+	}
+
+	public Slice<NoticeResponseDto> findNotices(int pageNumber, int pageSize) {
+		if (pageNumber < 0) {
+			throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
+		}
+		if (pageSize < 0) {
+			throw new CommonException(ErrorCode.INVALID_PAGE_SIZE);
+		}
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
+		Slice<Notice> notices = noticeRepository.findPageBy(pageable);
+
+		return notices.map(NoticeResponseDto::createNoticeResponseDto);
 	}
 }
