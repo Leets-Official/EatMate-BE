@@ -55,4 +55,12 @@ public class NoticeService {
 
 		noticeRepository.save(notice);
 	}
+
+	public void deleteNotice(Long noticeId) {
+
+		Notice notice = noticeRepository.findById(noticeId)
+			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
+
+		noticeRepository.delete(notice);
+	}
 }
