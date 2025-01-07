@@ -1,6 +1,7 @@
 package com.example.eatmate.app.domain.meeting.service;
 
 import static com.example.eatmate.app.domain.meeting.domain.GenderRestriction.*;
+import static com.example.eatmate.app.domain.meeting.domain.MeetingStatus.*;
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
 import java.time.LocalDateTime;
@@ -87,7 +88,7 @@ public class MeetingService {
 				.isLimited(createDeliveryMeetingRequestDto.getIsLimited())
 				.maxParticipants(createDeliveryMeetingRequestDto.getMaxParticipants())
 				.build())
-			.meetingStatus(MeetingStatus.ACTIVE)
+			.meetingStatus(ACTIVE)
 			.foodCategory(createDeliveryMeetingRequestDto.getFoodCategory())
 			.storeName(createDeliveryMeetingRequestDto.getStoreName())
 			.pickupLocation(createDeliveryMeetingRequestDto.getPickupLocation())
@@ -124,7 +125,7 @@ public class MeetingService {
 				.isLimited(createOfflineMeetingRequestDto.getIsLimited())
 				.maxParticipants(createOfflineMeetingRequestDto.getMaxParticipants())
 				.build())
-			.meetingStatus(MeetingStatus.ACTIVE)
+			.meetingStatus(ACTIVE)
 			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
 			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
@@ -177,7 +178,7 @@ public class MeetingService {
 	@Transactional(readOnly = true)
 	public List<OfflineMeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory offlineMeetingCategory) {
 		List<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategoryAndMeetingStatus(
-			offlineMeetingCategory, MeetingStatus.ACTIVE);
+			offlineMeetingCategory, ACTIVE);
 
 		return meetings.stream()
 			.map(meeting -> {
@@ -191,7 +192,7 @@ public class MeetingService {
 	@Transactional(readOnly = true)
 	public List<DeliveryMeetingListResponseDto> getDeliveryMeetingList(FoodCategory foodCategory) {
 		List<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategoryAndMeetingStatus(foodCategory,
-			MeetingStatus.ACTIVE);
+			ACTIVE);
 
 		return meetings.stream()
 			.map(meeting -> {
@@ -293,7 +294,14 @@ public class MeetingService {
 	@Transactional
 	public List<MeetingListResponseDto> getMyMeetingList(UserDetails userDetails, ParticipantRole role) {
 		Member member = getMember(userDetails);
-		return meetingRepository.findAllMeetings(member.getMemberId(), role);
+		return meetingRepository.findAllMeetings(member.getMemberId(), role, null);
+	}
+
+	// 내가 참여 중인 활성화된 모임 조회
+	@Transactional
+	public List<MeetingListResponseDto> getMyActiveMeetingList(UserDetails userDetails, ParticipantRole role) {
+		Member member = getMember(userDetails);
+		return meetingRepository.findAllMeetings(member.getMemberId(), null, ACTIVE);
 	}
 
 	// 회원 정보 조회 메소드
