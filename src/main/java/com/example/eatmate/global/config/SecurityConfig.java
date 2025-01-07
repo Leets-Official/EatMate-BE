@@ -78,10 +78,9 @@ public class SecurityConfig {
 				"http://localhost:3000",
 				"https://develop.d4u0qurydeei4.amplifyapp.com"
 		));
-		configuration.setAllowedOrigins(Arrays.asList("https://develop.d4u0qurydeei4.amplifyapp.com"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
-		configuration.setExposedHeaders(Arrays.asList("Authorization", "Authorization_refresh", "accept"));
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "Authorization_refresh", "Role", "accept")); //헤더에 노출할 정보 Role 포함
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
