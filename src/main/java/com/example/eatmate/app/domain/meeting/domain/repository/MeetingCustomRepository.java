@@ -2,11 +2,8 @@ package com.example.eatmate.app.domain.meeting.domain.repository;
 
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.dto.CreatedMeetingListResponseDto;
 
-public interface MeetingRepository extends JpaRepository<Meeting, Long>, MeetingCustomRepository {
+public interface MeetingCustomRepository {
 	List<CreatedMeetingListResponseDto> findAllHostMeetings(Long memberId);
 }
