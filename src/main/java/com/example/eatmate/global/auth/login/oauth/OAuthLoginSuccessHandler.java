@@ -41,7 +41,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                 jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
             }
             logTokens(accessToken, refreshToken);
-            setTokensInHeader(response, accessToken, refreshToken);
+            setTokensInHeader(response, accessToken, refreshToken, userRole.name());
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생: {} " , e.getMessage());
             throw e;
@@ -49,12 +49,13 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
 
-    private void setTokensInHeader(HttpServletResponse response, String accessToken, String refreshToken) {
+    private void setTokensInHeader(HttpServletResponse response, String accessToken, String refreshToken, String role) {
         response.setHeader("Authorization", "Bearer " + accessToken);
         if (refreshToken != null) {
             response.setHeader("Authorization-Refresh", "Bearer " + refreshToken);
         }
-        log.info("헤더에 AccessToken, RefreshToken 설정 완료");
+        response.setHeader("Role", role);  //헤더에 role도 담기
+        log.info("헤더에 AccessToken, RefreshToken, Role 설정 완료");
     }
 
     // 로그용 (삭제해도 ok)
