@@ -55,13 +55,7 @@ public class ReportService {
 
 		List<Report> myReports = reportRepository.findAllByReporterEmail(email);
 		return myReports.stream()
-			.map(report -> new ReportResponseDto(
-				report.getReported().getName(),
-				report.getReportTypes(),
-				report.getReportingReasonDescription(),
-				report.getCreatedAt(),
-				report.isProcessed()
-			))
+			.map(ReportResponseDto::createReportResponseDto)
 			.toList();
 	}
 
@@ -70,16 +64,8 @@ public class ReportService {
 
 		List<Report> myReports = reportRepository.findAll();
 		return myReports.stream()
-			.map(report -> new ReportAdminResponseDto(
-				report.getReporter().getName(),
-				report.getReporter().getEmail(),
-				report.getReported().getName(),
-				report.getReported().getEmail(),
-				report.getReportTypes(),
-				report.getReportingReasonDescription(),
-				report.getCreatedAt(),
-				report.isProcessed()
-			))
+			.map(ReportAdminResponseDto::createReportAdminResponseDto
+			)
 			.toList();
 	}
 
