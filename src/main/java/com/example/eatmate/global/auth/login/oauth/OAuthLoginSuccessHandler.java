@@ -42,6 +42,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
             }
             logTokens(accessToken, refreshToken);
             setTokensInHeader(response, accessToken, refreshToken, userRole.name());
+			response.sendRedirect("http://localhost:3000/oauth2/callback");
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생: {} " , e.getMessage());
             throw e;
