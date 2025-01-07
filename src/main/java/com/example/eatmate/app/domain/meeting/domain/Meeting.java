@@ -50,6 +50,10 @@ public abstract class Meeting {
 	@Embedded
 	private ParticipantLimit participantLimit;
 
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private MeetingStatus meetingStatus;
+
 	@CreatedDate
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
