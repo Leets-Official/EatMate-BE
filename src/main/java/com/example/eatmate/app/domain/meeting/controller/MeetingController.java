@@ -22,9 +22,9 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.CreatedMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
@@ -120,7 +120,7 @@ public class MeetingController {
 
 	@GetMapping("/my/created")
 	@Operation(summary = "내가 생성한 모임 목록 조회", description = "내가 생성한 모임 목록(과거 포함)을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>> getMyCreatedMeetingList(
+	public ResponseEntity<GlobalResponseDto<List<CreatedMeetingListResponseDto>>> getMyCreatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -129,7 +129,7 @@ public class MeetingController {
 
 	@GetMapping("/my/participated")
 	@Operation(summary = "내가 참여한 모임 목록 조회", description = "내가 참여한 모임 목록(과거 포함)을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>> getMyParticipatedMeetingList(
+	public ResponseEntity<GlobalResponseDto<List<CreatedMeetingListResponseDto>>> getMyParticipatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
