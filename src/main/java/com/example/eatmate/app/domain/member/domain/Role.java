@@ -1,8 +1,10 @@
 package com.example.eatmate.app.domain.member.domain;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public enum Role {
 	USER("사용자"),
 	ADMIN("관리자"),

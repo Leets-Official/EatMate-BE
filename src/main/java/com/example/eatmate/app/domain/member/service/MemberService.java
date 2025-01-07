@@ -68,7 +68,7 @@ public class MemberService {
 				memberLoginRequestDto.getNickname(), memberLoginRequestDto.getName(),
 				memberLoginRequestDto.getGender()));
 
-		String accessToken = jwtService.createAccessToken(member.getEmail());
+		String accessToken = jwtService.createAccessToken(member.getEmail(), member.getRole());
 		String refreshToken = jwtService.createRefreshToken();
 
 		member.updateRefreshToken(refreshToken);
