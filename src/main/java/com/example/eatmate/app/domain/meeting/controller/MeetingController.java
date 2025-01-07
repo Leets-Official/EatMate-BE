@@ -136,7 +136,7 @@ public class MeetingController {
 				meetingService.getMyMeetingList(userDetails, PARTICIPANT)));
 	}
 
-	@GetMapping("my/active")
+	@GetMapping("my/participating")
 	@Operation(summary = "내가 참여 중인 모임 목록 조회", description = "내가 참여중인 활성화된 모임 목록을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>>
 	getMyActiveMeetingList(@AuthenticationPrincipal UserDetails userDetails) {
