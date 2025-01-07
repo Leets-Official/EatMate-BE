@@ -1,6 +1,7 @@
 package com.example.eatmate.app.domain.notice.domain;
 
 import com.example.eatmate.app.domain.notice.dto.NoticeAdminRequestDto;
+import com.example.eatmate.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Getter
-public class Notice {
+public class Notice extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
