@@ -8,6 +8,7 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.exception.custom.UserNotFoundException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
@@ -34,17 +36,10 @@ public class JwtService {
     @Value("${jwt.refresh.expiration}")
     private Long refreshTokenExpirationPeriod;
 
-    @Value("${jwt.access.header}")
-    private String accessHeader;
-
-    @Value("${jwt.refresh.header}")
-    private String refreshHeader;
-
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
     private static final String ROLE_CLAIM = "role";
-    private static final String BEARER = "Bearer";
 
     private final MemberRepository memberRepository;
 
@@ -80,26 +75,27 @@ public class JwtService {
     }
 
     /**
-     * 요청 헤더에서 Access Token 추출
+     * 공통: 쿠키에서 토큰 추출
      */
-    public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return extractToken(request, accessHeader);
+    private Optional<String> extractTokenFromCookie(HttpServletRequest request, String cookieName) {
+        return Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+                .filter(cookie -> cookie.getName().equals(cookieName))
+                .map(Cookie::getValue)
+                .findFirst();
     }
 
     /**
-     * 요청 헤더에서 Refresh Token 추출
+     * 쿠키에서 Access Token 추출
      */
-    public Optional<String> extractRefreshToken(HttpServletRequest request) {
-        return extractToken(request, refreshHeader);
+    public Optional<String> extractAccessTokenFromCookie(HttpServletRequest request) {
+        return extractTokenFromCookie(request, "AccessToken");
     }
 
     /**
-     * 공통: 헤더에서 토큰 추출
+     * 쿠키에서 Refresh Token 추출
      */
-    private Optional<String> extractToken(HttpServletRequest request, String header) {
-        return Optional.ofNullable(request.getHeader(header))
-                .filter(token -> token.startsWith(BEARER))
-                .map(token -> token.replace(BEARER + " ", ""));
+    public Optional<String> extractRefreshTokenFromCookie(HttpServletRequest request) {
+        return extractTokenFromCookie(request, "RefreshToken");
     }
 
     /**
