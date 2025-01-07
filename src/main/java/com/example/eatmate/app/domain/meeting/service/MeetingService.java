@@ -29,9 +29,9 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.CreatedMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
@@ -291,7 +291,7 @@ public class MeetingService {
 
 	// 내가 생성, 참여한 모임 조회
 	@Transactional
-	public List<CreatedMeetingListResponseDto> getMyMeetingList(UserDetails userDetails, ParticipantRole role) {
+	public List<MeetingListResponseDto> getMyMeetingList(UserDetails userDetails, ParticipantRole role) {
 		Member member = getMember(userDetails);
 		return meetingRepository.findAllMeetings(member.getMemberId(), role);
 	}

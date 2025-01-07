@@ -8,7 +8,7 @@ import static com.example.eatmate.app.domain.meeting.domain.QOfflineMeeting.*;
 import java.util.List;
 
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
-import com.example.eatmate.app.domain.meeting.dto.CreatedMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -25,11 +25,11 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<CreatedMeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role) {
+	public List<MeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role) {
 		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
 
 		return queryFactory
-			.select(Projections.constructor(CreatedMeetingListResponseDto.class,
+			.select(Projections.constructor(MeetingListResponseDto.class,
 				meeting.type,
 				meeting.id,
 				meeting.meetingName,
