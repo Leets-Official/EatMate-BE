@@ -11,6 +11,7 @@ import com.example.eatmate.app.domain.notice.dto.NoticeAdminRequestDto;
 import com.example.eatmate.app.domain.notice.service.NoticeService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +23,7 @@ public class NoticeAdminController {
 	private final NoticeService noticeService;
 
 	@PostMapping
+	@Operation(summary = "관리자 공지사항 작성", description = "관리자가 공지사항을 작성합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> save(
 		@RequestBody @Valid NoticeAdminRequestDto noticeAdminRequestDto) {
 
