@@ -1,5 +1,7 @@
 package com.example.eatmate.app.domain.meeting.controller;
 
+import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
+
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -117,11 +119,21 @@ public class MeetingController {
 	}
 
 	@GetMapping("/my/created")
-	@Operation(summary = "내가 생성한 모임 목록 조회", description = "내가 생성한 모임 목록을 조회합니다.")
+	@Operation(summary = "내가 생성한 모임 목록 조회", description = "내가 생성한 모임 목록(과거 포함)을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<List<CreatedMeetingListResponseDto>>> getMyCreatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getMyCreatedMeetingList(userDetails)));
+				meetingService.getMyMeetingList(userDetails, HOST)));
 	}
+
+	@GetMapping("/my/participated")
+	@Operation(summary = "내가 참여한 모임 목록 조회", description = "내가 참여한 모임 목록(과거 포함)을 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<List<CreatedMeetingListResponseDto>>> getMyParticipatedMeetingList(
+		@AuthenticationPrincipal UserDetails userDetails) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success(
+				meetingService.getMyMeetingList(userDetails, PARTICIPANT)));
+	}
+
 }
