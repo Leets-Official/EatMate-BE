@@ -74,7 +74,10 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+		configuration.setAllowedOrigins(Arrays.asList(
+				"http://localhost:3000",
+				"https://develop.d4u0qurydeei4.amplifyapp.com"
+		));
 		configuration.setAllowedOrigins(Arrays.asList("https://develop.d4u0qurydeei4.amplifyapp.com"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
