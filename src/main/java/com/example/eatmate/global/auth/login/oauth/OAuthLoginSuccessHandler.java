@@ -41,7 +41,9 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                 jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
             }
             logTokens(accessToken, refreshToken);
-            setTokensInHeader(response, accessToken, refreshToken, userRole.name());
+
+            setTokensInCookie(response,accessToken, refreshToken);
+
 			response.sendRedirect("http://localhost:3000/oauth2/callback");
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생: {} " , e.getMessage());
@@ -49,15 +51,43 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
+// 쿠키 설정 메소드 생성
+    private void setTokensInCookie(HttpServletResponse response, String accessToken, String refreshToken) {
+        // Access Token 쿠키 설정
+        Cookie accessTokenCookie = new Cookie("AccessToken", accessToken);
+        accessTokenCookie.setHttpOnly(true); // 자바스크립트에서 접근 불가 (보안 강화)
+        accessTokenCookie.setSecure(false); // HTTPS 에서만 전송
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(60 * 60); // 1시간
 
-    private void setTokensInHeader(HttpServletResponse response, String accessToken, String refreshToken, String role) {
-        response.setHeader("Authorization", "Bearer " + accessToken);
+        // SameSite 설정
+        response.addHeader("Set-Cookie", "AccessToken=" + accessToken +
+                "; HttpOnly; Secure=true; SameSite=None; Path=/; Max-Age=" + (60 * 60));
+
+        // Refresh Token 쿠키 설정 (필요 시)
+        Cookie refreshTokenCookie = null;
         if (refreshToken != null) {
-            response.setHeader("Authorization-Refresh", "Bearer " + refreshToken);
+            refreshTokenCookie = new Cookie("RefreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(false);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7); // 7일
+
+            // SameSite 설정
+            response.addHeader("Set-Cookie", "RefreshToken=" + refreshToken +
+                    "; HttpOnly; Secure=true; SameSite=None; Path=/; Max-Age=" + (60 * 60 * 24 * 7));
         }
-        response.setHeader("Role", role);  //헤더에 role도 담기
-        log.info("헤더에 AccessToken, RefreshToken, Role 설정 완료");
+
+
+        // 응답에 쿠키 추가
+        response.addCookie(accessTokenCookie);
+        if (refreshTokenCookie != null) {
+            response.addCookie(refreshTokenCookie);
+        }
+
+        log.info("쿠키에 AccessToken, RefreshToken 설정 완료");
     }
+
 
     // 로그용 (삭제해도 ok)
     private void logTokens(String accessToken, String refreshToken) {
