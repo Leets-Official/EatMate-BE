@@ -80,7 +80,7 @@ public class SecurityConfig {
 		));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
-		configuration.setExposedHeaders(Arrays.asList("Authorization", "Authorization_refresh", "Role", "accept")); //헤더에 노출할 정보 Role 포함
+		configuration.setExposedHeaders(Arrays.asList("AccessToken", "RefreshToken", "Role", "accept")); //헤더에 노출할 정보 Role 포함
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
