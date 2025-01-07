@@ -20,7 +20,6 @@ import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
-import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingRepository;
@@ -289,11 +288,11 @@ public class MeetingService {
 		}
 	}
 
-	// 내가 생성, 참여한 모임 조회
+	// 내가 생성한 모임 조회
 	@Transactional
-	public List<CreatedMeetingListResponseDto> getMyMeetingList(UserDetails userDetails, ParticipantRole role) {
+	public List<CreatedMeetingListResponseDto> getMyCreatedMeetingList(UserDetails userDetails) {
 		Member member = getMember(userDetails);
-		return meetingRepository.findAllMeetings(member.getMemberId(), role);
+		return meetingRepository.findAllHostMeetings(member.getMemberId());
 	}
 
 	// 회원 정보 조회 메소드
