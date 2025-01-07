@@ -37,7 +37,9 @@ public enum ErrorCode {
 	DUPLICATE_REPORT_NOT_ALLOWED(400, "DUPLICATE_REPORT_NOT_ALLOWED", "같은 유저를 연속적으로 신고할 수 없습니다."),
 
 	// 공지사항
-	NOTICE_NOT_FOUND(404, "NOTICE_NOT_FOUND", "해당 공지사항을 찾을 수 없습니다.");
+	NOTICE_NOT_FOUND(404, "NOTICE_NOT_FOUND", "해당 공지사항을 찾을 수 없습니다."),
+	INVALID_PAGE_NUMBER(400, "INVALID_PAGE_NUMBER ", "올바르지 않은 페이지 넘버입니다."),
+	INVALID_PAGE_SIZE(400, "INVALID_PAGE_SIZE", "올바르지 않은 페이지 크기입니다");
 
 	private final int status;
 	private final String code;
