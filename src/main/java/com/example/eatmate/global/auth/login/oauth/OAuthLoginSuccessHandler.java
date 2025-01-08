@@ -21,6 +21,12 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
 
+    private static final boolean COOKIE_HTTP_ONLY = true;
+    private static final boolean COOKIE_SECURE = false;
+    private static final String COOKIE_PATH = "/";
+    private static final int ACCESS_TOKEN_MAX_AGE = 60 * 60; // 1시간
+    private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7일
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("OAuth2 Login 성공");
@@ -30,7 +36,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
             // 사용자 Role 확인
             Role userRole = oAuth2User.getRole();
-            log.info("사용자 Role : {}" , userRole);
 
             //토큰 생성
             String accessToken = jwtService.createAccessToken(oAuth2User.getEmail(), oAuth2User.getRole().name() );
@@ -41,7 +46,9 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                 jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
             }
             logTokens(accessToken, refreshToken);
-            setTokensInHeader(response, accessToken, refreshToken, userRole.name());
+
+            setTokensInCookie(response,accessToken, refreshToken);
+
 			response.sendRedirect("http://localhost:3000/oauth2/callback");
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생: {} " , e.getMessage());
@@ -49,15 +56,41 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
+// 쿠키 설정 메소드 생성
+    private void setTokensInCookie(HttpServletResponse response, String accessToken, String refreshToken) {
+        // Access Token 쿠키 설정
+        Cookie accessTokenCookie = new Cookie("AccessToken", accessToken);
+        accessTokenCookie.setHttpOnly(COOKIE_HTTP_ONLY);
+        accessTokenCookie.setSecure(COOKIE_SECURE);
+        accessTokenCookie.setPath(COOKIE_PATH);
+        accessTokenCookie.setMaxAge(ACCESS_TOKEN_MAX_AGE);
 
-    private void setTokensInHeader(HttpServletResponse response, String accessToken, String refreshToken, String role) {
-        response.setHeader("Authorization", "Bearer " + accessToken);
+        // Refresh Token 쿠키 설정 (필요 시)
+        Cookie refreshTokenCookie = null;
         if (refreshToken != null) {
-            response.setHeader("Authorization-Refresh", "Bearer " + refreshToken);
+            refreshTokenCookie = new Cookie("RefreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(COOKIE_HTTP_ONLY);
+            refreshTokenCookie.setSecure(COOKIE_SECURE);
+            refreshTokenCookie.setPath(COOKIE_PATH);
+            refreshTokenCookie.setMaxAge(REFRESH_TOKEN_MAX_AGE);
         }
-        response.setHeader("Role", role);  //헤더에 role도 담기
-        log.info("헤더에 AccessToken, RefreshToken, Role 설정 완료");
+
+        // SameSite 설정
+        response.addHeader("Set-Cookie", "AccessToken=" + accessToken +
+                "; HttpOnly; Secure=" + COOKIE_SECURE + "; SameSite=None; Path=" + COOKIE_PATH + "; Max-Age=" + ACCESS_TOKEN_MAX_AGE);
+
+        if (refreshToken != null) {
+            response.addHeader("Set-Cookie", "RefreshToken=" + refreshToken +
+                    "; HttpOnly; Secure=" + COOKIE_SECURE + "; SameSite=None; Path=" + COOKIE_PATH + "; Max-Age=" + REFRESH_TOKEN_MAX_AGE);
+        }
+        // 응답에 쿠키 추가
+        response.addCookie(accessTokenCookie);
+        if (refreshTokenCookie != null) {
+            response.addCookie(refreshTokenCookie);
+        }
+
     }
+
 
     // 로그용 (삭제해도 ok)
     private void logTokens(String accessToken, String refreshToken) {
