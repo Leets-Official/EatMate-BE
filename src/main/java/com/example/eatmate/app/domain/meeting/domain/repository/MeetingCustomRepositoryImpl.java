@@ -10,6 +10,7 @@ import java.util.List;
 import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -76,10 +77,9 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			.from(meeting)
 			.join(meetingParticipant).on(
 				meetingParticipant.meeting.id.eq(meeting.id),
-				meetingParticipant.member.memberId.eq(memberId),
-				roleCondition
+				meetingParticipant.member.memberId.eq(memberId)
 			)
-			.where(statusCondition)
+			.where(statusCondition, roleCondition)
 			.orderBy(
 				meeting.meetingStatus.asc(),
 				new OrderSpecifier<>(Order.ASC,
@@ -98,4 +98,58 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			.fetch();
 	}
 
+	@Override
+	public UpcomingMeetingResponseDto findUpcomingMeeting(Long memberId) {
+		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
+
+		return queryFactory
+			.select(Projections.constructor(UpcomingMeetingResponseDto.class,
+				meetingParticipant.member.nickname,
+				ExpressionUtils.as(
+					new CaseBuilder()
+						.when(isDelivery)
+						.then(JPAExpressions
+							.select(deliveryMeeting.orderDeadline)
+							.from(deliveryMeeting)
+							.where(deliveryMeeting.id.eq(meeting.id)))
+						.otherwise(JPAExpressions
+							.select(offlineMeeting.meetingDate)
+							.from(offlineMeeting)
+							.where(offlineMeeting.id.eq(meeting.id))),
+					"meetingTime"),
+				ExpressionUtils.as(
+					new CaseBuilder()
+						.when(isDelivery)
+						.then(JPAExpressions
+							.select(deliveryMeeting.storeName)
+							.from(deliveryMeeting)
+							.where(deliveryMeeting.id.eq(meeting.id)))
+						.otherwise(JPAExpressions
+							.select(offlineMeeting.meetingPlace)
+							.from(offlineMeeting)
+							.where(offlineMeeting.id.eq(meeting.id))),
+					"meetingLocation")
+			))
+			.from(meeting)
+			.join(meetingParticipant).on(
+				meetingParticipant.meeting.id.eq(meeting.id),
+				meetingParticipant.member.memberId.eq(memberId)
+			)
+			.where(meeting.meetingStatus.eq(MeetingStatus.ACTIVE))
+			.orderBy(
+				new OrderSpecifier<>(Order.ASC,
+					new CaseBuilder()
+						.when(isDelivery)
+						.then(JPAExpressions
+							.select(deliveryMeeting.orderDeadline)
+							.from(deliveryMeeting)
+							.where(deliveryMeeting.id.eq(meeting.id)))
+						.otherwise(JPAExpressions
+							.select(offlineMeeting.meetingDate)
+							.from(offlineMeeting)
+							.where(offlineMeeting.id.eq(meeting.id)))
+				)
+			)
+			.fetchFirst();
+	}
 }

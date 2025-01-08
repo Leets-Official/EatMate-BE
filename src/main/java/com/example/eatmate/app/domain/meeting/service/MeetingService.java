@@ -35,6 +35,7 @@ import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -291,21 +292,40 @@ public class MeetingService {
 	}
 
 	// 내가 생성, 참여한 모임 조회
-	@Transactional
+	@Transactional(readOnly = true)
 	public List<MeetingListResponseDto> getMyMeetingList(UserDetails userDetails, ParticipantRole role) {
 		Member member = getMember(userDetails);
 		return meetingRepository.findAllMeetings(member.getMemberId(), role, null);
 	}
 
 	// 내가 참여 중인 활성화된 모임 조회
-	@Transactional
-	public List<MeetingListResponseDto> getMyActiveMeetingList(UserDetails userDetails, ParticipantRole role) {
+	@Transactional(readOnly = true)
+	public List<MeetingListResponseDto> getMyActiveMeetingList(UserDetails userDetails) {
 		Member member = getMember(userDetails);
 		return meetingRepository.findAllMeetings(member.getMemberId(), null, ACTIVE);
 	}
 
+	// 가장 최근 미팅 조회
+	@Transactional(readOnly = true)
+	public UpcomingMeetingResponseDto getUpcomingMeeting(UserDetails userDetails) {
+		Member member = getMember(userDetails);
+
+		// 임박한 미팅 조회
+		UpcomingMeetingResponseDto upcomingMeeting = meetingRepository.findUpcomingMeeting(member.getMemberId());
+
+		// 진행중인 미팅이 없는 경우
+		if (upcomingMeeting == null) {
+			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
+		}
+
+		return upcomingMeeting;
+	}
+
 	// 회원 정보 조회 메소드
 	private Member getMember(UserDetails userDetails) {
+		if (userDetails == null) {
+			throw new CommonException(ErrorCode.INVALID_LOGIN_INFO);
+		}
 		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
