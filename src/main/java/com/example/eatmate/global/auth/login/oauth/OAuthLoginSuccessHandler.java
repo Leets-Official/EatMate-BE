@@ -21,6 +21,12 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
 
+    private static final boolean COOKIE_HTTP_ONLY = true;
+    private static final boolean COOKIE_SECURE = false;
+    private static final String COOKIE_PATH = "/";
+    private static final int ACCESS_TOKEN_MAX_AGE = 60 * 60; // 1시간
+    private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7일
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("OAuth2 Login 성공");
@@ -30,7 +36,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
             // 사용자 Role 확인
             Role userRole = oAuth2User.getRole();
-            log.info("사용자 Role : {}" , userRole);
 
             //토큰 생성
             String accessToken = jwtService.createAccessToken(oAuth2User.getEmail(), oAuth2User.getRole().name() );
@@ -55,37 +60,35 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private void setTokensInCookie(HttpServletResponse response, String accessToken, String refreshToken) {
         // Access Token 쿠키 설정
         Cookie accessTokenCookie = new Cookie("AccessToken", accessToken);
-        accessTokenCookie.setHttpOnly(true); // 자바스크립트에서 접근 불가 (보안 강화)
-        accessTokenCookie.setSecure(false); // HTTPS 에서만 전송
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setMaxAge(60 * 60); // 1시간
-
-        // SameSite 설정
-        response.addHeader("Set-Cookie", "AccessToken=" + accessToken +
-                "; HttpOnly; Secure=true; SameSite=None; Path=/; Max-Age=" + (60 * 60));
+        accessTokenCookie.setHttpOnly(COOKIE_HTTP_ONLY);
+        accessTokenCookie.setSecure(COOKIE_SECURE);
+        accessTokenCookie.setPath(COOKIE_PATH);
+        accessTokenCookie.setMaxAge(ACCESS_TOKEN_MAX_AGE);
 
         // Refresh Token 쿠키 설정 (필요 시)
         Cookie refreshTokenCookie = null;
         if (refreshToken != null) {
             refreshTokenCookie = new Cookie("RefreshToken", refreshToken);
-            refreshTokenCookie.setHttpOnly(true);
-            refreshTokenCookie.setSecure(false);
-            refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7); // 7일
-
-            // SameSite 설정
-            response.addHeader("Set-Cookie", "RefreshToken=" + refreshToken +
-                    "; HttpOnly; Secure=true; SameSite=None; Path=/; Max-Age=" + (60 * 60 * 24 * 7));
+            refreshTokenCookie.setHttpOnly(COOKIE_HTTP_ONLY);
+            refreshTokenCookie.setSecure(COOKIE_SECURE);
+            refreshTokenCookie.setPath(COOKIE_PATH);
+            refreshTokenCookie.setMaxAge(REFRESH_TOKEN_MAX_AGE);
         }
 
+        // SameSite 설정
+        response.addHeader("Set-Cookie", "AccessToken=" + accessToken +
+                "; HttpOnly; Secure=" + COOKIE_SECURE + "; SameSite=None; Path=" + COOKIE_PATH + "; Max-Age=" + ACCESS_TOKEN_MAX_AGE);
 
+        if (refreshToken != null) {
+            response.addHeader("Set-Cookie", "RefreshToken=" + refreshToken +
+                    "; HttpOnly; Secure=" + COOKIE_SECURE + "; SameSite=None; Path=" + COOKIE_PATH + "; Max-Age=" + REFRESH_TOKEN_MAX_AGE);
+        }
         // 응답에 쿠키 추가
         response.addCookie(accessTokenCookie);
         if (refreshTokenCookie != null) {
             response.addCookie(refreshTokenCookie);
         }
 
-        log.info("쿠키에 AccessToken, RefreshToken 설정 완료");
     }
 
 
