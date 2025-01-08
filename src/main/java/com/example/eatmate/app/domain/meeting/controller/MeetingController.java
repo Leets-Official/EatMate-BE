@@ -27,6 +27,7 @@ import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
@@ -142,7 +143,16 @@ public class MeetingController {
 	getMyActiveMeetingList(@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getMyActiveMeetingList(userDetails, null)));
+				meetingService.getMyActiveMeetingList(userDetails)));
+	}
+
+	@GetMapping("my/upcoming")
+	@Operation(summary = "가장 임박한 모임 조회", description = "내가 참여중인 활성화된 모임 중 가장 임박한 모임을 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<UpcomingMeetingResponseDto>> getUpcomingMeeting(
+		@AuthenticationPrincipal UserDetails userDetails) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success(
+				meetingService.getUpcomingMeeting(userDetails)));
 	}
 
 }
