@@ -40,9 +40,5 @@ public class MeetingListResponseDto {
 		this.participantCount = participantCount;
 	}
 
-	public LocalDateTime getDateTime() {
-		return "DELIVERY".equals(meetingType) ? orderDeadline : meetingDate;
-	}
-
 }
 

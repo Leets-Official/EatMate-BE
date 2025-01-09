@@ -33,12 +33,13 @@ public class CursorResponseDto<T> {
 		}
 
 		MeetingListResponseDto lastItem = (MeetingListResponseDto)result.get(result.size() - 1);
-
+		LocalDateTime lastDateTime =
+			"DELIVERY".equals(lastItem.getMeetingType()) ? lastItem.getOrderDeadline() : lastItem.getMeetingDate();
 		return new CursorResponseDto<>(
 			result,
 			hasNext,
 			lastItem.getId(),
-			lastItem.getDateTime() // orderDeadline 또는 meetingDate
+			lastDateTime // orderDeadline 또는 meetingDate
 		);
 	}
 }
