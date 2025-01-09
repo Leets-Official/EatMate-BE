@@ -165,7 +165,7 @@ public class MeetingController {
 				meetingService.getMyMeetingList(userDetails, PARTICIPANT, lastMeetingId, lastDateTime, pageSize)));
 	}
 
-	@GetMapping("my/participating")
+	@GetMapping("/my/participating")
 	@Operation(summary = "내가 참여 중인 모임 목록 조회", description = "내가 참여중인 활성화된 모임 목록을 조회합니다.")
 	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
 	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
@@ -181,7 +181,7 @@ public class MeetingController {
 				meetingService.getMyActiveMeetingList(userDetails, lastMeetingId, lastDateTime, pageSize)));
 	}
 
-	@GetMapping("my/upcoming")
+	@GetMapping("/my/upcoming")
 	@Operation(summary = "가장 임박한 모임 조회", description = "내가 참여중인 활성화된 모임 중 가장 임박한 모임을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<UpcomingMeetingResponseDto>> getUpcomingMeeting(
 		@AuthenticationPrincipal UserDetails userDetails) {
