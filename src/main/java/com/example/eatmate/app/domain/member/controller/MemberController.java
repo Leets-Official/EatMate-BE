@@ -1,7 +1,9 @@
 package com.example.eatmate.app.domain.member.controller;
 
 import com.example.eatmate.app.domain.member.dto.MyInfoResponseDto;
+import com.example.eatmate.app.domain.member.dto.MyInfoUpdateRequestDto;
 import com.example.eatmate.global.response.GlobalResponseDto;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,12 +32,24 @@ public class MemberController {
 		return memberService.login(memberLoginRequestDto);
 
 	}
+
 	@GetMapping("/myinfo")
 	@Operation(summary = "본인 정보 조회", description = "마이페이지에 들어올 시 조회되는 본인의 정보")
 	public ResponseEntity<GlobalResponseDto<MyInfoResponseDto>> getMyInfo(@AuthenticationPrincipal UserDetails userDetails) {
 		// 서비스 호출 및 응답 반환
 		return ResponseEntity.ok(
 				GlobalResponseDto.success(memberService.getMyInfo(userDetails), HttpStatus.OK.value())
+		);
+	}
+
+	@PatchMapping("/myinfo")
+	@Operation(summary = "프로필 수정", description = "사용자의 닉네임, 전화번호, MBTI, 생년월일을 일부 수정합니다.")
+	public ResponseEntity<GlobalResponseDto<MyInfoResponseDto>> updateMyProfile(
+			@RequestBody @Valid MyInfoUpdateRequestDto updateRequestDto,
+			@AuthenticationPrincipal UserDetails userDetails
+	) {
+		return ResponseEntity.ok(
+				GlobalResponseDto.success(memberService.updateMyInfo(userDetails, updateRequestDto), HttpStatus.OK.value())
 		);
 	}
 }
