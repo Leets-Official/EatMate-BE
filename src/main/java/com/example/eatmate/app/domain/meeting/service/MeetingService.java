@@ -6,8 +6,9 @@ import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -180,30 +181,27 @@ public class MeetingService {
 
 	// 밥, 술 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
-	public List<OfflineMeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory offlineMeetingCategory) {
-		List<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategoryAndMeetingStatus(
-			offlineMeetingCategory, ACTIVE);
+	public Slice<OfflineMeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory offlineMeetingCategory,
+		Pageable pageable) {
+		Slice<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategoryAndMeetingStatus(
+			offlineMeetingCategory, ACTIVE, pageable);
 
-		return meetings.stream()
-			.map(meeting -> {
-				Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
-				return OfflineMeetingListResponseDto.of(meeting, participantCount);
-			})
-			.collect(Collectors.toList());
+		return meetings.map(meeting -> {
+			Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
+			return OfflineMeetingListResponseDto.of(meeting, participantCount);
+		});
 	}
 
 	// 배달 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
-	public List<DeliveryMeetingListResponseDto> getDeliveryMeetingList(FoodCategory foodCategory) {
-		List<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategoryAndMeetingStatus(foodCategory,
-			ACTIVE);
+	public Slice<DeliveryMeetingListResponseDto> getDeliveryMeetingList(FoodCategory foodCategory, Pageable pageable) {
+		Slice<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategoryAndMeetingStatus(foodCategory,
+			ACTIVE, pageable);
 
-		return meetings.stream()
-			.map(meeting -> {
-				Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
-				return DeliveryMeetingListResponseDto.of(meeting, participantCount);
-			})
-			.collect(Collectors.toList());
+		return meetings.map(meeting -> {
+			Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
+			return DeliveryMeetingListResponseDto.of(meeting, participantCount);
+		});
 	}
 
 	// 오프라인 모임 상세 조회 메소드
