@@ -30,26 +30,20 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("OAuth2 Login 성공");
-
         try {
             CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-
             // 사용자 Role 확인
             Role userRole = oAuth2User.getRole();
-
             //토큰 생성
             String accessToken = jwtService.createAccessToken(oAuth2User.getEmail(), oAuth2User.getRole().name() );
             String refreshToken = null;
-
             if (userRole == Role.USER) {
                 refreshToken = jwtService.createRefreshToken();
                 jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
             }
             logTokens(accessToken, refreshToken);
-
             setTokensInCookie(response,accessToken, refreshToken);
-
-			response.sendRedirect("http://localhost:3000/oauth2/callback");
+            response.sendRedirect("http://localhost:3000/oauth2/callback");
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 오류 발생: {} " , e.getMessage());
             throw e;
@@ -58,6 +52,9 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
 // 쿠키 설정 메소드 생성
     private void setTokensInCookie(HttpServletResponse response, String accessToken, String refreshToken) {
+
+
+
         // Access Token 쿠키 설정
         Cookie accessTokenCookie = new Cookie("AccessToken", accessToken);
         accessTokenCookie.setHttpOnly(COOKIE_HTTP_ONLY);
