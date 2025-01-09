@@ -2,8 +2,10 @@ package com.example.eatmate.app.domain.meeting.controller;
 
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,10 +31,14 @@ import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDt
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
+import com.example.eatmate.global.response.CursorResponseDto;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -121,29 +127,50 @@ public class MeetingController {
 
 	@GetMapping("/my/created")
 	@Operation(summary = "내가 생성한 모임 목록 조회", description = "마이페이지에서 내가 생성한 모임 목록(과거 포함)을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>> getMyCreatedMeetingList(
-		@AuthenticationPrincipal UserDetails userDetails) {
+	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
+	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
+	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
+	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MeetingListResponseDto>>> getMyCreatedMeetingList(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(required = false) Long lastMeetingId,
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
+		@RequestParam(defaultValue = "20") @Positive @Max(100) int pageSize
+	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getMyMeetingList(userDetails, HOST)));
+				meetingService.getMyMeetingList(userDetails, HOST, lastMeetingId, lastDateTime, pageSize)));
 	}
 
 	@GetMapping("/my/participated")
 	@Operation(summary = "내가 참여한 모임 목록 조회", description = "마이페이지에서 내가 참여한 모임 목록(과거 포함)을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>> getMyParticipatedMeetingList(
-		@AuthenticationPrincipal UserDetails userDetails) {
+	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
+	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
+	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
+	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MeetingListResponseDto>>> getMyParticipatedMeetingList(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(required = false) Long lastMeetingId,
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
+		@RequestParam(defaultValue = "20") @Positive @Max(100) int pageSize
+	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getMyMeetingList(userDetails, PARTICIPANT)));
+				meetingService.getMyMeetingList(userDetails, PARTICIPANT, lastMeetingId, lastDateTime, pageSize)));
 	}
 
 	@GetMapping("my/participating")
 	@Operation(summary = "내가 참여 중인 모임 목록 조회", description = "내가 참여중인 활성화된 모임 목록을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<MeetingListResponseDto>>>
-	getMyActiveMeetingList(@AuthenticationPrincipal UserDetails userDetails) {
+	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
+	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
+	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
+	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MeetingListResponseDto>>> getMyActiveMeetingList(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(required = false) Long lastMeetingId,
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
+		@RequestParam(defaultValue = "20") @Positive @Max(100) int pageSize
+	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getMyActiveMeetingList(userDetails)));
+				meetingService.getMyActiveMeetingList(userDetails, lastMeetingId, lastDateTime, pageSize)));
 	}
 
 	@GetMapping("my/upcoming")
