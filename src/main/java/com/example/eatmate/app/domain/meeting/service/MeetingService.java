@@ -40,7 +40,10 @@ import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
+import com.example.eatmate.global.response.CursorResponseDto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -293,16 +296,43 @@ public class MeetingService {
 
 	// 내가 생성, 참여한 모임 조회
 	@Transactional(readOnly = true)
-	public List<MeetingListResponseDto> getMyMeetingList(UserDetails userDetails, ParticipantRole role) {
+	public CursorResponseDto<MeetingListResponseDto> getMyMeetingList(
+		UserDetails userDetails,
+		ParticipantRole role,
+		Long lastMeetingId,
+		LocalDateTime lastDateTime,
+		@Positive @Max(value = 100) int pageSize
+	) {
 		Member member = getMember(userDetails);
-		return meetingRepository.findAllMeetings(member.getMemberId(), role, null);
+		List<MeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
+			member.getMemberId(),
+			role,
+			null,
+			lastMeetingId,
+			lastDateTime,
+			pageSize
+		);
+		return CursorResponseDto.of(meetings, pageSize);
 	}
 
 	// 내가 참여 중인 활성화된 모임 조회
 	@Transactional(readOnly = true)
-	public List<MeetingListResponseDto> getMyActiveMeetingList(UserDetails userDetails) {
+	public CursorResponseDto<MeetingListResponseDto> getMyActiveMeetingList(
+		UserDetails userDetails,
+		Long lastMeetingId,
+		LocalDateTime lastDateTime,
+		@Positive @Max(value = 100) int pageSize
+	) {
 		Member member = getMember(userDetails);
-		return meetingRepository.findAllMeetings(member.getMemberId(), null, ACTIVE);
+		List<MeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
+			member.getMemberId(),
+			null,
+			ACTIVE,
+			lastMeetingId,
+			lastDateTime,
+			pageSize
+		);
+		return CursorResponseDto.of(meetings, pageSize);
 	}
 
 	// 가장 최근 미팅 조회

@@ -5,6 +5,7 @@ import static com.example.eatmate.app.domain.meeting.domain.QMeeting.*;
 import static com.example.eatmate.app.domain.meeting.domain.QMeetingParticipant.*;
 import static com.example.eatmate.app.domain.meeting.domain.QOfflineMeeting.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
@@ -28,14 +29,19 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 
 	@Override
 	public List<MeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role,
-		MeetingStatus meetingStatus) {
+		MeetingStatus meetingStatus, Long lastMeetingId, LocalDateTime lastDateTime, int pageSize) {
+
 		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
 
+		// 상태와 역할에 대한 조건
 		BooleanExpression statusCondition = meetingStatus != null ?
 			meeting.meetingStatus.eq(meetingStatus) : null;
 
 		BooleanExpression roleCondition = role != null ?
 			meetingParticipant.role.eq(role) : null;
+
+		// No-Offset 페이징을 위한 동적 조건
+		BooleanExpression cursorCondition = getCursorCondition(lastMeetingId, lastDateTime);
 
 		return queryFactory
 			.select(Projections.constructor(MeetingListResponseDto.class,
@@ -79,7 +85,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				meetingParticipant.meeting.id.eq(meeting.id),
 				meetingParticipant.member.memberId.eq(memberId)
 			)
-			.where(statusCondition, roleCondition)
+			.where(statusCondition, roleCondition, cursorCondition)
 			.orderBy(
 				meeting.meetingStatus.asc(),
 				new OrderSpecifier<>(Order.ASC,
@@ -93,9 +99,39 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 							.select(offlineMeeting.meetingDate)
 							.from(offlineMeeting)
 							.where(offlineMeeting.id.eq(meeting.id)))
-				)
+				),
+				meeting.id.desc()
 			)
+			.limit(pageSize)
 			.fetch();
+	}
+
+	private BooleanExpression getCursorCondition(Long lastMeetingId, LocalDateTime lastDateTime) {
+		if (lastMeetingId == null || lastDateTime == null) {
+			return null;
+		}
+
+		return new CaseBuilder()
+			.when(meeting.meetingStatus.ne(MeetingStatus.INACTIVE))
+			.then(1)
+			.otherwise(0)
+			.eq(new CaseBuilder()
+				.when(meeting.meetingStatus.ne(MeetingStatus.INACTIVE))
+				.then(1)
+				.otherwise(0))
+			.and(new CaseBuilder()
+				.when(meeting.type.eq("DELIVERY"))
+				.then(deliveryMeeting.orderDeadline)
+				.otherwise(offlineMeeting.meetingDate)
+				.gt(lastDateTime)
+				.or(new CaseBuilder()
+					.when(meeting.type.eq("DELIVERY"))
+					.then(deliveryMeeting.orderDeadline)
+					.otherwise(offlineMeeting.meetingDate)
+					.eq(lastDateTime)
+					.and(meeting.id.lt(lastMeetingId))
+				)
+			);
 	}
 
 	@Override
