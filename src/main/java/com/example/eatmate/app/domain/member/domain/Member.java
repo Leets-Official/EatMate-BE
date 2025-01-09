@@ -122,7 +122,27 @@ public class Member extends BaseTimeEntity {
 	public void updateRefreshToken(String updateRefreshToken) {
 		this.refreshToken = updateRefreshToken;
 	}
-	//
+
+	public void editMyInfo(String nickname, String phoneNumber, Mbti mbti,
+						   BirthDate birthDate, Long studentNumber) {
+		if (nickname != null) {
+			this.nickname = nickname;
+		}
+		if (phoneNumber != null) {
+			this.phoneNumber = phoneNumber;
+		}
+		if (mbti != null) {
+			this.mbti = mbti;
+		}
+		if (birthDate != null) {
+			this.birthDate = birthDate;
+		}
+		if (studentNumber != null) {
+			this.studentNumber = studentNumber;
+		}
+
+	}
+
 	//
 	//    public void updateNickname(String nickname) {
 	//        this.nickname = nickname;
@@ -155,3 +175,4 @@ public class Member extends BaseTimeEntity {
 	//    }
 
 }
+
