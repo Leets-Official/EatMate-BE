@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.eatmate.app.domain.chatRoom.service.ChatRoomService;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
@@ -45,6 +46,7 @@ public class MeetingService {
 	private final MemberRepository memberRepository;
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
+	private final ChatRoomService chatRoomService;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
 	private static void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
@@ -90,6 +92,8 @@ public class MeetingService {
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
 			.build();
 
+		 chatRoomService.createChatRoom(member, deliveryMeeting); //미팅 생성 후 채팅방 생성 + 큐 연결
+
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
 
 		meetingParticipantRepository.save(
@@ -123,6 +127,8 @@ public class MeetingService {
 			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
 			.build();
 
+		chatRoomService.createChatRoom(member, offlineMeeting); //미팅 생성 후 채팅방 생성 + 큐 연결
+
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
 		meetingParticipantRepository.save(
 			MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST)); // 참여 등록
@@ -154,12 +160,16 @@ public class MeetingService {
 	@Transactional
 	public void joinDeliveryMeeting(Long meetingId, UserDetails userDetails) {
 		joinMeeting(meetingId, userDetails, true);
+
+		chatRoomService.joinChatRoom(meetingId, userDetails);//모임 참여 + 채팅방 연결
 	}
 
 	// 밥, 술 모임 참여
 	@Transactional
 	public void joinOfflineMeeting(Long meetingId, UserDetails userDetails) {
 		joinMeeting(meetingId, userDetails, false);
+
+		chatRoomService.joinChatRoom(meetingId, userDetails);//모임 참여 + 채팅방 연결
 	}
 
 	// 밥, 술 모임 목록 조회 메소드
