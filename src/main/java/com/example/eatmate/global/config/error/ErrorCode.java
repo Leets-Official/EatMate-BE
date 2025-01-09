@@ -34,7 +34,12 @@ public enum ErrorCode {
 	// 신고
 	SELF_REPORT_NOT_ALLOWED(400, "SELF_REPORT_NOT_ALLOWED", "자기 자신을 신고할 수 없습니다."),
 	INVALID_REPORT_TYPE_LIST(400, "INVALID_REPORT_TYPE_LIST", "올바르지 않은 신고 사유 리스트입니다."),
-	DUPLICATE_REPORT_NOT_ALLOWED(400, "DUPLICATE_REPORT_NOT_ALLOWED", "같은 유저를 연속적으로 신고할 수 없습니다.");
+	DUPLICATE_REPORT_NOT_ALLOWED(400, "DUPLICATE_REPORT_NOT_ALLOWED", "같은 유저를 연속적으로 신고할 수 없습니다."),
+
+	//채팅
+	CHATROOM_NOT_FOUND(404, "CHATROOM_NOT_FOUND", "채팅방을 찾을 수 없습니다."),
+	MEMBER_CHATROOM_NOT_FOUND(404, "MEMBER_CHATROOM_NOT_FOUND", "멤버채팅방을 찾을 수 없습니다."),
+	CHAT_NOT_FOUND(404, "CHAT_NOT_FOUND", "채팅을 찾을 수 없습니다.");
 
 	private final int status;
 	private final String code;
