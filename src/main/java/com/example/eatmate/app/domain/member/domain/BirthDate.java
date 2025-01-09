@@ -35,4 +35,5 @@ public class BirthDate {
 	public static BirthDate of(int year, int month, int day) {
 		return new BirthDate(year, month, day);
 	}
+
 }
