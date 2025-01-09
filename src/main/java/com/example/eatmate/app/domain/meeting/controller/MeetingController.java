@@ -3,8 +3,10 @@ package com.example.eatmate.app.domain.meeting.controller;
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,20 +93,26 @@ public class MeetingController {
 
 	@GetMapping("/offline")
 	@Operation(summary = "오프라인 모임 목록 조회", description = "오프라인 모임 목록을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<OfflineMeetingListResponseDto>>> getOfflineMeetingList(
-		@RequestParam(required = true) OfflineMeetingCategory category) {
+	public ResponseEntity<GlobalResponseDto<Slice<OfflineMeetingListResponseDto>>> getOfflineMeetingList(
+		@RequestParam(required = true) OfflineMeetingCategory category,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "20") int size) {
+		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getOfflineMeetingList(category)));
+				meetingService.getOfflineMeetingList(category, pageRequest)));
 	}
 
 	@GetMapping("/delivery")
 	@Operation(summary = "배달 모임 목록 조회", description = "배달 모임 목록을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<List<DeliveryMeetingListResponseDto>>> getDeliveryMeetingList(
-		@RequestParam(required = true) FoodCategory foodCategory) {
+	public ResponseEntity<GlobalResponseDto<Slice<DeliveryMeetingListResponseDto>>> getDeliveryMeetingList(
+		@RequestParam(required = true) FoodCategory foodCategory,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "20") int size) {
+		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getDeliveryMeetingList(foodCategory)));
+				meetingService.getDeliveryMeetingList(foodCategory, pageRequest)));
 	}
 
 	@GetMapping("/offline/{meetingId}")
