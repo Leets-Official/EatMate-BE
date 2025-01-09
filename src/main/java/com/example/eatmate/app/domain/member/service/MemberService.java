@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.member.service;
 
+import com.example.eatmate.app.domain.member.dto.MyInfoResponseDto;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,16 @@ public class MemberService {
 
 	}
 
+	public MyInfoResponseDto getMyInfo(UserDetails userDetails) {
+
+		String email = userDetails.getUsername();
+
+		Member member = memberRepository.findByEmail(email)
+				.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		return MyInfoResponseDto.of(member);
+	}
+
 	// 개발용 임시 로그인/회원가입
 
 	public MemberLoginResponseDto login(MemberLoginRequestDto memberLoginRequestDto) {
@@ -77,6 +88,9 @@ public class MemberService {
 
 		return MemberLoginResponseDto.of(accessToken, refreshToken);
 	}
+
+
+
 }
 
 //    private void updateMemberDetails(Member member, MemberSignUpRequestDto signUpRequestDto) {
