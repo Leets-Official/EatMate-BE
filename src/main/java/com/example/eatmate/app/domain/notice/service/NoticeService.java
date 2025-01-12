@@ -37,13 +37,6 @@ public class NoticeService {
 
 	public Slice<NoticeResponseDto> findNotices(int pageNumber, int pageSize) {
 
-		if (pageNumber < 0) {
-			throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
-		}
-		if (pageSize < 0) {
-			throw new CommonException(ErrorCode.INVALID_PAGE_SIZE);
-		}
-
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 		Slice<Notice> notices = noticeRepository.findPageBy(pageable);
 

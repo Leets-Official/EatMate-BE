@@ -14,6 +14,10 @@ import com.example.eatmate.app.domain.notice.service.NoticeService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,10 +35,12 @@ public class NoticeController {
 	}
 
 	@GetMapping
-	@Operation(summary = "공지사항 목록 조회", description = "공지사항을 조회합니다.")
+	@Operation(summary = "공지사항 목록 조회", description = "공지사항 목록을 페이지별로 조회합니다..")
+	@Parameter(name = "pageNumber", description = "조회할 페이지 번호 (0부터 시작, 기본값: 0)", required = false)
+	@Parameter(name = "pageSize", description = "페이지당 조회할 공지사항 수 (기본값: 20, 최대: 100)", required = false)
 	public ResponseEntity<GlobalResponseDto<Slice<NoticeResponseDto>>> getNotices(
-		@RequestParam int pageNumber,
-		@RequestParam int pageSize) {
+		@RequestParam(defaultValue = "0") @PositiveOrZero int pageNumber,
+		@RequestParam(defaultValue = "20") @Positive @Max(100) int pageSize) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(noticeService.findNotices(pageNumber, pageSize)));
 	}
