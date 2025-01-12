@@ -75,17 +75,14 @@ public class MemberService {
 		Member member = memberRepository.findByEmail(email)
 				.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
-		// BirthDate 생성
-		BirthDate newBirthDate = myInfoUpdateRequestDto.toBirthDate(member.getBirthDate());
 
-		// 엔티티의 업데이트 메서드 호출
+
+		// 닉네임과 MBTI 업데이트
 		member.editMyInfo(
 				myInfoUpdateRequestDto.getNickname(),
-				myInfoUpdateRequestDto.getPhoneNumber(),
-				myInfoUpdateRequestDto.getMbti(),
-				newBirthDate,
-				myInfoUpdateRequestDto.getStudentNumber()
+				myInfoUpdateRequestDto.getMbti()
 		);
+
 
 		// 업데이트된 Member 정보 반환
 		return MyInfoResponseDto.of(member);
