@@ -58,8 +58,6 @@ public class NoticeService {
 
 		notice.update(noticeAdminRequestDto.getTitle(), noticeAdminRequestDto.getContent());
 
-		noticeRepository.save(notice);
-
 		return NoticeIdResponseDto.from(noticeId);
 	}
 
