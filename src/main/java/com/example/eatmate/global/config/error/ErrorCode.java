@@ -13,6 +13,7 @@ public enum ErrorCode {
 
 	//회원
 	USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다."),
+	TOKEN_NOT_FOUND(404, "TOKEN_NOT_FOUND", "토큰를 찾을 수 없습니다."),
 	MEMBER_ALREADY_EXISTS(409, "MEMBER_ALREADY_EXISTS", "이미 가입된 이메일입니다."),
 	DUPLICATE_PHONE_NUMBER(409, "DUPLICATE_PHONE_NUMBER", "이미 사용 중인 전화번호입니다."),
 	DUPLICATE_STUDENT_NUMBER(409, "DUPLICATE_STUDENT_NUMBER", "이미 사용 중인 학번입니다."),

@@ -152,7 +152,7 @@ public class JwtService {
         memberRepository.findByEmail(email).ifPresentOrElse(
                 member -> {
                     member.updateRefreshToken(refreshToken);
-                    memberRepository.save(member);
+                    memberRepository.saveAndFlush(member);
                 },
                 () -> {
                     throw new UserNotFoundException();
