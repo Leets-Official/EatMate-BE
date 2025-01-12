@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.notice.domain.Notice;
 import com.example.eatmate.app.domain.notice.domain.repository.NoticeRepository;
@@ -22,6 +23,7 @@ public class NoticeService {
 
 	private final NoticeRepository noticeRepository;
 
+	@Transactional
 	public NoticeIdResponseDto createNotice(NoticeAdminRequestDto noticeAdminRequestDto) {
 
 		Notice notice = Notice.createNotice(noticeAdminRequestDto.getTitle(), noticeAdminRequestDto.getContent());
@@ -30,6 +32,7 @@ public class NoticeService {
 		return NoticeIdResponseDto.from(notice.getId());
 	}
 
+	@Transactional(readOnly = true)
 	public NoticeResponseDto findNotice(Long noticeId) {
 
 		Notice notice = noticeRepository.findById(noticeId)
@@ -38,6 +41,7 @@ public class NoticeService {
 		return NoticeResponseDto.from(notice);
 	}
 
+	@Transactional(readOnly = true)
 	public Slice<NoticeResponseDto> findNotices(int pageNumber, int pageSize) {
 
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
@@ -46,6 +50,7 @@ public class NoticeService {
 		return notices.map(NoticeResponseDto::from);
 	}
 
+	@Transactional
 	public NoticeIdResponseDto updateNotice(Long noticeId, NoticeAdminRequestDto noticeAdminRequestDto) {
 
 		Notice notice = noticeRepository.findById(noticeId)
@@ -58,6 +63,7 @@ public class NoticeService {
 		return NoticeIdResponseDto.from(noticeId);
 	}
 
+	@Transactional
 	public NoticeIdResponseDto deleteNotice(Long noticeId) {
 
 		Notice notice = noticeRepository.findById(noticeId)
