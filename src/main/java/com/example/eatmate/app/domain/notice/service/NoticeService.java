@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.notice.domain.Notice;
 import com.example.eatmate.app.domain.notice.domain.repository.NoticeRepository;
-import com.example.eatmate.app.domain.notice.dto.CreateNoticeResponseDto;
 import com.example.eatmate.app.domain.notice.dto.NoticeAdminRequestDto;
+import com.example.eatmate.app.domain.notice.dto.NoticeIdResponseDto;
 import com.example.eatmate.app.domain.notice.dto.NoticeResponseDto;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
@@ -22,10 +22,12 @@ public class NoticeService {
 
 	private final NoticeRepository noticeRepository;
 
-	public void createNotice(NoticeAdminRequestDto noticeAdminRequestDto) {
+	public NoticeIdResponseDto createNotice(NoticeAdminRequestDto noticeAdminRequestDto) {
 
 		Notice notice = Notice.createNotice(noticeAdminRequestDto.getTitle(), noticeAdminRequestDto.getContent());
 		noticeRepository.save(notice);
+
+		return NoticeIdResponseDto.from(notice.getId());
 	}
 
 	public NoticeResponseDto findNotice(Long noticeId) {
@@ -33,7 +35,7 @@ public class NoticeService {
 		Notice notice = noticeRepository.findById(noticeId)
 			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
 
-		return NoticeResponseDto.createNoticeResponseDto(notice);
+		return NoticeResponseDto.from(notice);
 	}
 
 	public Slice<NoticeResponseDto> findNotices(int pageNumber, int pageSize) {
@@ -44,7 +46,7 @@ public class NoticeService {
 		return notices.map(NoticeResponseDto::from);
 	}
 
-	public CreateNoticeResponseDto updateNotice(Long noticeId, NoticeAdminRequestDto noticeAdminRequestDto) {
+	public NoticeIdResponseDto updateNotice(Long noticeId, NoticeAdminRequestDto noticeAdminRequestDto) {
 
 		Notice notice = noticeRepository.findById(noticeId)
 			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
@@ -52,13 +54,17 @@ public class NoticeService {
 		notice.update(noticeAdminRequestDto.getTitle(), noticeAdminRequestDto.getContent());
 
 		noticeRepository.save(notice);
+
+		return NoticeIdResponseDto.from(noticeId);
 	}
 
-	public void deleteNotice(Long noticeId) {
+	public NoticeIdResponseDto deleteNotice(Long noticeId) {
 
 		Notice notice = noticeRepository.findById(noticeId)
 			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
 
 		noticeRepository.delete(notice);
+
+		return NoticeIdResponseDto.from(noticeId);
 	}
 }
