@@ -96,7 +96,7 @@ public class MeetingController {
 	public ResponseEntity<GlobalResponseDto<Slice<OfflineMeetingListResponseDto>>> getOfflineMeetingList(
 		@RequestParam(required = true) OfflineMeetingCategory category,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "20") int size) {
+		@RequestParam(defaultValue = "20") @Positive @Max(100) int size) {
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -108,7 +108,7 @@ public class MeetingController {
 	public ResponseEntity<GlobalResponseDto<Slice<DeliveryMeetingListResponseDto>>> getDeliveryMeetingList(
 		@RequestParam(required = true) FoodCategory foodCategory,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "20") int size) {
+		@RequestParam(defaultValue = "20") @Positive @Max(100) int size) {
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
