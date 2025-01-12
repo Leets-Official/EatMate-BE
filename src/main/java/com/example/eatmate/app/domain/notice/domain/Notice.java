@@ -1,6 +1,5 @@
 package com.example.eatmate.app.domain.notice.domain;
 
-import com.example.eatmate.app.domain.notice.dto.NoticeAdminRequestDto;
 import com.example.eatmate.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -28,20 +27,21 @@ public class Notice extends BaseTimeEntity {
 	private String content;
 
 	@Builder
-	private Notice(NoticeAdminRequestDto noticeAdminRequestDto) {
-		this.title = noticeAdminRequestDto.getTitle();
-		this.content = noticeAdminRequestDto.getContent();
+	private Notice(String title, String content) {
+		this.title = title;
+		this.content = content;
 	}
 
-	public static Notice createNotice(NoticeAdminRequestDto noticeAdminRequestDto) {
+	public static Notice createNotice(String title, String content) {
 		return Notice.builder()
-			.noticeAdminRequestDto(noticeAdminRequestDto)
+			.title(title)
+			.content(content)
 			.build();
 	}
 
-	public void update(NoticeAdminRequestDto noticeAdminRequestDto) {
-		this.title = noticeAdminRequestDto.getTitle();
-		this.content = noticeAdminRequestDto.getContent();
+	public void update(String title, String content) {
+		this.title = title;
+		this.content = content;
 	}
 
 }

@@ -23,7 +23,7 @@ public class NoticeService {
 
 	public void createNotice(NoticeAdminRequestDto noticeAdminRequestDto) {
 
-		Notice notice = Notice.createNotice(noticeAdminRequestDto);
+		Notice notice = Notice.createNotice(noticeAdminRequestDto.getTitle(), noticeAdminRequestDto.getContent());
 		noticeRepository.save(notice);
 	}
 
@@ -48,7 +48,7 @@ public class NoticeService {
 		Notice notice = noticeRepository.findById(noticeId)
 			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
 
-		notice.update(noticeAdminRequestDto);
+		notice.update(noticeAdminRequestDto.getTitle(), noticeAdminRequestDto.getContent());
 
 		noticeRepository.save(notice);
 	}
