@@ -10,28 +10,33 @@ import lombok.Getter;
 @Getter
 public class NoticeResponseDto {
 
-	Long noticeId;
+	private final Long noticeId;
 
-	String title;
+	private final String title;
 
-	String content;
+	private final String content;
 
-	LocalDateTime createdAt;
+	private final LocalDateTime createdAt;
 
-	LocalDateTime updatedAt;
+	private final LocalDateTime updatedAt;
 
 	@Builder
-	private NoticeResponseDto(Notice notice) {
-		this.noticeId = notice.getId();
-		this.title = notice.getTitle();
-		this.content = notice.getContent();
-		this.createdAt = notice.getCreatedAt();
-		this.updatedAt = notice.getUpdatedAt();
+	private NoticeResponseDto(Long noticeId, String title, String content,
+		LocalDateTime createdAt, LocalDateTime updatedAt) {
+		this.noticeId = noticeId;
+		this.title = title;
+		this.content = content;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
 	}
 
-	public static NoticeResponseDto createNoticeResponseDto(Notice notice) {
+	public static NoticeResponseDto from(Notice notice) {
 		return NoticeResponseDto.builder()
-			.notice(notice)
+			.noticeId(notice.getId())
+			.title(notice.getTitle())
+			.content(notice.getContent())
+			.createdAt(notice.getCreatedAt())
+			.updatedAt(notice.getUpdatedAt())
 			.build();
 	}
 }

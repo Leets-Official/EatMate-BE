@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.notice.domain.Notice;
 import com.example.eatmate.app.domain.notice.domain.repository.NoticeRepository;
+import com.example.eatmate.app.domain.notice.dto.CreateNoticeResponseDto;
 import com.example.eatmate.app.domain.notice.dto.NoticeAdminRequestDto;
 import com.example.eatmate.app.domain.notice.dto.NoticeResponseDto;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -40,10 +41,10 @@ public class NoticeService {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 		Slice<Notice> notices = noticeRepository.findPageBy(pageable);
 
-		return notices.map(NoticeResponseDto::createNoticeResponseDto);
+		return notices.map(NoticeResponseDto::from);
 	}
 
-	public void updateNotice(Long noticeId, NoticeAdminRequestDto noticeAdminRequestDto) {
+	public CreateNoticeResponseDto updateNotice(Long noticeId, NoticeAdminRequestDto noticeAdminRequestDto) {
 
 		Notice notice = noticeRepository.findById(noticeId)
 			.orElseThrow(() -> new CommonException(ErrorCode.NOTICE_NOT_FOUND));
