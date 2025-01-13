@@ -10,7 +10,6 @@ import com.example.eatmate.app.domain.member.domain.Role;
 import com.example.eatmate.global.auth.jwt.JwtService;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -54,40 +53,33 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
 	// 쿠키 설정 메소드 생성
 	private void setTokensInCookie(HttpServletResponse response, String accessToken, String refreshToken) {
-
 		// Access Token 쿠키 설정
-		Cookie accessTokenCookie = new Cookie("AccessToken", accessToken);
-		accessTokenCookie.setHttpOnly(COOKIE_HTTP_ONLY);
-		accessTokenCookie.setSecure(COOKIE_SECURE);
-		accessTokenCookie.setPath(COOKIE_PATH);
-		accessTokenCookie.setMaxAge(ACCESS_TOKEN_MAX_AGE);
+		String accessTokenCookieString = String.format("AccessToken=%s; " +
+				"Path=%s; " +
+				"Max-Age=%d; " +
+				"HttpOnly; " +
+				"Secure; " +
+				"SameSite=None",
+			accessToken,
+			COOKIE_PATH,
+			ACCESS_TOKEN_MAX_AGE);
 
-		// Refresh Token 쿠키 설정 (필요 시)
-		Cookie refreshTokenCookie = null;
+		response.addHeader("Set-Cookie", accessTokenCookieString);
+
+		// Refresh Token 쿠키 설정
 		if (refreshToken != null) {
-			refreshTokenCookie = new Cookie("RefreshToken", refreshToken);
-			refreshTokenCookie.setHttpOnly(COOKIE_HTTP_ONLY);
-			refreshTokenCookie.setSecure(COOKIE_SECURE);
-			refreshTokenCookie.setPath(COOKIE_PATH);
-			refreshTokenCookie.setMaxAge(REFRESH_TOKEN_MAX_AGE);
-		}
+			String refreshTokenCookieString = String.format("RefreshToken=%s; " +
+					"Path=%s; " +
+					"Max-Age=%d; " +
+					"HttpOnly; " +
+					"Secure; " +
+					"SameSite=None",
+				refreshToken,
+				COOKIE_PATH,
+				REFRESH_TOKEN_MAX_AGE);
 
-		// SameSite 설정
-		response.addHeader("Set-Cookie", "AccessToken=" + accessToken +
-			"; HttpOnly; Secure=" + COOKIE_SECURE + "; SameSite=None; Path=" + COOKIE_PATH + "; Max-Age="
-			+ ACCESS_TOKEN_MAX_AGE);
-
-		if (refreshToken != null) {
-			response.addHeader("Set-Cookie", "RefreshToken=" + refreshToken +
-				"; HttpOnly; Secure=" + COOKIE_SECURE + "; SameSite=None; Path=" + COOKIE_PATH + "; Max-Age="
-				+ REFRESH_TOKEN_MAX_AGE);
+			response.addHeader("Set-Cookie", refreshTokenCookieString);
 		}
-		// 응답에 쿠키 추가
-		response.addCookie(accessTokenCookie);
-		if (refreshTokenCookie != null) {
-			response.addCookie(refreshTokenCookie);
-		}
-
 	}
 
 	// 로그용 (삭제해도 ok)
