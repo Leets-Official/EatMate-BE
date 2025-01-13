@@ -43,8 +43,6 @@ import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 import com.example.eatmate.global.response.CursorResponseDto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -299,7 +297,7 @@ public class MeetingService {
 		ParticipantRole role,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
-		@Positive @Max(value = 100) int pageSize
+		int pageSize
 	) {
 		Member member = getMember(userDetails);
 		List<MeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
@@ -319,7 +317,7 @@ public class MeetingService {
 		UserDetails userDetails,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
-		@Positive @Max(value = 100) int pageSize
+		int pageSize
 	) {
 		Member member = getMember(userDetails);
 		List<MeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
