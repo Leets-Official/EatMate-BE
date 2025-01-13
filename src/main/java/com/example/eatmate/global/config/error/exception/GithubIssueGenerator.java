@@ -24,8 +24,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GithubIssueGenerator {
 	private static final String REPO_URL = "https://api.github.com/repos/Leets-Official/EatMate-BE/issues";
-	private static final List ASSIGNEES = List.of("ehs208", "seokjun01", "jj0526", "dyk-im");
-	private static final List LABELS = List.of("fix");
+	private static final List<String> ASSIGNEES = List.of("ehs208", "seokjun01", "jj0526", "dyk-im");
+	private static final List<String> LABELS = List.of("fix");
 	private static final MediaType JSON_MEDIA_TYPE = new MediaType("application", "json", StandardCharsets.UTF_8);
 	private final ObjectMapper objectMapper;
 	private final RestTemplate restTemplate;
