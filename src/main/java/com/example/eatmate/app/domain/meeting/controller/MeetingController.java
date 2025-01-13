@@ -41,6 +41,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -95,7 +96,8 @@ public class MeetingController {
 	@Operation(summary = "오프라인 모임 목록 조회", description = "오프라인 모임 목록을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<Slice<OfflineMeetingListResponseDto>>> getOfflineMeetingList(
 		@RequestParam(required = true) OfflineMeetingCategory category,
-		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "0")
+		@PositiveOrZero(message = "페이지 번호는 0 이상이어야 합니다") int page,
 		@RequestParam(defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
 		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int size) {
@@ -109,7 +111,8 @@ public class MeetingController {
 	@Operation(summary = "배달 모임 목록 조회", description = "배달 모임 목록을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<Slice<DeliveryMeetingListResponseDto>>> getDeliveryMeetingList(
 		@RequestParam(required = true) FoodCategory foodCategory,
-		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "0")
+		@PositiveOrZero(message = "페이지 번호는 0 이상이어야 합니다") int page,
 		@RequestParam(defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
 		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int size) {
