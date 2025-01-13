@@ -13,6 +13,7 @@ import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.ErrorResponse;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -64,4 +65,17 @@ public class GlobalExceptionHandler {
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
 	}
 
+	@ExceptionHandler(ConstraintViolationException.class) // 파라미터 검증 실패
+	public ResponseEntity<GlobalResponseDto<String>> handleConstraintViolationException(
+		ConstraintViolationException ex) {
+		ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
+
+		String errorMessage = ex.getConstraintViolations()
+			.stream()
+			.map(violation -> violation.getMessage())
+			.collect(Collectors.joining(", "));
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
 }
