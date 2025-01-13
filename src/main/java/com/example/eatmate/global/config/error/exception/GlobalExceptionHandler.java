@@ -13,6 +13,7 @@ import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.ErrorResponse;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,8 +35,9 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
 		log.error(ex.getMessage());
+		log.error(ex.getClass().getSimpleName());
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
-				.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
+			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
 	}
 
 	@ExceptionHandler(CommonException.class) // Custom Exception을 포괄적으로 처리
@@ -44,23 +46,36 @@ public class GlobalExceptionHandler {
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
 		showErrorLog(errorCode);
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
-				.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
+			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class) // Valid 검증 실패시 예외처리
 	public ResponseEntity<GlobalResponseDto<String>> handleValidationExceptions(
-			MethodArgumentNotValidException ex) {
+		MethodArgumentNotValidException ex) {
 		ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
 
 		// 모든 검증 오류를 하나의 문자열로 결합
 		String errorMessage = ex.getBindingResult()
-				.getAllErrors()
-				.stream()
-				.map(error -> error.getDefaultMessage())
-				.collect(Collectors.joining(", "));
+			.getAllErrors()
+			.stream()
+			.map(error -> error.getDefaultMessage())
+			.collect(Collectors.joining(", "));
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
-				.body(GlobalResponseDto.fail(errorCode, errorMessage));
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
 	}
 
+	@ExceptionHandler(ConstraintViolationException.class) // 파라미터 검증 실패
+	public ResponseEntity<GlobalResponseDto<String>> handleConstraintViolationException(
+		ConstraintViolationException ex) {
+		ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
+
+		String errorMessage = ex.getConstraintViolations()
+			.stream()
+			.map(violation -> violation.getMessage())
+			.collect(Collectors.joining(", "));
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
 }

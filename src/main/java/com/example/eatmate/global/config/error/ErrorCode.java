@@ -23,6 +23,7 @@ public enum ErrorCode {
 	INVALID_MBTI(404, "INVALID_MBTI", "유효하지 않은 MBTI입니다."),
 	INVALID_GENDER(400, "INVALID_GENDER", "성별 선택은 필수입니다."),
 	INVALID_PHONE_NUMBER(400, "INVALID_PHONE_NUMBER", "유효하지 않은 전화번호입니다."),
+	INVALID_LOGIN_INFO(401, "INVALID_LOGIN_INFO", "로그인 정보가 올바르지 않습니다."),
 
 	// 모임
 	INVALID_PARTICIPANT_LIMIT(400, "INVALID_PARTICIPANT_LIMIT", "올바른 참가자 수를 입력해주세요."),
