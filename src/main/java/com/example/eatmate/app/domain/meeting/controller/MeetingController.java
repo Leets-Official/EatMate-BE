@@ -96,7 +96,9 @@ public class MeetingController {
 	public ResponseEntity<GlobalResponseDto<Slice<OfflineMeetingListResponseDto>>> getOfflineMeetingList(
 		@RequestParam(required = true) OfflineMeetingCategory category,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "20") @Positive @Max(100) int size) {
+		@RequestParam(defaultValue = "20")
+		@Positive(message = "페이지 크기는 양수여야 합니다")
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int size) {
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -108,7 +110,9 @@ public class MeetingController {
 	public ResponseEntity<GlobalResponseDto<Slice<DeliveryMeetingListResponseDto>>> getDeliveryMeetingList(
 		@RequestParam(required = true) FoodCategory foodCategory,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "20") @Positive @Max(100) int size) {
+		@RequestParam(defaultValue = "20")
+		@Positive(message = "페이지 크기는 양수여야 합니다")
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int size) {
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -142,7 +146,9 @@ public class MeetingController {
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long lastMeetingId,
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
-		@RequestParam(defaultValue = "20") @Positive @Max(100) int pageSize
+		@RequestParam(defaultValue = "20")
+		@Positive(message = "페이지 크기는 양수여야 합니다")
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -158,7 +164,9 @@ public class MeetingController {
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long lastMeetingId,
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
-		@RequestParam(defaultValue = "20") @Positive @Max(100) int pageSize
+		@RequestParam(defaultValue = "20")
+		@Positive(message = "페이지 크기는 양수여야 합니다")
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -174,7 +182,9 @@ public class MeetingController {
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long lastMeetingId,
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
-		@RequestParam(defaultValue = "20") @Positive @Max(100) int pageSize
+		@RequestParam(defaultValue = "20")
+		@Positive(message = "페이지 크기는 양수여야 합니다")
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
