@@ -22,7 +22,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
 
     private static final boolean COOKIE_HTTP_ONLY = true;
-    private static final boolean COOKIE_SECURE = true; //https 환경에서는 true
+    private static final boolean COOKIE_SECURE = false; //https 환경에서는 true
     private static final String COOKIE_PATH = "/";
     private static final int ACCESS_TOKEN_MAX_AGE = 60 * 60; // 1시간
     private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7일
