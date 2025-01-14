@@ -1,7 +1,9 @@
 package com.example.eatmate.global.config.error.exception;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,17 +16,18 @@ import com.example.eatmate.global.config.error.ErrorResponse;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
+	private static final String ISSUE_CREATE_ENV = "dev";
 	private final View error;
-
-	public GlobalExceptionHandler(View error) {
-		this.error = error;
-	}
+	private final GithubIssueGenerator githubIssueGenerator;
+	private final Environment environment;
 
 	private static void showErrorLog(ErrorCode errorCode) {
 		log.error("errorCode: {}, message: {}", errorCode.getCode(), errorCode.getMessage());
@@ -35,6 +38,7 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
 		log.error(ex.getMessage());
+		handleUnexpectedError(ex);
 		log.error(ex.getClass().getSimpleName());
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
@@ -77,5 +81,15 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	public void handleUnexpectedError(Exception ex) {
+		if (isProd(environment.getActiveProfiles())) {
+			githubIssueGenerator.create(ex);
+		}
+	}
+
+	private boolean isProd(String[] activeProfiles) {
+		return Arrays.stream(activeProfiles).anyMatch(profile -> profile.equalsIgnoreCase(ISSUE_CREATE_ENV));
 	}
 }

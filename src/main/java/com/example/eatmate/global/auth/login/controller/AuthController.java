@@ -1,21 +1,24 @@
 package com.example.eatmate.global.auth.login.controller;
 
-import com.example.eatmate.global.auth.jwt.JwtService;
-import com.example.eatmate.global.auth.login.dto.UserLoginResponseDto;
-import com.example.eatmate.global.auth.login.service.LoginService;
-import com.example.eatmate.global.config.error.exception.CommonException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
 import com.example.eatmate.app.domain.member.service.MemberService;
+import com.example.eatmate.global.auth.jwt.JwtService;
+import com.example.eatmate.global.auth.login.dto.UserLoginResponseDto;
+import com.example.eatmate.global.auth.login.service.LoginService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -49,7 +52,5 @@ public class AuthController {
 
 		return ResponseEntity.ok(GlobalResponseDto.success(userInfo, HttpStatus.OK.value()));
 	}
-
-
 
 }
