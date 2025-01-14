@@ -13,6 +13,7 @@ public enum ErrorCode {
 	JSON_PARSING_ERROR(400, "JSON_PARSING_ERROR", "JSON 데이터 처리 중 오류가 발생했습니다"),
 	//회원
 	USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다."),
+	TOKEN_NOT_FOUND(404, "TOKEN_NOT_FOUND", "토큰를 찾을 수 없습니다."),
 	MEMBER_ALREADY_EXISTS(409, "MEMBER_ALREADY_EXISTS", "이미 가입된 이메일입니다."),
 	DUPLICATE_PHONE_NUMBER(409, "DUPLICATE_PHONE_NUMBER", "이미 사용 중인 전화번호입니다."),
 	DUPLICATE_STUDENT_NUMBER(409, "DUPLICATE_STUDENT_NUMBER", "이미 사용 중인 학번입니다."),
@@ -22,6 +23,7 @@ public enum ErrorCode {
 	INVALID_MBTI(404, "INVALID_MBTI", "유효하지 않은 MBTI입니다."),
 	INVALID_GENDER(400, "INVALID_GENDER", "성별 선택은 필수입니다."),
 	INVALID_PHONE_NUMBER(400, "INVALID_PHONE_NUMBER", "유효하지 않은 전화번호입니다."),
+	INVALID_LOGIN_INFO(401, "INVALID_LOGIN_INFO", "로그인 정보가 올바르지 않습니다."),
 
 	// 모임
 	INVALID_PARTICIPANT_LIMIT(400, "INVALID_PARTICIPANT_LIMIT", "올바른 참가자 수를 입력해주세요."),
@@ -34,7 +36,10 @@ public enum ErrorCode {
 	// 신고
 	SELF_REPORT_NOT_ALLOWED(400, "SELF_REPORT_NOT_ALLOWED", "자기 자신을 신고할 수 없습니다."),
 	INVALID_REPORT_TYPE_LIST(400, "INVALID_REPORT_TYPE_LIST", "올바르지 않은 신고 사유 리스트입니다."),
-	DUPLICATE_REPORT_NOT_ALLOWED(400, "DUPLICATE_REPORT_NOT_ALLOWED", "같은 유저를 연속적으로 신고할 수 없습니다.");
+	DUPLICATE_REPORT_NOT_ALLOWED(400, "DUPLICATE_REPORT_NOT_ALLOWED", "같은 유저를 연속적으로 신고할 수 없습니다."),
+
+	// 공지사항
+	NOTICE_NOT_FOUND(404, "NOTICE_NOT_FOUND", "해당 공지사항을 찾을 수 없습니다.");
 
 	private final int status;
 	private final String code;

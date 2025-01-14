@@ -37,34 +37,34 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-				.csrf(AbstractHttpConfigurer::disable)
-				.cors(Customizer.withDefaults())
-				.headers(
-						headersConfigurer -> headersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(
-						authorize -> authorize
-								.requestMatchers("/api/admin/**").hasRole("ADMIN")
-								// 아이콘, css, js 관련
-								// 기본 페이지, css, image, js 하위 폴더에 있는 자료들은 모두 접근 가능, h2-console에 접근 가능
-								// 			.requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
-								// 			.requestMatchers("/v3/api-docs", "/v3/api-docs/", "/swagger-ui.html", "/swagger-ui/", "/swagger/**").permitAll()
-								// 			.requestMatchers("/register").permitAll()
-								.anyRequest().permitAll()
-				)
-				.exceptionHandling(exceptionHandling ->
-						exceptionHandling
-								.authenticationEntryPoint((request, response, authException) -> {
-									response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-								})
-								.accessDeniedHandler((request, response, accessDeniedException) -> {
-									response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
-								})
-				)
-				.addFilterBefore(jwtAuthenticationProcessingFilter, UsernamePasswordAuthenticationFilter.class)  // 필터 순서 확인
-				//== 소셜 로그인 설정 ==//
-				.oauth2Login(oauth2 -> oauth2.successHandler(oAuthLoginSuccessHandler)
-						.failureHandler(oAuthLoginFailureHandler)); // 소셜 로그인 실패 시 핸들러 설정
+			.csrf(AbstractHttpConfigurer::disable)
+			.cors(Customizer.withDefaults())
+			.headers(
+				headersConfigurer -> headersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.authorizeHttpRequests(
+				authorize -> authorize
+					.requestMatchers("/api/admin/**").hasRole("ADMIN")
+					// 아이콘, css, js 관련
+					// 기본 페이지, css, image, js 하위 폴더에 있는 자료들은 모두 접근 가능, h2-console에 접근 가능
+					// 			.requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
+					// 			.requestMatchers("/v3/api-docs", "/v3/api-docs/", "/swagger-ui.html", "/swagger-ui/", "/swagger/**").permitAll()
+					// 			.requestMatchers("/register").permitAll()
+					.anyRequest().permitAll()
+			)
+			.exceptionHandling(exceptionHandling ->
+				exceptionHandling
+					.authenticationEntryPoint((request, response, authException) -> {
+						response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+					})
+					.accessDeniedHandler((request, response, accessDeniedException) -> {
+						response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+					})
+			)
+			.addFilterBefore(jwtAuthenticationProcessingFilter, UsernamePasswordAuthenticationFilter.class)  // 필터 순서 확인
+			//== 소셜 로그인 설정 ==//
+			.oauth2Login(oauth2 -> oauth2.successHandler(oAuthLoginSuccessHandler)
+				.failureHandler(oAuthLoginFailureHandler)); // 소셜 로그인 실패 시 핸들러 설정
 		//.userInfoEndpoint().userService(customOAuth2UserService)); // customUserService 설정
 
 		return http.build();
@@ -75,12 +75,14 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		configuration.setAllowedOrigins(Arrays.asList(
-				"http://localhost:3000",
-				"https://develop.d4u0qurydeei4.amplifyapp.com"
+			"http://localhost:3000/",
+			"https://develop.d4u0qurydeei4.amplifyapp.com"
 		));
+		configuration.addAllowedOriginPattern("*");
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("*"));
-		configuration.setExposedHeaders(Arrays.asList("AccessToken", "RefreshToken", "Role", "accept")); //헤더에 노출할 정보 Role 포함
+		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "Cookie"));
+		configuration.setExposedHeaders(
+			Arrays.asList("Role", "accept")); //헤더에 노출할 정보 Role 포함
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

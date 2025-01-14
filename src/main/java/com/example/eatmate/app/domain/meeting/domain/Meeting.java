@@ -36,6 +36,9 @@ public abstract class Meeting {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "meeting_type", insertable = false, updatable = false)
+	private String type;  // discriminator 값을 조회하기 위한 필드
+
 	@Column(length = 30, nullable = false)
 	private String meetingName;
 
@@ -49,6 +52,10 @@ public abstract class Meeting {
 	@Column
 	@Embedded
 	private ParticipantLimit participantLimit;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private MeetingStatus meetingStatus;
 
 	@CreatedDate
 	@Column(updatable = false)
