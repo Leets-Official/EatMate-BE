@@ -7,7 +7,7 @@ import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import lombok.Getter;
 
 @Getter
-public class MeetingListResponseDto {
+public class MyMeetingListResponseDto {
 	private String meetingType;
 	private Long id;
 	private String meetingName;
@@ -18,7 +18,7 @@ public class MeetingListResponseDto {
 	private LocalDateTime orderDeadline;  // DeliveryMeeting인 경우
 	private LocalDateTime meetingDate; // OfflineMeeting인 경우
 
-	public MeetingListResponseDto(
+	public MyMeetingListResponseDto(
 		String type,
 		Long id,
 		String meetingName,

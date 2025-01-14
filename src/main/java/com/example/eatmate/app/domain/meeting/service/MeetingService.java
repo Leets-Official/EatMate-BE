@@ -33,7 +33,7 @@ import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
@@ -292,7 +292,7 @@ public class MeetingService {
 
 	// 내가 생성, 참여한 모임 조회
 	@Transactional(readOnly = true)
-	public CursorResponseDto<MeetingListResponseDto> getMyMeetingList(
+	public CursorResponseDto<MyMeetingListResponseDto> getMyMeetingList(
 		UserDetails userDetails,
 		ParticipantRole role,
 		Long lastMeetingId,
@@ -300,7 +300,7 @@ public class MeetingService {
 		int pageSize
 	) {
 		Member member = getMember(userDetails);
-		List<MeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
+		List<MyMeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
 			member.getMemberId(),
 			role,
 			null,
@@ -313,14 +313,14 @@ public class MeetingService {
 
 	// 내가 참여 중인 활성화된 모임 조회
 	@Transactional(readOnly = true)
-	public CursorResponseDto<MeetingListResponseDto> getMyActiveMeetingList(
+	public CursorResponseDto<MyMeetingListResponseDto> getMyActiveMeetingList(
 		UserDetails userDetails,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
 		int pageSize
 	) {
 		Member member = getMember(userDetails);
-		List<MeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
+		List<MyMeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
 			member.getMemberId(),
 			null,
 			ACTIVE,

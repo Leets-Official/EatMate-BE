@@ -3,7 +3,7 @@ package com.example.eatmate.global.response;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +32,7 @@ public class CursorResponseDto<T> {
 			return new CursorResponseDto<>(result, false, null, null);
 		}
 
-		MeetingListResponseDto lastItem = (MeetingListResponseDto)result.get(result.size() - 1);
+		MyMeetingListResponseDto lastItem = (MyMeetingListResponseDto)result.get(result.size() - 1);
 		LocalDateTime lastDateTime =
 			"DELIVERY".equals(lastItem.getMeetingType()) ? lastItem.getOrderDeadline() : lastItem.getMeetingDate();
 		return new CursorResponseDto<>(

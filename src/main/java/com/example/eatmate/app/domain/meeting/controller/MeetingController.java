@@ -28,7 +28,7 @@ import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
@@ -145,7 +145,7 @@ public class MeetingController {
 	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
 	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
 	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
-	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MeetingListResponseDto>>> getMyCreatedMeetingList(
+	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MyMeetingListResponseDto>>> getMyCreatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long lastMeetingId,
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
@@ -163,7 +163,7 @@ public class MeetingController {
 	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
 	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
 	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
-	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MeetingListResponseDto>>> getMyParticipatedMeetingList(
+	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MyMeetingListResponseDto>>> getMyParticipatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long lastMeetingId,
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
@@ -181,7 +181,7 @@ public class MeetingController {
 	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
 	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
 	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
-	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MeetingListResponseDto>>> getMyActiveMeetingList(
+	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MyMeetingListResponseDto>>> getMyActiveMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long lastMeetingId,
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
