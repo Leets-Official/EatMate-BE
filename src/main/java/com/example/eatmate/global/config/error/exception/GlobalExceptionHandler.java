@@ -10,11 +10,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.ErrorResponse;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +40,8 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
 		log.error(ex.getMessage());
-		handleUnexpectedError(ex);
 		log.error(ex.getClass().getSimpleName());
+		handleUnexpectedError(ex);
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
 	}
@@ -81,6 +83,26 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(NoResourceFoundException.class) // 리소스를 찾을 수 없을 때
+	public ResponseEntity<GlobalResponseDto<String>> handleNoResourceFoundException(NoResourceFoundException ex,
+		HttpServletRequest request) {
+		ErrorCode errorCode = ErrorCode.NO_RESOURCE_FOUND;
+		ErrorResponse errorResponse = new ErrorResponse(errorCode);
+
+		// 요청된 URI와 전체 URL을 로그에 기록
+		String requestUri = request.getRequestURI();
+		String requestUrl = request.getRequestURL().toString();
+
+		if (requestUri.contains("favicon.ico")) {
+			log.error("Favicon request not found - URI: {}, Full URL: {}", requestUri, requestUrl);
+		} else {
+			log.error("Resource not found - URI: {}, Full URL: {}", requestUri, requestUrl);
+		}
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
+
 	}
 
 	public void handleUnexpectedError(Exception ex) {
