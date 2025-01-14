@@ -300,7 +300,7 @@ public class MeetingService {
 		int pageSize
 	) {
 		Member member = getMember(userDetails);
-		List<MyMeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
+		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
 			member.getMemberId(),
 			role,
 			null,
@@ -320,7 +320,7 @@ public class MeetingService {
 		int pageSize
 	) {
 		Member member = getMember(userDetails);
-		List<MyMeetingListResponseDto> meetings = meetingRepository.findAllMeetings(
+		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
 			member.getMemberId(),
 			null,
 			ACTIVE,

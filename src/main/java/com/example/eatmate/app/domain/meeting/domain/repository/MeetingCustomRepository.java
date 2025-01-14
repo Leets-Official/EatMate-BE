@@ -9,7 +9,7 @@ import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 
 public interface MeetingCustomRepository {
-	List<MyMeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role, MeetingStatus meetingStatus,
+	List<MyMeetingListResponseDto> findMyMeetingList(Long memberId, ParticipantRole role, MeetingStatus meetingStatus,
 		Long lastMeetingId, LocalDateTime lastDateTime, int pageSize);
 
 	UpcomingMeetingResponseDto findUpcomingMeeting(Long memberId);

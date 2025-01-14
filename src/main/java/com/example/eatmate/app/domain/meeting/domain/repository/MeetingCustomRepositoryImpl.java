@@ -28,7 +28,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<MyMeetingListResponseDto> findAllMeetings(Long memberId, ParticipantRole role,
+	public List<MyMeetingListResponseDto> findMyMeetingList(Long memberId, ParticipantRole role,
 		MeetingStatus meetingStatus, Long lastMeetingId, LocalDateTime lastDateTime, int pageSize) {
 
 		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
