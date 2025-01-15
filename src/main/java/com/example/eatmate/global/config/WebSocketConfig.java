@@ -45,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override //소켓연결 엔드포인트 경로와 cors설정
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws/chat")
-			.setAllowedOrigins("*") // 추후 jwt 인증 추가 예정
-			.withSockJS();
+			.setAllowedOriginPatterns("*");
+			//.withSockJS();
 	}
 }
