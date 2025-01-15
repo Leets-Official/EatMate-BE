@@ -1,6 +1,7 @@
 package com.example.eatmate.global.auth.login.dto;
 
 import com.example.eatmate.app.domain.member.domain.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserLoginResponseDto {
 
-    private String email;
-    private Role role;
+	private String email;
+	private Role role;
 }

@@ -7,7 +7,6 @@ public enum MeetingStatus {
 	ACTIVE("활성화"),
 	INACTIVE("비활성화"),
 	;
-	
 	private final String text;
 
 	MeetingStatus(String text) {
