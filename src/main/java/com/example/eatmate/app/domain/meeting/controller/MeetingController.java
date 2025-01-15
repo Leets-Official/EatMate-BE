@@ -2,6 +2,7 @@ package com.example.eatmate.app.domain.meeting.controller;
 
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
+import java.beans.PropertyEditorSupport;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,7 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +55,28 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MeetingController {
 	private final MeetingService meetingService;
+
+	/**
+	 * QueryString으로 들어오는 MeetingSortType enum 값을 대소문자 구분 없이 처리하기 위한 설정
+	 *
+	 * 사용 예시:
+	 * /api/meetings?sort-type=created_at
+	 *
+	 * 변환 과정:
+	 * 1. created_at (클라이언트 요청)
+	 * 2. CREATED_AT (toUpperCase 변환)
+	 * 3. MeetingSortType.CREATED_AT (Enum 매핑)
+	 */
+
+	@InitBinder
+	public void initBinder(WebDataBinder dataBinder) {
+		dataBinder.registerCustomEditor(MeetingSortType.class, new PropertyEditorSupport() {
+			@Override
+			public void setAsText(String text) {
+				setValue(MeetingSortType.valueOf(text.toUpperCase()));
+			}
+		});
+	}
 
 	@PostMapping("/delivery")
 	@Operation(summary = "배달 모임 생성", description = "배달 모임을 생성합니다.")
@@ -104,10 +129,10 @@ public class MeetingController {
 		@RequestParam(defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
 		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") Long pageSize,
-		@RequestParam(required = false) GenderRestriction genderRestriction,
-		@RequestParam(required = false) Long maxParticipant,
-		@RequestParam(required = false) Long minParticipant,
-		@RequestParam(required = false) MeetingSortType sortType) {
+		@RequestParam(value = "gender-restriction", required = false) GenderRestriction genderRestriction,
+		@RequestParam(value = "max-participant", required = false) Long maxParticipant,
+		@RequestParam(value = "min-participant", required = false) Long minParticipant,
+		@RequestParam(value = "sort-type", required = false) MeetingSortType sortType) {
 		// PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
