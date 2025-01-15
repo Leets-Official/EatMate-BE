@@ -6,8 +6,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.eatmate.app.domain.chat.dto.ChatDto;
+import com.example.eatmate.app.domain.chat.dto.ChatMessageDto;
 import com.example.eatmate.app.domain.chat.service.ChatService;
+import com.example.eatmate.app.domain.chat.service.QueueManager;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.MemberChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
@@ -17,7 +18,6 @@ import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.common.DeletedStatus;
-import com.example.eatmate.global.config.RabbitConfig;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
@@ -32,14 +32,15 @@ public class ChatRoomService {
 	private final MemberChatRoomRepository memberChatRoomRepository;
 	private final MemberRepository memberRepository;
 	private final ChatService chatService;
-	private final RabbitConfig rabbitConfig;
+	private final QueueManager queueManager;
 
 	//채팅방 생성
 	public ChatRoom createChatRoom(Member host, Meeting meeting){
 		ChatRoom newChatRoom = ChatRoom.createChatRoom(host.getMemberId(), meeting);
-		rabbitConfig.createQueueForChatRoom(newChatRoom.getId());
+		chatRoomRepository.save(newChatRoom);
 		memberChatRoomRepository.save(MemberChatRoom.create(newChatRoom,host));
-		return chatRoomRepository.save(newChatRoom);
+		queueManager.createQueueForChatRoom(newChatRoom.getId());
+		return newChatRoom;
 	}
 
 	//모임 참여 -> 유저채팅방 생성 + 참가자 추가
@@ -56,12 +57,12 @@ public class ChatRoomService {
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
-		Page<ChatDto> chatList =  chatService.loadChat(chatRoomId, pageable);
+		Page<ChatMessageDto> chatList =  chatService.loadChat(chatRoomId, pageable);
 		return ChatRoomResponseDto.from(chatRoom, chatList);
 	}
 
 	//나가기(두 가지) + 큐 해제
-	//참여 기록 삭제는 항목 비활성화인가요?
+	//참여 기록 삭제는 항목 비활성화 여부
 	public String leaveChatRoom(Long chatRoomId, UserDetails userDetails) {
 		Member member = getMember(userDetails);
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
@@ -75,7 +76,8 @@ public class ChatRoomService {
 			chatRoom.deleteChatRoom();
 			chatRoom.getParticipant().forEach(memberChatRoomRepository::delete);
 			chatService.deleteChat(chatRoom);
-			rabbitConfig.deleteQueueForChatRoom(chatRoomId);
+			queueManager.deleteQueueForChatRoom(chatRoomId);
+			queueManager.stopChatRoomListener(chatRoomId);
 		}
 		else {
 			memberChatRoomRepository.delete(target);

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 
-import com.example.eatmate.app.domain.chat.dto.ChatDto;
+import com.example.eatmate.app.domain.chat.dto.ChatMessageDto;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 
 import lombok.Builder;
@@ -15,16 +15,16 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ChatRoomResponseDto {
-	private Page<ChatDto> chats;
+	private Page<ChatMessageDto> chats;
 	private List<ChatMemberDto> participants;
 
 	@Builder
-	private ChatRoomResponseDto(Page<ChatDto> chats, List<ChatMemberDto> participants) {
+	private ChatRoomResponseDto(Page<ChatMessageDto> chats, List<ChatMemberDto> participants) {
 		this.chats = chats;
 		this.participants = participants;
 	}
 
-	public static ChatRoomResponseDto from(ChatRoom chatRoom, Page<ChatDto> chatPage) {
+	public static ChatRoomResponseDto from(ChatRoom chatRoom, Page<ChatMessageDto> chatPage) {
 		List<ChatMemberDto> participants = chatRoom.getParticipant() != null ? chatRoom.getParticipant()
 			.stream()
 			.map(memberChatRoom -> ChatMemberDto.from(memberChatRoom.getMember()))
