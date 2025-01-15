@@ -26,6 +26,7 @@ import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingRepository;
+import com.example.eatmate.app.domain.meeting.domain.repository.MeetingSortType;
 import com.example.eatmate.app.domain.meeting.domain.repository.OfflineMeetingRepository;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
@@ -33,9 +34,9 @@ import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
@@ -179,15 +180,13 @@ public class MeetingService {
 
 	// 밥, 술 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
-	public Slice<OfflineMeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory offlineMeetingCategory,
-		Pageable pageable) {
-		Slice<OfflineMeeting> meetings = offlineMeetingRepository.findAllByOfflineMeetingCategoryAndMeetingStatus(
-			offlineMeetingCategory, ACTIVE, pageable);
+	public List<MeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory category,
+		GenderRestriction genderRestriction, Long maxParticipant, Long minParticipant, MeetingSortType sortType,
+		Long pageSize) {
+		List<MeetingListResponseDto> meetings = meetingRepository.findOfflineMeetingList(category, genderRestriction,
+			maxParticipant, minParticipant, sortType, pageSize);
 
-		return meetings.map(meeting -> {
-			Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
-			return OfflineMeetingListResponseDto.of(meeting, participantCount);
-		});
+		return meetings;
 	}
 
 	// 배달 모임 목록 조회 메소드
