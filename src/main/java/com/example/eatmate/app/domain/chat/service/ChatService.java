@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.chat.domain.Chat;
 import com.example.eatmate.app.domain.chat.domain.repository.ChatRepository;
-import com.example.eatmate.app.domain.chat.dto.ChatDto;
+import com.example.eatmate.app.domain.chat.dto.ChatMessageDto;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.member.domain.Member;
@@ -19,7 +19,9 @@ import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -30,8 +32,8 @@ public class ChatService {
 	private final MemberRepository memberRepository;
 
 	//채팅 저장 -> 추후 몽고디비 고려
-	public void saveChat(ChatDto chatDto) {
-		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatDto.chatRoomId(), DeletedStatus.NOT_DELETED)
+	public void saveChat(ChatMessageDto chatDto) {
+		ChatRoom chatRoom = chatRoomRepository.findById(chatDto.chatRoomId())
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 		Member member = memberRepository.findById(chatDto.senderId())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
@@ -40,13 +42,13 @@ public class ChatService {
 	}
 
 	//불러오기(읽기 상태 제외)
-	public Page<ChatDto> loadChat(Long chatRoomId, Pageable pageable) {
+	public Page<ChatMessageDto> loadChat(Long chatRoomId, Pageable pageable) {
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		Page<Chat> chats = chatRepository.findChatByChatRoom(chatRoom, pageable);
 
-		return chats.map(ChatDto::from);
+		return chats.map(ChatMessageDto::from);
 	}
 
 	//채팅 삭제
