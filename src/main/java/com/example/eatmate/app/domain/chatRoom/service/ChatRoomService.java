@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.eatmate.app.domain.chat.dto.ChatMessageDto;
+import com.example.eatmate.app.domain.chat.dto.response.ChatMessageResponseDto;
 import com.example.eatmate.app.domain.chat.service.ChatService;
 import com.example.eatmate.app.domain.chat.service.QueueManager;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
@@ -66,7 +66,7 @@ public class ChatRoomService {
 			.map(memberChatRoom -> ChatMemberDto.from(memberChatRoom.getMember()))
 			.collect(Collectors.toList());
 
-		Page<ChatMessageDto> chatList =  chatService.loadChat(chatRoomId, pageable);
+		Page<ChatMessageResponseDto> chatList =  chatService.loadChat(chatRoomId, pageable);
 		return ChatRoomResponseDto.of(participants, chatList);
 	}
 
