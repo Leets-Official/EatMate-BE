@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.chat.service;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +15,14 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.chat.dto.request.ChatMessageRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbitmq.client.Channel;
 
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -84,7 +87,7 @@ public class QueueManager {
 
 		SimpleMessageListenerContainer container = rabbitListenerContainerFactory.createListenerContainer();
 		container.setQueueNames(queueName);
-		container.setMessageListener(message -> {
+		container.setMessageListener((ChannelAwareMessageListener)(message, channel) -> {
 			try {
 				String messageBody = new String(message.getBody(), StandardCharsets.UTF_8);
 				ChatMessageRequestDto chatMessage = objectMapper.readValue(messageBody, ChatMessageRequestDto.class);
@@ -92,8 +95,10 @@ public class QueueManager {
 				// WebSocket 메시지 전달
 				log.info("Sending message to chatRoom {}: {}", chatRoomId, chatMessage);
 				messagingTemplate.convertAndSend("/topic/chat." + chatMessage.getChatRoomId(), chatMessage);
+				channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 			} catch (Exception e) {
 				log.error("Failed to process message for chat room {}: {}", chatRoomId, e.getMessage());
+				channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
 			}
 		});
 
@@ -119,15 +124,21 @@ public class QueueManager {
 	}
 
 	@RabbitListener(queues = "dead.letter.queue", containerFactory = "rabbitListenerContainerFactory")
-	public void processDeadLetterQueue(Message message) {
+	public void processDeadLetterQueue(Message message, Channel channel) {
 		try {
 			// 메시지 복구 로직
 			String messageBody = new String(message.getBody(), StandardCharsets.UTF_8);
 			ChatMessageRequestDto chatMessage = objectMapper.readValue(messageBody, ChatMessageRequestDto.class);
 			log.error("Dead Letter Queue received message: {}", chatMessage);
 			messagingTemplate.convertAndSend("/topic/chat." + chatMessage.getChatRoomId(), chatMessage);
+			channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 		} catch (Exception e) {
-			log.error("Failed to process dead letter message: {}", e.getMessage(), e);
+			try {
+				// 처리 실패 시 NACK로 메시지 재처리 방지 -> 필요시 true로 변경하면 재처리 가능
+				channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+			} catch (IOException ex) {
+				log.error("Failed to nack message: {}", ex.getMessage(), ex);
+			}
 		}
 	}
 }
