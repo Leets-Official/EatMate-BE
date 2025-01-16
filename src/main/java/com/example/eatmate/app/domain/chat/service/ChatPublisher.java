@@ -4,7 +4,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.example.eatmate.app.domain.chat.dto.ChatMessageDto;
+import com.example.eatmate.app.domain.chat.dto.request.ChatMessageRequestDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +20,7 @@ public class ChatPublisher {
 	@Value("${rabbitmq.binding-key-prefix}")
 	private String bindingKeyPrefix;
 
-	public void sendMessage(Long chatRoomId, ChatMessageDto chatDto) {
+	public void sendMessage(Long chatRoomId, ChatMessageRequestDto chatDto) {
 		String bindingKey = bindingKeyPrefix + chatRoomId;
 		rabbitTemplate.convertAndSend(exchange, bindingKey, chatDto);
 	}
