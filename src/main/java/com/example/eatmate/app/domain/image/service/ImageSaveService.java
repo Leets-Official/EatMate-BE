@@ -36,7 +36,8 @@ public class ImageSaveService {
 	}
 
 	private static String getFileExtension(String originalFileName) {
-		return originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
+		int lastIndex = originalFileName.lastIndexOf(".");
+		return (lastIndex == -1) ? "" : originalFileName.substring(lastIndex + 1);
 	}
 
 	public List<String> uploadImages(List<MultipartFile> images) {
