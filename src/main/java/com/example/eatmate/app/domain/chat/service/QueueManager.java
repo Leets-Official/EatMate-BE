@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import com.example.eatmate.app.domain.chat.dto.ChatMessageDto;
+import com.example.eatmate.app.domain.chat.dto.request.ChatMessageRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PreDestroy;
@@ -87,11 +87,11 @@ public class QueueManager {
 		container.setMessageListener(message -> {
 			try {
 				String messageBody = new String(message.getBody(), StandardCharsets.UTF_8);
-				ChatMessageDto chatMessage = objectMapper.readValue(messageBody, ChatMessageDto.class);
+				ChatMessageRequestDto chatMessage = objectMapper.readValue(messageBody, ChatMessageRequestDto.class);
 
 				// WebSocket 메시지 전달
 				log.info("Sending message to chatRoom {}: {}", chatRoomId, chatMessage);
-				messagingTemplate.convertAndSend("/topic/chatRoom/" + chatRoomId, chatMessage);
+				messagingTemplate.convertAndSend("/topic/chat." + chatMessage.getChatRoomId(), chatMessage);
 			} catch (Exception e) {
 				log.error("Failed to process message for chat room {}: {}", chatRoomId, e.getMessage());
 			}
@@ -123,9 +123,9 @@ public class QueueManager {
 		try {
 			// 메시지 복구 로직
 			String messageBody = new String(message.getBody(), StandardCharsets.UTF_8);
-			ChatMessageDto chatDto = objectMapper.readValue(messageBody, ChatMessageDto.class);
-			log.error("Dead Letter Queue received message: {}", chatDto);
-			messagingTemplate.convertAndSend("/topic/chatRoom/" + chatDto.chatRoomId(), chatDto);
+			ChatMessageRequestDto chatMessage = objectMapper.readValue(messageBody, ChatMessageRequestDto.class);
+			log.error("Dead Letter Queue received message: {}", chatMessage);
+			messagingTemplate.convertAndSend("/topic/chat." + chatMessage.getChatRoomId(), chatMessage);
 		} catch (Exception e) {
 			log.error("Failed to process dead letter message: {}", e.getMessage(), e);
 		}
