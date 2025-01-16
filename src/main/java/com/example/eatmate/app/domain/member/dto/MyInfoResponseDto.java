@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.member.dto;
 import com.example.eatmate.app.domain.member.domain.BirthDate;
 import com.example.eatmate.app.domain.member.domain.Mbti;
 import com.example.eatmate.app.domain.member.domain.Member;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,24 +14,22 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class MyInfoResponseDto {
-    private String email;
-    private String nickname;
-    private Long studentNumber;
-    private Mbti mbti;
-    private String phoneNumber;
-    private BirthDate birthDate;
+	private String email;
+	private String nickname;
+	private Long studentNumber;
+	private Mbti mbti;
+	private String phoneNumber;
+	private BirthDate birthDate;
 
-    public static MyInfoResponseDto of(Member member) {
-        return MyInfoResponseDto.builder()
-                .email(member.getEmail())
-                .nickname(member.getNickname())
-                .studentNumber(member.getStudentNumber())
-                .mbti(member.getMbti())
-                .birthDate(member.getBirthDate())
-                .phoneNumber(member.getPhoneNumber())
-                .build();
-    }
-
-
+	public static MyInfoResponseDto from(Member member) {
+		return MyInfoResponseDto.builder()
+			.email(member.getEmail())
+			.nickname(member.getNickname())
+			.studentNumber(member.getStudentNumber())
+			.mbti(member.getMbti())
+			.birthDate(member.getBirthDate())
+			.phoneNumber(member.getPhoneNumber())
+			.build();
+	}
 
 }

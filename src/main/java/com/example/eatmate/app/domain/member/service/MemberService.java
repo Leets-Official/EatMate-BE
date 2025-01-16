@@ -69,7 +69,7 @@ public class MemberService {
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
-		return MyInfoResponseDto.of(member);
+		return MyInfoResponseDto.from(member);
 	}
 
 	//프로필 수정 메서드
@@ -96,7 +96,7 @@ public class MemberService {
 		}
 
 		// 업데이트된 Member 정보 반환
-		return MyInfoResponseDto.of(member);
+		return MyInfoResponseDto.from(member);
 	}
 
 	// 개발용 임시 로그인/회원가입
