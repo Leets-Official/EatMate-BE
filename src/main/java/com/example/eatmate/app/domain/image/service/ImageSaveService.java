@@ -14,6 +14,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.eatmate.app.domain.image.domain.Image;
+import com.example.eatmate.app.domain.image.domain.ImageType;
 import com.example.eatmate.app.domain.image.domain.repository.ImageRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
@@ -43,7 +44,7 @@ public class ImageSaveService {
 		return (lastIndex == -1) ? "" : originalFileName.substring(lastIndex + 1);
 	}
 
-	public List<Image> uploadImages(List<MultipartFile> imageFiles) {
+	public List<Image> uploadImages(List<MultipartFile> imageFiles, ImageType type) {
 		// 다중 업로드 && 리스트 ","을 기준으로 하나의 문자열 반환
 		if (imageFiles == null || imageFiles.isEmpty())
 			return List.of();   // images가 비었다면 빈 리스트 반환
@@ -52,7 +53,7 @@ public class ImageSaveService {
 
 		try {
 			for (MultipartFile imageFile : imageFiles) {
-				uploadedImages.add(uploadImage(imageFile)); // 이미지 업로드
+				uploadedImages.add(uploadImage(imageFile, type)); // 이미지 업로드
 			}
 		} catch (Exception e) {
 			// 예외가 발생하면 그동안 업로드된 이미지들을 삭제
@@ -63,7 +64,7 @@ public class ImageSaveService {
 		return uploadedImages;
 	}
 
-	public Image uploadImage(MultipartFile imageFile) {
+	public Image uploadImage(MultipartFile imageFile, ImageType type) {
 		if (imageFile == null || imageFile.isEmpty())
 			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
 
@@ -83,7 +84,7 @@ public class ImageSaveService {
 		} catch (IOException e) {
 			throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAIL);
 		}
-		Image image = Image.createImage(extractUrl(fileName));    // 파일명들 추출 후 이미지 생성
+		Image image = Image.createImage(extractUrl(fileName), type);    // 파일명들 추출 후 이미지 생성
 		imageRepository.save(image);
 
 		return image;
