@@ -47,7 +47,7 @@ public enum ErrorCode {
 	CHATROOM_NOT_FOUND(404, "CHATROOM_NOT_FOUND", "채팅방을 찾을 수 없습니다."),
 	MEMBER_CHATROOM_NOT_FOUND(404, "MEMBER_CHATROOM_NOT_FOUND", "멤버채팅방을 찾을 수 없습니다."),
 	CHAT_NOT_FOUND(404, "CHAT_NOT_FOUND", "채팅을 찾을 수 없습니다."),
-	QUEUE_NOT_EXIST(404, "QUEUE_NOT_EXIST", "큐를 찾을 수 없습니다.");
+	QUEUE_NOT_EXIST(404, "QUEUE_NOT_EXIST", "큐를 찾을 수 없습니다."),
   
 	// 이미지
 	WRONG_IMAGE_FORMAT(400, "WRONG_IMAGE_FORMAT", "지원되지 않는 확장자 입니다. jpg, jpeg, png 파일만 업로드할 수 있습니다"),
