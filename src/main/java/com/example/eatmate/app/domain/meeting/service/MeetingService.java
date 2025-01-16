@@ -39,7 +39,7 @@ import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
+import com.example.eatmate.global.common.CommonService;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 import com.example.eatmate.global.response.CursorResponseDto;
@@ -51,10 +51,10 @@ import lombok.RequiredArgsConstructor;
 public class MeetingService {
 
 	private final DeliveryMeetingRepository deliveryMeetingRepository;
-	private final MemberRepository memberRepository;
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
 	private final MeetingRepository meetingRepository;
+	private final CommonService commonService;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
 	private static void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
@@ -75,7 +75,7 @@ public class MeetingService {
 	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
-		Member member = getMember(userDetails);
+		Member member = commonService.getMember(userDetails);
 
 		validateGenderRestriction(createDeliveryMeetingRequestDto, member);
 
@@ -112,7 +112,7 @@ public class MeetingService {
 	@Transactional
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
-		Member member = getMember(userDetails);
+		Member member = commonService.getMember(userDetails);
 
 		validateGenderRestriction(createOfflineMeetingRequestDto, member);
 
@@ -144,7 +144,7 @@ public class MeetingService {
 
 	// 모임 참여 메소드 (공통)
 	private void joinMeeting(Long meetingId, UserDetails userDetails, boolean isDeliveryMeeting) {
-		Member member = getMember(userDetails);
+		Member member = commonService.getMember(userDetails);
 		Meeting meeting;
 
 		if (isDeliveryMeeting) {
@@ -300,7 +300,7 @@ public class MeetingService {
 		LocalDateTime lastDateTime,
 		Long pageSize
 	) {
-		Member member = getMember(userDetails);
+		Member member = commonService.getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
 			member.getMemberId(),
 			role,
@@ -321,7 +321,7 @@ public class MeetingService {
 		LocalDateTime lastDateTime,
 		Long pageSize
 	) {
-		Member member = getMember(userDetails);
+		Member member = commonService.getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
 			member.getMemberId(),
 			null,
@@ -337,7 +337,7 @@ public class MeetingService {
 	// 가장 최근 미팅 조회
 	@Transactional(readOnly = true)
 	public UpcomingMeetingResponseDto getUpcomingMeeting(UserDetails userDetails) {
-		Member member = getMember(userDetails);
+		Member member = commonService.getMember(userDetails);
 
 		// 임박한 미팅 조회
 		UpcomingMeetingResponseDto upcomingMeeting = meetingRepository.findUpcomingMeeting(member.getMemberId());
@@ -348,15 +348,6 @@ public class MeetingService {
 		}
 
 		return upcomingMeeting;
-	}
-
-	// 회원 정보 조회 메소드
-	private Member getMember(UserDetails userDetails) {
-		if (userDetails == null) {
-			throw new CommonException(ErrorCode.INVALID_LOGIN_INFO);
-		}
-		return memberRepository.findByEmail(userDetails.getUsername())
-			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 
 }
