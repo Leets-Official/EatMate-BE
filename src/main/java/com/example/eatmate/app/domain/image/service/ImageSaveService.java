@@ -2,6 +2,7 @@ package com.example.eatmate.app.domain.image.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,9 +48,19 @@ public class ImageSaveService {
 		if (imageFiles == null || imageFiles.isEmpty())
 			return List.of();   // images가 비었다면 빈 리스트 반환
 
-		return imageFiles.parallelStream()
-			.map(this::uploadImage)
-			.toList();
+		List<Image> uploadedImages = new ArrayList<>();
+
+		try {
+			for (MultipartFile imageFile : imageFiles) {
+				uploadedImages.add(uploadImage(imageFile)); // 이미지 업로드
+			}
+		} catch (Exception e) {
+			// 예외가 발생하면 그동안 업로드된 이미지들을 삭제
+			imageRepository.deleteAll(uploadedImages);
+			throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAIL);
+		}
+
+		return uploadedImages;
 	}
 
 	public Image uploadImage(MultipartFile imageFile) {
