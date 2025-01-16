@@ -60,6 +60,21 @@ public class ImageSaveService {
 			.toList();
 	}
 
+	public String uploadImage(MultipartFile image) {
+		if (image == null || image.isEmpty())
+			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
+
+		java.io.File fileObj = convertMultiPartFileToFile(image);
+		String fileExtension = getFileExtension(image.getOriginalFilename());
+		if (!isSupportedFileExtension(fileExtension)) {
+			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
+		}
+		String fileName = generateUniqueFileName(image, fileExtension);
+		s3Client.putObject(new PutObjectRequest(bucket, fileName, fileObj));    // s3에 파일 업로드
+		fileObj.delete();   // 업로드 후 파일 삭제
+		return extractUrl(fileName);    // 파일명 추출
+	}
+
 	private boolean isSupportedFileExtension(String fileExtension) {
 		for (String ext : SUPPORTED_EXTENSIONS) {
 			if (ext.equalsIgnoreCase(fileExtension)) {
