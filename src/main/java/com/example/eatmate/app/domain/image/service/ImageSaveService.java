@@ -1,7 +1,7 @@
-package com.example.eatmate.global.image.service;
+package com.example.eatmate.app.domain.image.service;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.example.eatmate.app.domain.image.domain.Image;
+import com.example.eatmate.app.domain.image.domain.repository.ImageRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
@@ -21,10 +24,9 @@ import lombok.RequiredArgsConstructor;
 public class ImageSaveService {
 
 	private static final String HTTPS_PROTOCOL = "https://";
-
 	// 지원하는 이미지 파일 확장자 목록
 	private static final String[] SUPPORTED_EXTENSIONS = {"jpg", "jpeg", "png"};
-
+	private final ImageRepository imageRepository;
 	private final AmazonS3 s3Client;
 
 	@Value("${cloud.aws.s3.bucket}")
@@ -40,40 +42,62 @@ public class ImageSaveService {
 		return (lastIndex == -1) ? "" : originalFileName.substring(lastIndex + 1);
 	}
 
-	public List<String> uploadImages(List<MultipartFile> images) {
+	public List<Image> uploadImages(List<MultipartFile> imageFiles) {
 		// 다중 업로드 && 리스트 ","을 기준으로 하나의 문자열 반환
-		if (images == null || images.isEmpty())
+		if (imageFiles == null || imageFiles.isEmpty())
 			return List.of();   // images가 비었다면 빈 리스트 반환
 
-		return images.parallelStream()
+		return imageFiles.parallelStream()
 			.map(file -> {
-				java.io.File fileObj = convertMultiPartFileToFile(file);
 				String fileExtension = getFileExtension(file.getOriginalFilename());
 				if (!isSupportedFileExtension(fileExtension)) {
 					throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
 				}
 				String fileName = generateUniqueFileName(file, fileExtension);
-				s3Client.putObject(new PutObjectRequest(bucket, fileName, fileObj));    // s3에 파일 업로드
-				fileObj.delete();   // 업로드 후 파일 삭제
+				try (InputStream inputStream = file.getInputStream()) {
+					ObjectMetadata objectMetadata = new ObjectMetadata();
+					objectMetadata.setContentType(file.getContentType());
+					objectMetadata.setContentLength(file.getSize());    //객체(파일)의 메타데이터 설정
 
-				return extractUrl(fileName);    // 파일명들 추출
+					s3Client.putObject(
+						new PutObjectRequest(bucket, fileName, inputStream, objectMetadata));    // s3에 파일 업로드
+
+				} catch (IOException e) {
+					throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAIL);
+				}
+
+				Image image = Image.createImage(extractUrl(fileName));    // 파일명들 추출 후 이미지 생성
+				imageRepository.save(image);
+
+				return image;
 			})
 			.toList();
 	}
 
-	public String uploadImage(MultipartFile image) {
-		if (image == null || image.isEmpty())
+	public Image uploadImage(MultipartFile imageFile) {
+		if (imageFile == null || imageFile.isEmpty())
 			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
 
-		java.io.File fileObj = convertMultiPartFileToFile(image);
-		String fileExtension = getFileExtension(image.getOriginalFilename());
+		String fileExtension = getFileExtension(imageFile.getOriginalFilename());
 		if (!isSupportedFileExtension(fileExtension)) {
 			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
 		}
-		String fileName = generateUniqueFileName(image, fileExtension);
-		s3Client.putObject(new PutObjectRequest(bucket, fileName, fileObj));    // s3에 파일 업로드
-		fileObj.delete();   // 업로드 후 파일 삭제
-		return extractUrl(fileName);    // 파일명 추출
+		String fileName = generateUniqueFileName(imageFile, fileExtension);
+		try (InputStream inputStream = imageFile.getInputStream()) {
+			ObjectMetadata objectMetadata = new ObjectMetadata();
+			objectMetadata.setContentType(imageFile.getContentType());
+			objectMetadata.setContentLength(imageFile.getSize());    //객체(파일)의 메타데이터 설정
+
+			s3Client.putObject(
+				new PutObjectRequest(bucket, fileName, inputStream, objectMetadata));    // s3에 파일 업로드
+
+		} catch (IOException e) {
+			throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAIL);
+		}
+		Image image = Image.createImage(extractUrl(fileName));    // 파일명들 추출 후 이미지 생성
+		imageRepository.save(image);
+
+		return image;
 	}
 
 	private boolean isSupportedFileExtension(String fileExtension) {
@@ -92,14 +116,4 @@ public class ImageSaveService {
 		return HTTPS_PROTOCOL + s3Url.getHost() + s3Url.getFile();
 	}
 
-	private java.io.File convertMultiPartFileToFile(MultipartFile file) {
-		// MultipartFile을 java.io.File로 변환
-		java.io.File convertedFile = new java.io.File(file.getOriginalFilename());
-		try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
-			fos.write(file.getBytes());
-		} catch (IOException e) {
-			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
-		}
-		return convertedFile;
-	}
 }
