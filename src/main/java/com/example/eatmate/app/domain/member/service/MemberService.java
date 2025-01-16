@@ -1,6 +1,5 @@
 package com.example.eatmate.app.domain.member.service;
 
-import com.example.eatmate.app.domain.member.dto.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.eatmate.app.domain.member.domain.BirthDate;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
+import com.example.eatmate.app.domain.member.dto.MemberLoginRequestDto;
+import com.example.eatmate.app.domain.member.dto.MemberLoginResponseDto;
+import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
+import com.example.eatmate.app.domain.member.dto.MyInfoResponseDto;
+import com.example.eatmate.app.domain.member.dto.MyInfoUpdateRequestDto;
 import com.example.eatmate.global.auth.jwt.JwtService;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
@@ -29,12 +33,12 @@ public class MemberService {
 		validateSignUpData(signUpRequestDto);
 		// 이메일로 기존 사용자 조회
 		Member member = memberRepository.findByEmail(email)
-				.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		member.updateMemberDetails(signUpRequestDto.getNickname(), signUpRequestDto.getPhoneNumber(),
-				signUpRequestDto.getStudentNumber(), signUpRequestDto.getGender(),
-				BirthDate.of(signUpRequestDto.getYear(), signUpRequestDto.getMonth(), signUpRequestDto.getDay()),
-				signUpRequestDto.getMbti());
+			signUpRequestDto.getStudentNumber(), signUpRequestDto.getGender(),
+			BirthDate.of(signUpRequestDto.getYear(), signUpRequestDto.getMonth(), signUpRequestDto.getDay()),
+			signUpRequestDto.getMbti());
 		return null;
 	}
 
@@ -63,7 +67,7 @@ public class MemberService {
 		String email = userDetails.getUsername();
 
 		Member member = memberRepository.findByEmail(email)
-				.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		return MyInfoResponseDto.of(member);
 	}
@@ -73,21 +77,27 @@ public class MemberService {
 		// 로그인한 사용자의 이메일로 Member 조회
 		String email = userDetails.getUsername();
 		Member member = memberRepository.findByEmail(email)
-				.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
+		// 닉네임 중복 확인
+		if (myInfoUpdateRequestDto.getNickname() != null &&
+			memberRepository.existsByNickname(myInfoUpdateRequestDto.getNickname())) {
+			throw new CommonException(ErrorCode.DUPLICATE_NICKNAME);
+		}
 
+		// 닉네임 업데이트
+		if (myInfoUpdateRequestDto.getNickname() != null) {
+			member.updateNickname(myInfoUpdateRequestDto.getNickname());
+		}
 
-		// 닉네임과 MBTI 업데이트
-		member.editMyInfo(
-				myInfoUpdateRequestDto.getNickname(),
-				myInfoUpdateRequestDto.getMbti()
-		);
-
+		// MBTI 업데이트
+		if (myInfoUpdateRequestDto.getMbti() != null) {
+			member.updateMbti(myInfoUpdateRequestDto.getMbti());
+		}
 
 		// 업데이트된 Member 정보 반환
 		return MyInfoResponseDto.of(member);
 	}
-
 
 	// 개발용 임시 로그인/회원가입
 
@@ -107,8 +117,6 @@ public class MemberService {
 
 		return MemberLoginResponseDto.of(accessToken, refreshToken);
 	}
-
-
 
 }
 
