@@ -1,5 +1,8 @@
 package com.example.eatmate.app.domain.chatRoom.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +16,7 @@ import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.MemberChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.MemberChatRoomRepository;
+import com.example.eatmate.app.domain.chatRoom.dto.response.ChatMemberDto;
 import com.example.eatmate.app.domain.chatRoom.dto.response.ChatRoomResponseDto;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.member.domain.Member;
@@ -57,8 +61,13 @@ public class ChatRoomService {
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
+		List<ChatMemberDto> participants = chatRoom.getParticipant()
+			.stream()
+			.map(memberChatRoom -> ChatMemberDto.from(memberChatRoom.getMember()))
+			.collect(Collectors.toList());
+
 		Page<ChatMessageDto> chatList =  chatService.loadChat(chatRoomId, pageable);
-		return ChatRoomResponseDto.from(chatRoom, chatList);
+		return ChatRoomResponseDto.of(participants, chatList);
 	}
 
 	//나가기(두 가지) + 큐 해제
