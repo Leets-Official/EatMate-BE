@@ -13,30 +13,24 @@ public class MyMeetingListResponseDto {
 	private String meetingName;
 	private MeetingStatus meetingStatus;
 	private Long participantCount;
-	private String storeName;    // DeliveryMeeting인 경우
-	private String meetingPlace; // OfflineMeeting인 경우
-	private LocalDateTime orderDeadline;  // DeliveryMeeting인 경우
-	private LocalDateTime meetingDate; // OfflineMeeting인 경우
+	private String location;
+	private LocalDateTime dueDateTime;
 
 	public MyMeetingListResponseDto(
 		String type,
 		Long id,
 		String meetingName,
 		MeetingStatus meetingStatus,
-		String storeName,
-		String meetingPlace,
-		LocalDateTime orderDeadline,
-		LocalDateTime meetingDate,
+		String location,
+		LocalDateTime dueDateTime,
 		Long participantCount
 	) {
 		this.meetingType = type;
 		this.id = id;
 		this.meetingName = meetingName;
 		this.meetingStatus = meetingStatus;
-		this.storeName = storeName;
-		this.meetingPlace = meetingPlace;
-		this.orderDeadline = orderDeadline;
-		this.meetingDate = meetingDate;
+		this.location = location;
+		this.dueDateTime = dueDateTime;
 		this.participantCount = participantCount;
 	}
 

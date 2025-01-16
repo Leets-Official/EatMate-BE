@@ -180,13 +180,15 @@ public class MeetingService {
 
 	// 밥, 술 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
-	public List<MeetingListResponseDto> getOfflineMeetingList(OfflineMeetingCategory category,
+	public CursorResponseDto getOfflineMeetingList(OfflineMeetingCategory category,
 		GenderRestriction genderRestriction, Long maxParticipant, Long minParticipant, MeetingSortType sortType,
-		Long pageSize) {
+		Long pageSize, Long lasMeetingId, LocalDateTime lastDateTime) {
 		List<MeetingListResponseDto> meetings = meetingRepository.findOfflineMeetingList(category, genderRestriction,
-			maxParticipant, minParticipant, sortType, pageSize);
+			maxParticipant, minParticipant, sortType, pageSize, lasMeetingId, lastDateTime);
 
-		return meetings;
+		return CursorResponseDto.of(meetings, pageSize, MeetingListResponseDto::getMeetingId,
+			MeetingListResponseDto::getCreatedAt, MeetingListResponseDto::getDueDateTime,
+			MeetingListResponseDto::getCurrentParticipantCount);
 	}
 
 	// 배달 모임 목록 조회 메소드
@@ -296,7 +298,7 @@ public class MeetingService {
 		ParticipantRole role,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
-		int pageSize
+		Long pageSize
 	) {
 		Member member = getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
@@ -307,7 +309,8 @@ public class MeetingService {
 			lastDateTime,
 			pageSize
 		);
-		return CursorResponseDto.of(meetings, pageSize);
+		return CursorResponseDto.of(meetings, pageSize, MyMeetingListResponseDto::getId,
+			MyMeetingListResponseDto::getDueDateTime);
 	}
 
 	// 내가 참여 중인 활성화된 모임 조회
@@ -316,7 +319,7 @@ public class MeetingService {
 		UserDetails userDetails,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
-		int pageSize
+		Long pageSize
 	) {
 		Member member = getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
@@ -327,7 +330,8 @@ public class MeetingService {
 			lastDateTime,
 			pageSize
 		);
-		return CursorResponseDto.of(meetings, pageSize);
+		return CursorResponseDto.of(meetings, pageSize, MyMeetingListResponseDto::getId,
+			MyMeetingListResponseDto::getDueDateTime);
 	}
 
 	// 가장 최근 미팅 조회

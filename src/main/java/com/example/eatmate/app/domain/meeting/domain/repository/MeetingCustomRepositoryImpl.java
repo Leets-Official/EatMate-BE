@@ -35,7 +35,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 
 	@Override
 	public List<MyMeetingListResponseDto> findMyMeetingList(Long memberId, ParticipantRole role,
-		MeetingStatus meetingStatus, Long lastMeetingId, LocalDateTime lastDateTime, int pageSize) {
+		MeetingStatus meetingStatus, Long lastMeetingId, LocalDateTime lastDateTime, Long pageSize) {
 
 		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
 
@@ -56,29 +56,29 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				meeting.meetingName,
 				meeting.meetingStatus,
 				ExpressionUtils.as(
-					JPAExpressions
-						.select(deliveryMeeting.storeName)
-						.from(deliveryMeeting)
-						.where(deliveryMeeting.id.eq(meeting.id)),
-					"storeName"),
+					new CaseBuilder()
+						.when(meeting.type.eq("DELIVERY"))
+						.then(JPAExpressions
+							.select(deliveryMeeting.storeName)
+							.from(deliveryMeeting)
+							.where(deliveryMeeting.id.eq(meeting.id)))
+						.otherwise(JPAExpressions
+							.select(offlineMeeting.meetingPlace)
+							.from(offlineMeeting)
+							.where(offlineMeeting.id.eq(meeting.id))),
+					"location"),
 				ExpressionUtils.as(
-					JPAExpressions
-						.select(offlineMeeting.meetingPlace)
-						.from(offlineMeeting)
-						.where(offlineMeeting.id.eq(meeting.id)),
-					"meetingPlace"),
-				ExpressionUtils.as(
-					JPAExpressions
-						.select(deliveryMeeting.orderDeadline)
-						.from(deliveryMeeting)
-						.where(deliveryMeeting.id.eq(meeting.id)),
-					"orderDeadline"),
-				ExpressionUtils.as(
-					JPAExpressions
-						.select(offlineMeeting.meetingDate)
-						.from(offlineMeeting)
-						.where(offlineMeeting.id.eq(meeting.id)),
-					"meetingDate"),
+					new CaseBuilder()
+						.when(meeting.type.eq("DELIVERY"))
+						.then(JPAExpressions
+							.select(deliveryMeeting.orderDeadline)
+							.from(deliveryMeeting)
+							.where(deliveryMeeting.id.eq(meeting.id)))
+						.otherwise(JPAExpressions
+							.select(offlineMeeting.meetingDate)
+							.from(offlineMeeting)
+							.where(offlineMeeting.id.eq(meeting.id))),
+					"dueDateTime"),
 				ExpressionUtils.as(
 					JPAExpressions
 						.select(meetingParticipant.count())
@@ -108,7 +108,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				),
 				meeting.id.desc()
 			)
-			.limit(pageSize)
+			.limit(pageSize + 1)
 			.fetch();
 	}
 
@@ -195,25 +195,6 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			.fetchFirst();
 	}
 
-	private OrderSpecifier<?> createOrderSpecifier(
-		MeetingSortType sortType,
-		NumberExpression<Long> participantCount,
-		Expression<LocalDateTime> meetingTimeExpr) {
-
-		if (sortType == null) {
-			return participantCount.desc();
-		}
-
-		switch (sortType) {
-			case CREATED_AT:
-				return meeting.createdAt.desc();
-			case MEETING_TIME:
-				return new OrderSpecifier<>(Order.ASC, meetingTimeExpr);
-			default:
-				return participantCount.desc();
-		}
-	}
-
 	@Override
 	public List<MeetingListResponseDto> findOfflineMeetingList(
 		OfflineMeetingCategory category,
@@ -221,7 +202,9 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		Long maxParticipant,
 		Long minParticipant,
 		MeetingSortType sortType,
-		Long pageSize) {
+		Long pageSize,
+		Long lastMeetingId,
+		LocalDateTime lastDateTime) {
 
 		// 카테고리 제한 조건
 		BooleanExpression isCategory = category != null ?
@@ -261,6 +244,9 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		// 모임 시간 관련 expression
 		Expression<LocalDateTime> meetingTimeExpr = offlineMeeting.meetingDate;
 
+		// No-offset 페이지네이션을 위한 동적 조건 추가
+		BooleanExpression cursorCondition = createCursorCondition(lastMeetingId, lastDateTime, sortType);
+
 		return queryFactory
 			.select(Projections.constructor(MeetingListResponseDto.class,
 				meeting.id,
@@ -270,7 +256,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				meeting.participantLimit.maxParticipants,
 				offlineMeeting.meetingPlace.as("location"),
 				meeting.createdAt,
-				offlineMeeting.meetingDate
+				offlineMeeting.meetingDate.as("dueDateTime")
 			))
 			.from(meeting)
 			.join(offlineMeeting).on(offlineMeeting.id.eq(meeting.id))
@@ -278,10 +264,74 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				meeting.meetingStatus.eq(MeetingStatus.ACTIVE),
 				isCategory,
 				genderCondition,
-				participantCondition
+				participantCondition,
+				cursorCondition
 			)
 			.orderBy(createOrderSpecifier(sortType, participantCount, meetingTimeExpr))
-			.limit(pageSize)
+			.limit(pageSize + 1)
 			.fetch();
+	}
+
+	private BooleanExpression createCursorCondition(Long lastMeetingId, LocalDateTime lastDateTime,
+		MeetingSortType sortType) {
+		if (lastMeetingId == null || lastDateTime == null) {
+			return null;
+		}
+
+		// 정렬 타입에 따른 커서 조건 생성
+		switch (sortType) {
+			case CREATED_AT:
+				return meeting.createdAt.gt(lastDateTime)
+					.or(meeting.createdAt.eq(lastDateTime)
+						.and(meeting.id.gt(lastMeetingId)));
+
+			case MEETING_TIME:
+				return offlineMeeting.meetingDate.gt(lastDateTime)
+					.or(offlineMeeting.meetingDate.eq(lastDateTime)
+						.and(meeting.id.lt(lastMeetingId)));
+			case PARTICIPANT_COUNT:
+				NumberExpression<Long> participantCount = Expressions.asNumber(
+					JPAExpressions
+						.select(meetingParticipant.count())
+						.from(meetingParticipant)
+						.where(meetingParticipant.meeting.eq(meeting))
+				).castToNum(Long.class);
+
+				NumberExpression<Long> lastParticipantCount = Expressions.asNumber(
+					JPAExpressions
+						.select(meetingParticipant.count())
+						.from(meetingParticipant)
+						.where(meetingParticipant.meeting.id.eq(lastMeetingId))
+				).castToNum(Long.class);
+
+				// 참여자 수가 같으면 ID로 보조 정렬
+				return participantCount.lt(lastParticipantCount)
+					.or(participantCount.eq(lastParticipantCount)
+						.and(meeting.id.lt(lastMeetingId)));
+			default:
+				return null;
+		}
+
+	}
+
+	private OrderSpecifier<?> createOrderSpecifier(
+		MeetingSortType sortType,
+		NumberExpression<Long> participantCount,
+		Expression<LocalDateTime> meetingTimeExpr) {
+
+		if (sortType == null) {
+			return participantCount.desc();
+		}
+
+		switch (sortType) {
+			case CREATED_AT:
+				return meeting.createdAt.desc();
+			case MEETING_TIME:
+				return new OrderSpecifier<>(Order.ASC, meetingTimeExpr);
+			case PARTICIPANT_COUNT:
+				return participantCount.desc();
+			default:
+				return participantCount.desc();
+		}
 	}
 }
