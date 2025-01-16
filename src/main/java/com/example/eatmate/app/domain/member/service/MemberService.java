@@ -10,6 +10,8 @@ import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.member.dto.MemberLoginRequestDto;
 import com.example.eatmate.app.domain.member.dto.MemberLoginResponseDto;
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
+import com.example.eatmate.app.domain.member.dto.MyInfoResponseDto;
+import com.example.eatmate.app.domain.member.dto.MyInfoUpdateRequestDto;
 import com.example.eatmate.global.auth.jwt.JwtService;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
@@ -59,6 +61,44 @@ public class MemberService {
 
 	}
 
+	// 프로필 조회 메서드
+	public MyInfoResponseDto getMyInfo(UserDetails userDetails) {
+
+		String email = userDetails.getUsername();
+
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		return MyInfoResponseDto.from(member);
+	}
+
+	//프로필 수정 메서드
+	public MyInfoResponseDto updateMyInfo(UserDetails userDetails, MyInfoUpdateRequestDto myInfoUpdateRequestDto) {
+		// 로그인한 사용자의 이메일로 Member 조회
+		String email = userDetails.getUsername();
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		// 닉네임 중복 확인
+		if (myInfoUpdateRequestDto.getNickname() != null &&
+			memberRepository.existsByNickname(myInfoUpdateRequestDto.getNickname())) {
+			throw new CommonException(ErrorCode.DUPLICATE_NICKNAME);
+		}
+
+		// 닉네임 업데이트
+		if (myInfoUpdateRequestDto.getNickname() != null) {
+			member.updateNickname(myInfoUpdateRequestDto.getNickname());
+		}
+
+		// MBTI 업데이트
+		if (myInfoUpdateRequestDto.getMbti() != null) {
+			member.updateMbti(myInfoUpdateRequestDto.getMbti());
+		}
+
+		// 업데이트된 Member 정보 반환
+		return MyInfoResponseDto.from(member);
+	}
+
 	// 개발용 임시 로그인/회원가입
 
 	public MemberLoginResponseDto login(MemberLoginRequestDto memberLoginRequestDto) {
@@ -77,6 +117,7 @@ public class MemberService {
 
 		return MemberLoginResponseDto.of(accessToken, refreshToken);
 	}
+
 }
 
 //    private void updateMemberDetails(Member member, MemberSignUpRequestDto signUpRequestDto) {
