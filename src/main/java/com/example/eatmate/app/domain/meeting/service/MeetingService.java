@@ -57,15 +57,15 @@ public class MeetingService {
 	private final CommonService commonService;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
-	private static void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
+	private void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
 		validateGenderRestrictionCommon(requestDto.getGenderRestriction(), member);
 	}
 
-	private static void validateGenderRestriction(CreateDeliveryMeetingRequestDto requestDto, Member member) {
+	private void validateGenderRestriction(CreateDeliveryMeetingRequestDto requestDto, Member member) {
 		validateGenderRestrictionCommon(requestDto.getGenderRestriction(), member);
 	}
 
-	private static void validateGenderRestrictionCommon(GenderRestriction genderRestriction, Member member) {
+	private void validateGenderRestrictionCommon(GenderRestriction genderRestriction, Member member) {
 		if (genderRestriction != ALL && !genderRestriction.toString().equals(member.getGender().toString())) {
 			throw new CommonException(ErrorCode.INVALID_GENDER_RESTRICTION);
 		}
