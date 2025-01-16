@@ -48,29 +48,7 @@ public class ImageSaveService {
 			return List.of();   // images가 비었다면 빈 리스트 반환
 
 		return imageFiles.parallelStream()
-			.map(file -> {
-				String fileExtension = getFileExtension(file.getOriginalFilename());
-				if (!isSupportedFileExtension(fileExtension)) {
-					throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
-				}
-				String fileName = generateUniqueFileName(file, fileExtension);
-				try (InputStream inputStream = file.getInputStream()) {
-					ObjectMetadata objectMetadata = new ObjectMetadata();
-					objectMetadata.setContentType(file.getContentType());
-					objectMetadata.setContentLength(file.getSize());    //객체(파일)의 메타데이터 설정
-
-					s3Client.putObject(
-						new PutObjectRequest(bucket, fileName, inputStream, objectMetadata));    // s3에 파일 업로드
-
-				} catch (IOException e) {
-					throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAIL);
-				}
-
-				Image image = Image.createImage(extractUrl(fileName));    // 파일명들 추출 후 이미지 생성
-				imageRepository.save(image);
-
-				return image;
-			})
+			.map(this::uploadImage)
 			.toList();
 	}
 
