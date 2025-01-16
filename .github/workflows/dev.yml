@@ -54,7 +54,7 @@ jobs:
           echo "${{ secrets.YML_OAUTH }}" > ./application-oauth.yml
         shell: bash
 
-      # 환경별 yml 파일 생성(3) - jwt
+      # 환경별 yml 파일 생성(4) - jwt
       - name: make application-jwt.yml
         if: |
           contains(github.ref, 'dev') || 
@@ -65,7 +65,7 @@ jobs:
           echo "${{ secrets.YML_JWT }}" > ./application-jwt.yml
         shell: bash
 
-      # 환경별 yml 파일 생성(4) - S3
+      # 환경별 yml 파일 생성(5) - S3
       - name: make application-s3.yml
         if: |
           contains(github.ref, 'dev') || 
@@ -74,6 +74,17 @@ jobs:
           cd ./src/main/resources
           touch ./application-s3.yml
           echo "${{ secrets.YML_S3 }}" > ./application-s3.yml
+        shell: bash
+        
+      # 환경별 yml 파일 생성(6) - rabbitMQ
+      - name: make application-mq.yml
+        if: |
+          contains(github.ref, 'dev') || 
+          (github.event_name == 'pull_request')
+        run: |
+          cd ./src/main/resources
+          touch ./application-mq.yml
+          echo "${{ secrets.YML_MQ }}" > ./application-mq.yml
         shell: bash
 
       # Gradle Build (test는 제외)

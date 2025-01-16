@@ -18,6 +18,7 @@ import com.example.eatmate.global.response.GlobalResponseDto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +42,7 @@ public class GlobalExceptionHandler {
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
 		log.error(ex.getMessage());
 		log.error(ex.getClass().getSimpleName());
+
 		handleUnexpectedError(ex);
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
@@ -102,7 +104,6 @@ public class GlobalExceptionHandler {
 		}
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
-
 	}
 
 	public void handleUnexpectedError(Exception ex) {
