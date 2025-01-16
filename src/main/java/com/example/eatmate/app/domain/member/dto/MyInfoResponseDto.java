@@ -4,15 +4,12 @@ import com.example.eatmate.app.domain.member.domain.BirthDate;
 import com.example.eatmate.app.domain.member.domain.Mbti;
 import com.example.eatmate.app.domain.member.domain.Member;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-//마이페이지 클릭 시 반환할 내 정보들(or 수정)
-//구글이메일, 닉네임, 학번, 전화번호, MBTI, 생년월일 , 프로필사진정보(추후구현)
+// 마이페이지 클릭 시 반환할 내 정보들(or 수정)
+// 구글이메일, 닉네임, 학번, 전화번호, MBTI, 생년월일 , 프로필사진정보(추후구현)
 @Getter
-@Builder
-@AllArgsConstructor
 public class MyInfoResponseDto {
 	private String email;
 	private String nickname;
@@ -20,6 +17,17 @@ public class MyInfoResponseDto {
 	private Mbti mbti;
 	private String phoneNumber;
 	private BirthDate birthDate;
+
+	@Builder
+	private MyInfoResponseDto(String email, String nickname, Long studentNumber, Mbti mbti, String phoneNumber,
+		BirthDate birthDate) {
+		this.email = email;
+		this.nickname = nickname;
+		this.studentNumber = studentNumber;
+		this.mbti = mbti;
+		this.phoneNumber = phoneNumber;
+		this.birthDate = birthDate;
+	}
 
 	public static MyInfoResponseDto from(Member member) {
 		return MyInfoResponseDto.builder()
@@ -31,5 +39,4 @@ public class MyInfoResponseDto {
 			.phoneNumber(member.getPhoneNumber())
 			.build();
 	}
-
 }
