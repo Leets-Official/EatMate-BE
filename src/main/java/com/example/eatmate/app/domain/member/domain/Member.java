@@ -123,14 +123,12 @@ public class Member extends BaseTimeEntity {
 		this.refreshToken = updateRefreshToken;
 	}
 
-	public void editMyInfo(String nickname, Mbti mbti) {
-		if (nickname != null) {
-			this.nickname = nickname;
-		}
-		if (mbti != null) {
-			this.mbti = mbti;
-		}
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
 
+	public void updateMbti(Mbti mbti) {
+		this.mbti = mbti;
 	}
 
 	//
