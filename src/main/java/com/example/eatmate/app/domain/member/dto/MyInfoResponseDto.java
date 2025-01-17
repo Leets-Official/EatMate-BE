@@ -17,16 +17,18 @@ public class MyInfoResponseDto {
 	private Mbti mbti;
 	private String phoneNumber;
 	private BirthDate birthDate;
+	private String profileImageUrl;
 
 	@Builder
 	private MyInfoResponseDto(String email, String nickname, Long studentNumber, Mbti mbti, String phoneNumber,
-		BirthDate birthDate) {
+		BirthDate birthDate, String profileImageUrl) {
 		this.email = email;
 		this.nickname = nickname;
 		this.studentNumber = studentNumber;
 		this.mbti = mbti;
 		this.phoneNumber = phoneNumber;
 		this.birthDate = birthDate;
+		this.profileImageUrl = profileImageUrl;
 	}
 
 	public static MyInfoResponseDto from(Member member) {
@@ -37,6 +39,7 @@ public class MyInfoResponseDto {
 			.mbti(member.getMbti())
 			.birthDate(member.getBirthDate())
 			.phoneNumber(member.getPhoneNumber())
+			.profileImageUrl(member.getProfileImage().getImageUrl())
 			.build();
 	}
 }
