@@ -96,7 +96,8 @@ public class MemberService {
 	}
 
 	//프로필 수정 메서드
-	public MyInfoResponseDto updateMyInfo(UserDetails userDetails, MyInfoUpdateRequestDto myInfoUpdateRequestDto) {
+	public MyInfoResponseDto updateMyInfo(UserDetails userDetails, MyInfoUpdateRequestDto myInfoUpdateRequestDto,
+		MultipartFile profileImage) {
 		// 로그인한 사용자의 이메일로 Member 조회
 		String email = userDetails.getUsername();
 		Member member = memberRepository.findByEmail(email)
@@ -117,6 +118,9 @@ public class MemberService {
 		if (myInfoUpdateRequestDto.getMbti() != null) {
 			member.updateMbti(myInfoUpdateRequestDto.getMbti());
 		}
+
+		Image profileImageEntity = imageSaveService.uploadImage(profileImage, ImageType.PROFILE);
+		member.updateProfileImage(profileImageEntity);
 
 		// 업데이트된 Member 정보 반환
 		return MyInfoResponseDto.from(member);
