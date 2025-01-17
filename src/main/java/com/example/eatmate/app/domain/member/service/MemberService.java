@@ -1,9 +1,15 @@
 package com.example.eatmate.app.domain.member.service;
 
+import java.util.List;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.eatmate.app.domain.image.domain.Image;
+import com.example.eatmate.app.domain.image.domain.ImageType;
+import com.example.eatmate.app.domain.image.service.ImageSaveService;
 import com.example.eatmate.app.domain.member.domain.BirthDate;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
@@ -25,24 +31,35 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final JwtService jwtService;
+	private final ImageSaveService imageSaveService; // ImageSaveService 주입
 
-	// 회원 가입 완료시 , 기본 값에서 사용자 입력값으로 업데이트 해주는 메소드
-	public Void completeRegistration(MemberSignUpRequestDto signUpRequestDto, UserDetails userDetails) {
+	public Void completeRegistration(MemberSignUpRequestDto signUpRequestDto, MultipartFile profileImage,
+		UserDetails userDetails) {
+
+		// 프로필 이미지 업로드 처리
+		Image profileImageEntity = imageSaveService.uploadImage(profileImage, ImageType.PROFILE);
+
+		// 기존 회원가입 로직
 		String email = userDetails.getUsername();
+		validateSignUpData(signUpRequestDto, profileImage);
 
-		validateSignUpData(signUpRequestDto);
-		// 이메일로 기존 사용자 조회
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
-		member.updateMemberDetails(signUpRequestDto.getNickname(), signUpRequestDto.getPhoneNumber(),
-			signUpRequestDto.getStudentNumber(), signUpRequestDto.getGender(),
+		member.updateMemberDetails(
+			signUpRequestDto.getNickname(),
+			signUpRequestDto.getPhoneNumber(),
+			signUpRequestDto.getStudentNumber(),
+			signUpRequestDto.getGender(),
 			BirthDate.of(signUpRequestDto.getYear(), signUpRequestDto.getMonth(), signUpRequestDto.getDay()),
-			signUpRequestDto.getMbti());
+			signUpRequestDto.getMbti(),
+			profileImageEntity
+		);
+
 		return null;
 	}
 
-	private void validateSignUpData(MemberSignUpRequestDto signUpRequestDto) {
+	private void validateSignUpData(MemberSignUpRequestDto signUpRequestDto, MultipartFile profileImage) {
 
 		// 전화번호 중복 검증
 		if (memberRepository.existsByPhoneNumber(signUpRequestDto.getPhoneNumber())) {
@@ -57,6 +74,12 @@ public class MemberService {
 		// 닉네임 중복 확인
 		if (memberRepository.existsByNickname(signUpRequestDto.getNickname())) {
 			throw new CommonException(ErrorCode.DUPLICATE_NICKNAME);
+		}
+
+		// 파일 확장자 검증
+		String fileExtension = getFileExtension(profileImage.getOriginalFilename());
+		if (!isSupportedFileExtension(fileExtension)) {
+			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
 		}
 
 	}
@@ -116,6 +139,17 @@ public class MemberService {
 		memberRepository.save(member);
 
 		return MemberLoginResponseDto.of(accessToken, refreshToken);
+	}
+
+	private boolean isSupportedFileExtension(String fileExtension) {
+		return List.of("jpg", "jpeg", "png").contains(fileExtension.toLowerCase());
+	}
+
+	private String getFileExtension(String fileName) {
+		if (fileName == null || !fileName.contains(".")) {
+			return "";
+		}
+		return fileName.substring(fileName.lastIndexOf(".") + 1);
 	}
 
 }
