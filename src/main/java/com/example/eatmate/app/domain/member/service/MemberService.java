@@ -81,7 +81,7 @@ public class MemberService {
 
 		String email = userDetails.getUsername();
 
-		Member member = memberRepository.findByEmail(email)
+		Member member = memberRepository.findByEmailWithProfileImage(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		return MyInfoResponseDto.from(member);
@@ -92,7 +92,7 @@ public class MemberService {
 		MultipartFile profileImage) {
 		// 로그인한 사용자의 이메일로 Member 조회
 		String email = userDetails.getUsername();
-		Member member = memberRepository.findByEmail(email)
+		Member member = memberRepository.findByEmailWithProfileImage(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		// 닉네임 중복 확인
