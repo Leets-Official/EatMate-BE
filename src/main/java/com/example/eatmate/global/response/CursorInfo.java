@@ -9,7 +9,6 @@ public class CursorInfo {
 	private Long id;
 	private LocalDateTime lastCreatedAt;
 	private LocalDateTime lastMeetingTime;
-	private Long lastParticipantCount;
 
 	// 기본 생성자 (id와 시간만)
 	public CursorInfo(Long id, LocalDateTime dateTime) {
@@ -18,10 +17,9 @@ public class CursorInfo {
 	}
 
 	// 전체 필드 생성자
-	public CursorInfo(Long id, LocalDateTime createdAt, LocalDateTime meetingTime, Long participantCount) {
+	public CursorInfo(Long id, LocalDateTime createdAt, LocalDateTime meetingTime) {
 		this.id = id;
 		this.lastCreatedAt = createdAt;
 		this.lastMeetingTime = meetingTime;
-		this.lastParticipantCount = participantCount;
 	}
 }

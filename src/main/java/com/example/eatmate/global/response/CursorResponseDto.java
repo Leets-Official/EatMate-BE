@@ -49,8 +49,7 @@ public class CursorResponseDto<T> {
 		Long pageSize,
 		Function<T, Long> idExtractor,
 		Function<T, LocalDateTime> createdAtExtractor,
-		Function<T, LocalDateTime> meetingTimeExtractor,
-		Function<T, Long> participantCountExtractor) {
+		Function<T, LocalDateTime> meetingTimeExtractor) {
 
 		boolean hasNext = content.size() > pageSize;
 		List<T> result = hasNext ? content.subList(0, content.size() - 1) : content;
@@ -63,8 +62,7 @@ public class CursorResponseDto<T> {
 		CursorInfo cursorInfo = new CursorInfo(
 			idExtractor.apply(lastItem),
 			createdAtExtractor.apply(lastItem),
-			meetingTimeExtractor.apply(lastItem),
-			participantCountExtractor.apply(lastItem)
+			meetingTimeExtractor.apply(lastItem)
 		);
 
 		return new CursorResponseDto<>(result, hasNext, cursorInfo);
