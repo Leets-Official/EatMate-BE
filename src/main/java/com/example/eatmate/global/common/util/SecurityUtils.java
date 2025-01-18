@@ -1,4 +1,4 @@
-package com.example.eatmate.global.common;
+package com.example.eatmate.global.common.util;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CommonService {
+public class SecurityUtils {
 	private final MemberRepository memberRepository;
 
 	public Member getMember(UserDetails userDetails) {
