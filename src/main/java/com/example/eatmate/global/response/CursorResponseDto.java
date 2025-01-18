@@ -20,51 +20,71 @@ public class CursorResponseDto<T> {
 		this.cursorInfo = cursorInfo;
 	}
 
-	// 기본 버전 (id와 시간만 필요한 경우)
-	public static <T> CursorResponseDto<T> of(
-		List<T> content,
-		Long pageSize,
-		Function<T, Long> idExtractor,
-		Function<T, LocalDateTime> dateTimeExtractor) {
-
+	// 공통 처리 로직
+	private static <T> List<T> processContent(List<T> content, Long pageSize) {
 		boolean hasNext = content.size() > pageSize;
-		List<T> result = hasNext ? content.subList(0, content.size() - 1) : content;
-
-		if (result.isEmpty()) {
-			return new CursorResponseDto<>(result, false, null);
-		}
-
-		T lastItem = result.get(result.size() - 1);
-		CursorInfo cursorInfo = new CursorInfo(
-			idExtractor.apply(lastItem),
-			dateTimeExtractor.apply(lastItem)
-		);
-
-		return new CursorResponseDto<>(result, hasNext, cursorInfo);
+		return hasNext ? content.subList(0, content.size() - 1) : content;
 	}
 
-	// 확장 버전 (모든 정렬 기준이 필요한 경우)
-	public static <T> CursorResponseDto<T> of(
+	// id만 사용하는 경우
+	public static <T> CursorResponseDto<T> ofId(
 		List<T> content,
 		Long pageSize,
-		Function<T, Long> idExtractor,
-		Function<T, LocalDateTime> createdAtExtractor,
-		Function<T, LocalDateTime> meetingTimeExtractor) {
+		Function<T, Long> idExtractor) {
 
-		boolean hasNext = content.size() > pageSize;
-		List<T> result = hasNext ? content.subList(0, content.size() - 1) : content;
+		List<T> result = processContent(content, pageSize);
 
 		if (result.isEmpty()) {
 			return new CursorResponseDto<>(result, false, null);
 		}
 
 		T lastItem = result.get(result.size() - 1);
-		CursorInfo cursorInfo = new CursorInfo(
+		CursorInfo cursorInfo = CursorInfo.onlyId(idExtractor.apply(lastItem));
+
+		return new CursorResponseDto<>(result, content.size() > pageSize, cursorInfo);
+	}
+
+	// id + createdAt 사용하는 경우
+	public static <T> CursorResponseDto<T> ofIdAndCreatedAt(
+		List<T> content,
+		Long pageSize,
+		Function<T, Long> idExtractor,
+		Function<T, LocalDateTime> createdAtExtractor) {
+
+		List<T> result = processContent(content, pageSize);
+
+		if (result.isEmpty()) {
+			return new CursorResponseDto<>(result, false, null);
+		}
+
+		T lastItem = result.get(result.size() - 1);
+		CursorInfo cursorInfo = CursorInfo.withCreatedAt(
 			idExtractor.apply(lastItem),
-			createdAtExtractor.apply(lastItem),
+			createdAtExtractor.apply(lastItem)
+		);
+
+		return new CursorResponseDto<>(result, content.size() > pageSize, cursorInfo);
+	}
+
+	// id + meetingTime 사용하는 경우
+	public static <T> CursorResponseDto<T> ofIdAndMeetingTime(
+		List<T> content,
+		Long pageSize,
+		Function<T, Long> idExtractor,
+		Function<T, LocalDateTime> meetingTimeExtractor) {
+
+		List<T> result = processContent(content, pageSize);
+
+		if (result.isEmpty()) {
+			return new CursorResponseDto<>(result, false, null);
+		}
+
+		T lastItem = result.get(result.size() - 1);
+		CursorInfo cursorInfo = CursorInfo.withMeetingTime(
+			idExtractor.apply(lastItem),
 			meetingTimeExtractor.apply(lastItem)
 		);
 
-		return new CursorResponseDto<>(result, hasNext, cursorInfo);
+		return new CursorResponseDto<>(result, content.size() > pageSize, cursorInfo);
 	}
 }

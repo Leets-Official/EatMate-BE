@@ -183,8 +183,21 @@ public class MeetingService {
 		List<MeetingListResponseDto> meetings = meetingRepository.findOfflineMeetingList(category, genderRestriction,
 			maxParticipant, minParticipant, sortType, pageSize, lasMeetingId, lastDateTime);
 
-		return CursorResponseDto.of(meetings, pageSize, MeetingListResponseDto::getMeetingId,
-			MeetingListResponseDto::getCreatedAt, MeetingListResponseDto::getDueDateTime);
+		if (sortType == MeetingSortType.CREATED_AT) {
+			return CursorResponseDto.ofIdAndCreatedAt(meetings, pageSize, MeetingListResponseDto::getMeetingId,
+				MeetingListResponseDto::getCreatedAt);
+		}
+
+		if (sortType == MeetingSortType.MEETING_TIME) {
+			return CursorResponseDto.ofIdAndMeetingTime(meetings, pageSize, MeetingListResponseDto::getMeetingId,
+				MeetingListResponseDto::getDueDateTime);
+		}
+
+		if (sortType == MeetingSortType.PARTICIPANT_COUNT) {
+			return CursorResponseDto.ofId(meetings, pageSize, MeetingListResponseDto::getMeetingId);
+		}
+
+		throw new CommonException(ErrorCode.INVALID_SORT_TYPE);
 	}
 
 	// 배달 모임 목록 조회 메소드
@@ -195,8 +208,21 @@ public class MeetingService {
 		List<MeetingListResponseDto> meetings = meetingRepository.findDeliveryMeetingList(category, genderRestriction,
 			maxParticipant,
 			minParticipant, sortType, pageSize, lastMeetingId, lastDateTime);
-		return CursorResponseDto.of(meetings, pageSize, MeetingListResponseDto::getMeetingId,
-			MeetingListResponseDto::getCreatedAt, MeetingListResponseDto::getDueDateTime);
+		if (sortType == MeetingSortType.CREATED_AT) {
+			return CursorResponseDto.ofIdAndCreatedAt(meetings, pageSize, MeetingListResponseDto::getMeetingId,
+				MeetingListResponseDto::getCreatedAt);
+		}
+
+		if (sortType == MeetingSortType.MEETING_TIME) {
+			return CursorResponseDto.ofIdAndMeetingTime(meetings, pageSize, MeetingListResponseDto::getMeetingId,
+				MeetingListResponseDto::getDueDateTime);
+		}
+
+		if (sortType == MeetingSortType.PARTICIPANT_COUNT) {
+			return CursorResponseDto.ofId(meetings, pageSize, MeetingListResponseDto::getMeetingId);
+		}
+
+		throw new CommonException(ErrorCode.INVALID_SORT_TYPE);
 
 	}
 
@@ -306,7 +332,7 @@ public class MeetingService {
 			lastDateTime,
 			pageSize
 		);
-		return CursorResponseDto.of(meetings, pageSize, MyMeetingListResponseDto::getId,
+		return CursorResponseDto.ofIdAndMeetingTime(meetings, pageSize, MyMeetingListResponseDto::getId,
 			MyMeetingListResponseDto::getDueDateTime);
 	}
 
@@ -327,7 +353,7 @@ public class MeetingService {
 			lastDateTime,
 			pageSize
 		);
-		return CursorResponseDto.of(meetings, pageSize, MyMeetingListResponseDto::getId,
+		return CursorResponseDto.ofIdAndMeetingTime(meetings, pageSize, MyMeetingListResponseDto::getId,
 			MyMeetingListResponseDto::getDueDateTime);
 	}
 
