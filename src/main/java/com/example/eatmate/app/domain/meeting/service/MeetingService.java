@@ -372,8 +372,3 @@ public class MeetingService {
 
 		return upcomingMeeting;
 	}
-
-}
-
-
-

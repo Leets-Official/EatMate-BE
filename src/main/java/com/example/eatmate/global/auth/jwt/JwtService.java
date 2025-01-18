@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 public class JwtService {
-
+  
 	private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
 	private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
 	private static final String EMAIL_CLAIM = "email";

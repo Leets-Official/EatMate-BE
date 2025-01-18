@@ -11,6 +11,8 @@ public enum ErrorCode {
 	INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR", "서버 내부 에러"),
 	VALIDATION_FAILED(400, "VALIDATION_FAILED", "요청 값이 올바르지 않습니다."),
 	JSON_PARSING_ERROR(400, "JSON_PARSING_ERROR", "JSON 데이터 처리 중 오류가 발생했습니다"),
+	NO_RESOURCE_FOUND(404, "NO_RESOURCE_FOUND", "해당 리소스를 찾을 수 없습니다."),
+
 	//회원
 	USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다."),
 	TOKEN_NOT_FOUND(404, "TOKEN_NOT_FOUND", "토큰를 찾을 수 없습니다."),
@@ -40,7 +42,17 @@ public enum ErrorCode {
 	DUPLICATE_REPORT_NOT_ALLOWED(400, "DUPLICATE_REPORT_NOT_ALLOWED", "같은 유저를 연속적으로 신고할 수 없습니다."),
 
 	// 공지사항
-	NOTICE_NOT_FOUND(404, "NOTICE_NOT_FOUND", "해당 공지사항을 찾을 수 없습니다.");
+	NOTICE_NOT_FOUND(404, "NOTICE_NOT_FOUND", "해당 공지사항을 찾을 수 없습니다."),
+
+	//채팅
+	CHATROOM_NOT_FOUND(404, "CHATROOM_NOT_FOUND", "채팅방을 찾을 수 없습니다."),
+	MEMBER_CHATROOM_NOT_FOUND(404, "MEMBER_CHATROOM_NOT_FOUND", "멤버채팅방을 찾을 수 없습니다."),
+	CHAT_NOT_FOUND(404, "CHAT_NOT_FOUND", "채팅을 찾을 수 없습니다."),
+	QUEUE_NOT_EXIST(404, "QUEUE_NOT_EXIST", "큐를 찾을 수 없습니다."),
+  
+	// 이미지
+	WRONG_IMAGE_FORMAT(400, "WRONG_IMAGE_FORMAT", "지원되지 않는 확장자 입니다. jpg, jpeg, png 파일만 업로드할 수 있습니다"),
+	IMAGE_UPLOAD_FAIL(400, "IMAGE_UPLOAD_FAIL", "이미지 업로드 중에 오류가 발생하였습니다.");
 
 	private final int status;
 	private final String code;

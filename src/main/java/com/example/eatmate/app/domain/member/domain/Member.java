@@ -122,7 +122,15 @@ public class Member extends BaseTimeEntity {
 	public void updateRefreshToken(String updateRefreshToken) {
 		this.refreshToken = updateRefreshToken;
 	}
-	//
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void updateMbti(Mbti mbti) {
+		this.mbti = mbti;
+	}
+
 	//
 	//    public void updateNickname(String nickname) {
 	//        this.nickname = nickname;
@@ -155,3 +163,4 @@ public class Member extends BaseTimeEntity {
 	//    }
 
 }
+
