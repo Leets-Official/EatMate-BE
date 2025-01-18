@@ -94,7 +94,7 @@ public class MeetingController {
 		@RequestParam(required = true) OfflineMeetingCategory category,
 		@RequestParam(value = "page-size", defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
-		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") Long pageSize,
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize,
 		@RequestParam(value = "gender-restriction", required = false) GenderRestriction genderRestriction,
 		@RequestParam(value = "max-participant", required = false) Long maxParticipant,
 		@RequestParam(value = "min-participant", required = false) Long minParticipant,
@@ -113,7 +113,7 @@ public class MeetingController {
 		@RequestParam(required = true) FoodCategory category,
 		@RequestParam(value = "page-size", defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
-		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") Long pageSize,
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize,
 		@RequestParam(value = "gender-restriction", required = false) GenderRestriction genderRestriction,
 		@RequestParam(value = "max-participant", required = false) Long maxParticipant,
 		@RequestParam(value = "min-participant", required = false) Long minParticipant,
@@ -155,7 +155,7 @@ public class MeetingController {
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
 		@RequestParam(defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
-		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") Long pageSize
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -173,7 +173,7 @@ public class MeetingController {
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
 		@RequestParam(defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
-		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") Long pageSize
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
@@ -191,7 +191,7 @@ public class MeetingController {
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
 		@RequestParam(defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
-		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") Long pageSize
+		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(

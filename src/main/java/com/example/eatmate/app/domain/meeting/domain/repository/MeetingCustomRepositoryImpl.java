@@ -39,7 +39,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 
 	@Override
 	public List<MyMeetingListResponseDto> findMyMeetingList(Long memberId, ParticipantRole role,
-		MeetingStatus meetingStatus, Long lastMeetingId, LocalDateTime lastDateTime, Long pageSize) {
+		MeetingStatus meetingStatus, Long lastMeetingId, LocalDateTime lastDateTime, int pageSize) {
 
 		BooleanExpression isDelivery = meeting.type.eq("DELIVERY");
 
@@ -202,7 +202,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 	@Override
 	public List<MeetingListResponseDto> findDeliveryMeetingList(FoodCategory category,
 		GenderRestriction genderRestriction, Long maxParticipant, Long minParticipant, MeetingSortType sortType,
-		Long pageSize, Long lastMeetingId, LocalDateTime lastDateTime) {
+		int pageSize, Long lastMeetingId, LocalDateTime lastDateTime) {
 
 		// 카테고리 제한 조건
 		BooleanExpression isCategory = category != null ?
@@ -234,7 +234,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		Long maxParticipant,
 		Long minParticipant,
 		MeetingSortType sortType,
-		Long pageSize,
+		int pageSize,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime) {
 
@@ -267,7 +267,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		Long maxParticipant,
 		Long minParticipant,
 		MeetingSortType sortType,
-		Long pageSize,
+		int pageSize,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
 		Expression<LocalDateTime> meetingTimeExpr,

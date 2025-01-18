@@ -21,7 +21,7 @@ public class CursorResponseDto<T> {
 	}
 
 	// 공통 처리 로직
-	private static <T> List<T> processContent(List<T> content, Long pageSize) {
+	private static <T> List<T> processContent(List<T> content, int pageSize) {
 		boolean hasNext = content.size() > pageSize;
 		return hasNext ? content.subList(0, content.size() - 1) : content;
 	}
@@ -29,7 +29,7 @@ public class CursorResponseDto<T> {
 	// id만 사용하는 경우
 	public static <T> CursorResponseDto<T> ofId(
 		List<T> content,
-		Long pageSize,
+		int pageSize,
 		Function<T, Long> idExtractor) {
 
 		List<T> result = processContent(content, pageSize);
@@ -47,7 +47,7 @@ public class CursorResponseDto<T> {
 	// id + createdAt 사용하는 경우
 	public static <T> CursorResponseDto<T> ofIdAndCreatedAt(
 		List<T> content,
-		Long pageSize,
+		int pageSize,
 		Function<T, Long> idExtractor,
 		Function<T, LocalDateTime> createdAtExtractor) {
 
@@ -69,7 +69,7 @@ public class CursorResponseDto<T> {
 	// id + meetingTime 사용하는 경우
 	public static <T> CursorResponseDto<T> ofIdAndMeetingTime(
 		List<T> content,
-		Long pageSize,
+		int pageSize,
 		Function<T, Long> idExtractor,
 		Function<T, LocalDateTime> meetingTimeExtractor) {
 

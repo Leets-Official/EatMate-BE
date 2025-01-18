@@ -14,7 +14,7 @@ import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 
 public interface MeetingCustomRepository {
 	List<MyMeetingListResponseDto> findMyMeetingList(Long memberId, ParticipantRole role, MeetingStatus meetingStatus,
-		Long lastMeetingId, LocalDateTime lastDateTime, Long pageSize);
+		Long lastMeetingId, LocalDateTime lastDateTime, int pageSize);
 
 	UpcomingMeetingResponseDto findUpcomingMeeting(Long memberId);
 
@@ -24,7 +24,7 @@ public interface MeetingCustomRepository {
 		Long maxParticipant,
 		Long minParticipant,
 		MeetingSortType sortType,
-		Long pageSize,
+		int pageSize,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime);
 
@@ -34,7 +34,7 @@ public interface MeetingCustomRepository {
 		Long maxParticipant,
 		Long minParticipant,
 		MeetingSortType sortType,
-		Long pageSize,
+		int pageSize,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime
 	);

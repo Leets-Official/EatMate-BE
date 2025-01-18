@@ -179,7 +179,7 @@ public class MeetingService {
 	@Transactional(readOnly = true)
 	public CursorResponseDto getOfflineMeetingList(OfflineMeetingCategory category,
 		GenderRestriction genderRestriction, Long maxParticipant, Long minParticipant, MeetingSortType sortType,
-		Long pageSize, Long lasMeetingId, LocalDateTime lastDateTime) {
+		int pageSize, Long lasMeetingId, LocalDateTime lastDateTime) {
 		List<MeetingListResponseDto> meetings = meetingRepository.findOfflineMeetingList(category, genderRestriction,
 			maxParticipant, minParticipant, sortType, pageSize, lasMeetingId, lastDateTime);
 
@@ -203,7 +203,7 @@ public class MeetingService {
 	// 배달 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
 	public CursorResponseDto getDeliveryMeetingList(FoodCategory category, GenderRestriction genderRestriction,
-		Long maxParticipant, Long minParticipant, MeetingSortType sortType, Long pageSize, Long lastMeetingId,
+		Long maxParticipant, Long minParticipant, MeetingSortType sortType, int pageSize, Long lastMeetingId,
 		LocalDateTime lastDateTime) {
 		List<MeetingListResponseDto> meetings = meetingRepository.findDeliveryMeetingList(category, genderRestriction,
 			maxParticipant,
@@ -321,7 +321,7 @@ public class MeetingService {
 		ParticipantRole role,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
-		Long pageSize
+		int pageSize
 	) {
 		Member member = securityUtils.getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
@@ -342,7 +342,7 @@ public class MeetingService {
 		UserDetails userDetails,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
-		Long pageSize
+		int pageSize
 	) {
 		Member member = securityUtils.getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
