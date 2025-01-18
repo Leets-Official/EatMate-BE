@@ -8,6 +8,7 @@ import static com.example.eatmate.app.domain.meeting.domain.QOfflineMeeting.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
@@ -15,6 +16,7 @@ import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
+import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
@@ -22,8 +24,10 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -196,6 +200,34 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 	}
 
 	@Override
+	public List<MeetingListResponseDto> findDeliveryMeetingList(FoodCategory category,
+		GenderRestriction genderRestriction, Long maxParticipant, Long minParticipant, MeetingSortType sortType,
+		Long pageSize, Long lastMeetingId, LocalDateTime lastDateTime) {
+
+		// 카테고리 제한 조건
+		BooleanExpression isCategory = category != null ?
+			deliveryMeeting.foodCategory.eq(category) : null;
+
+		// 모임 시간 관련 expression
+		Expression<LocalDateTime> meetingTimeExpr = deliveryMeeting.orderDeadline;
+
+		return findMeetingList(
+			isCategory,
+			genderRestriction,
+			maxParticipant,
+			minParticipant,
+			sortType,
+			pageSize,
+			lastMeetingId,
+			lastDateTime,
+			meetingTimeExpr,
+			createDeliveryMeetingProjection(),
+			deliveryMeeting,
+			deliveryMeeting.id
+		);
+	}
+
+	@Override
 	public List<MeetingListResponseDto> findOfflineMeetingList(
 		OfflineMeetingCategory category,
 		GenderRestriction genderRestriction,
@@ -210,59 +242,58 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		BooleanExpression isCategory = category != null ?
 			offlineMeeting.offlineMeetingCategory.eq(category) : null;
 
-		// 성별 제한 조건
-		BooleanExpression genderCondition = genderRestriction != null ?
-			meeting.genderRestriction.eq(genderRestriction) : null;
-
-		// 모임 현재 참여인원
-		NumberExpression<Long> participantCount = Expressions.asNumber(
-			JPAExpressions
-				.select(meetingParticipant.count())
-				.from(meetingParticipant)
-				.where(meetingParticipant.meeting.eq(meeting))
-		).castToNum(Long.class);
-
-		// 모임 최대 인원 조건
-		BooleanExpression participantCondition = null;
-		if (maxParticipant != null || minParticipant != null) {
-			// 1. 인원 제한이 있는 모임만 먼저 필터링
-			participantCondition = meeting.participantLimit.isLimited.isTrue();
-
-			// 2. 최대 인원 상한 조건
-			if (maxParticipant != null) {
-				participantCondition = participantCondition.and(
-					meeting.participantLimit.maxParticipants.loe(maxParticipant));
-			}
-
-			// 3. 최대 인원 하한 조건
-			if (minParticipant != null) {
-				participantCondition = participantCondition.and(
-					meeting.participantLimit.maxParticipants.goe(minParticipant));
-			}
-		}
-
 		// 모임 시간 관련 expression
 		Expression<LocalDateTime> meetingTimeExpr = offlineMeeting.meetingDate;
+
+		return findMeetingList(
+			isCategory,
+			genderRestriction,
+			maxParticipant,
+			minParticipant,
+			sortType,
+			pageSize,
+			lastMeetingId,
+			lastDateTime,
+			meetingTimeExpr,
+			createOfflineMeetingProjection(),
+			offlineMeeting,
+			offlineMeeting.id
+		);
+	}
+
+	private <T> List<MeetingListResponseDto> findMeetingList(
+		BooleanExpression categoryCondition,
+		GenderRestriction genderRestriction,
+		Long maxParticipant,
+		Long minParticipant,
+		MeetingSortType sortType,
+		Long pageSize,
+		Long lastMeetingId,
+		LocalDateTime lastDateTime,
+		Expression<LocalDateTime> meetingTimeExpr,
+		ConstructorExpression<MeetingListResponseDto> projection,
+		EntityPathBase<T> joinTable,
+		NumberPath<Long> joinTableId) {
+
+		// 성별 제한 조건
+		BooleanExpression genderCondition = createGenderCondition(genderRestriction);
+
+		// 모임 현재 참여인원
+		NumberExpression<Long> participantCount = calculateParticipantCount();
+
+		// 모임 최대 인원 조건
+		BooleanExpression participantCondition = createParticipantCondition(maxParticipant, minParticipant);
 
 		// No-offset 페이지네이션을 위한 동적 조건 추가
 		BooleanExpression cursorCondition = createCursorCondition(lastMeetingId, lastDateTime, sortType);
 
 		return queryFactory
-			.select(Projections.constructor(MeetingListResponseDto.class,
-				meeting.id,
-				meeting.meetingName,
-				meeting.meetingDescription,
-				participantCount,
-				meeting.participantLimit.maxParticipants,
-				offlineMeeting.meetingPlace.as("location"),
-				meeting.createdAt,
-				offlineMeeting.meetingDate.as("dueDateTime")
-			))
+			.select(projection)
 			.from(meeting)
-			.join(offlineMeeting).on(offlineMeeting.id.eq(meeting.id))
+			.join(joinTable).on(joinTableId.eq(meeting.id))
 			.where(
 				meeting.meetingStatus.eq(MeetingStatus.ACTIVE),
-				isCategory,
+				categoryCondition,
 				genderCondition,
 				participantCondition,
 				cursorCondition
@@ -270,6 +301,67 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			.orderBy(createOrderSpecifier(sortType, participantCount, meetingTimeExpr))
 			.limit(pageSize + 1)
 			.fetch();
+	}
+
+	private ConstructorExpression<MeetingListResponseDto> createDeliveryMeetingProjection() {
+		return Projections.constructor(MeetingListResponseDto.class,
+			meeting.id,
+			meeting.meetingName,
+			meeting.meetingDescription,
+			calculateParticipantCount(),
+			meeting.participantLimit.maxParticipants,
+			deliveryMeeting.storeName.as("location"),
+			meeting.createdAt,
+			deliveryMeeting.orderDeadline.as("dueDateTime")
+		);
+	}
+
+	private ConstructorExpression<MeetingListResponseDto> createOfflineMeetingProjection() {
+		return Projections.constructor(MeetingListResponseDto.class,
+			meeting.id,
+			meeting.meetingName,
+			meeting.meetingDescription,
+			calculateParticipantCount(),
+			meeting.participantLimit.maxParticipants,
+			offlineMeeting.meetingPlace.as("location"),
+			meeting.createdAt,
+			offlineMeeting.meetingDate.as("dueDateTime")
+		);
+	}
+
+	private NumberExpression<Long> calculateParticipantCount() {
+		return Expressions.asNumber(
+			JPAExpressions
+				.select(meetingParticipant.count())
+				.from(meetingParticipant)
+				.where(meetingParticipant.meeting.eq(meeting))
+		).castToNum(Long.class);
+	}
+
+	private BooleanExpression createGenderCondition(GenderRestriction genderRestriction) {
+		return genderRestriction != null ?
+			meeting.genderRestriction.eq(genderRestriction) : null;
+	}
+
+	private BooleanExpression createParticipantCondition(Long maxParticipant, Long minParticipant) {
+		if (maxParticipant == null && minParticipant == null) {
+			return null;
+		}
+
+		// 1. 인원 제한이 있는 모임만 먼저 필터링
+		BooleanExpression condition = meeting.participantLimit.isLimited.isTrue();
+
+		// 2. 최대 인원 상한 조건
+		if (maxParticipant != null) {
+			condition = condition.and(meeting.participantLimit.maxParticipants.loe(maxParticipant));
+		}
+
+		// 3. 최대 인원 하한 조건
+		if (minParticipant != null) {
+			condition = condition.and(meeting.participantLimit.maxParticipants.goe(minParticipant));
+		}
+
+		return condition;
 	}
 
 	private BooleanExpression createCursorCondition(Long lastMeetingId, LocalDateTime lastDateTime,
@@ -289,14 +381,9 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				return offlineMeeting.meetingDate.gt(lastDateTime)
 					.or(offlineMeeting.meetingDate.eq(lastDateTime)
 						.and(meeting.id.lt(lastMeetingId)));
-			case PARTICIPANT_COUNT:
-				NumberExpression<Long> participantCount = Expressions.asNumber(
-					JPAExpressions
-						.select(meetingParticipant.count())
-						.from(meetingParticipant)
-						.where(meetingParticipant.meeting.eq(meeting))
-				).castToNum(Long.class);
 
+			case PARTICIPANT_COUNT:
+				NumberExpression<Long> participantCount = calculateParticipantCount();
 				NumberExpression<Long> lastParticipantCount = Expressions.asNumber(
 					JPAExpressions
 						.select(meetingParticipant.count())
@@ -308,10 +395,10 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				return participantCount.lt(lastParticipantCount)
 					.or(participantCount.eq(lastParticipantCount)
 						.and(meeting.id.lt(lastMeetingId)));
+
 			default:
 				return null;
 		}
-
 	}
 
 	private OrderSpecifier<?> createOrderSpecifier(

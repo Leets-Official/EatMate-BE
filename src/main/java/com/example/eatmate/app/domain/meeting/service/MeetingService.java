@@ -7,8 +7,6 @@ import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,13 +31,12 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseD
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.global.common.CommonService;
+import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 import com.example.eatmate.global.response.CursorResponseDto;
@@ -54,7 +51,7 @@ public class MeetingService {
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
 	private final MeetingRepository meetingRepository;
-	private final CommonService commonService;
+	private final SecurityUtils securityUtils;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
 	private void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
@@ -75,7 +72,7 @@ public class MeetingService {
 	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
-		Member member = commonService.getMember(userDetails);
+		Member member = securityUtils.getMember(userDetails);
 
 		validateGenderRestriction(createDeliveryMeetingRequestDto, member);
 
@@ -112,7 +109,7 @@ public class MeetingService {
 	@Transactional
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
-		Member member = commonService.getMember(userDetails);
+		Member member = securityUtils.getMember(userDetails);
 
 		validateGenderRestriction(createOfflineMeetingRequestDto, member);
 
@@ -144,7 +141,7 @@ public class MeetingService {
 
 	// 모임 참여 메소드 (공통)
 	private void joinMeeting(Long meetingId, UserDetails userDetails, boolean isDeliveryMeeting) {
-		Member member = commonService.getMember(userDetails);
+		Member member = securityUtils.getMember(userDetails);
 		Meeting meeting;
 
 		if (isDeliveryMeeting) {
@@ -187,20 +184,20 @@ public class MeetingService {
 			maxParticipant, minParticipant, sortType, pageSize, lasMeetingId, lastDateTime);
 
 		return CursorResponseDto.of(meetings, pageSize, MeetingListResponseDto::getMeetingId,
-			MeetingListResponseDto::getCreatedAt, MeetingListResponseDto::getDueDateTime,
-			MeetingListResponseDto::getCurrentParticipantCount);
+			MeetingListResponseDto::getCreatedAt, MeetingListResponseDto::getDueDateTime);
 	}
 
 	// 배달 모임 목록 조회 메소드
 	@Transactional(readOnly = true)
-	public Slice<DeliveryMeetingListResponseDto> getDeliveryMeetingList(FoodCategory foodCategory, Pageable pageable) {
-		Slice<DeliveryMeeting> meetings = deliveryMeetingRepository.findAllByFoodCategoryAndMeetingStatus(foodCategory,
-			ACTIVE, pageable);
+	public CursorResponseDto getDeliveryMeetingList(FoodCategory category, GenderRestriction genderRestriction,
+		Long maxParticipant, Long minParticipant, MeetingSortType sortType, Long pageSize, Long lastMeetingId,
+		LocalDateTime lastDateTime) {
+		List<MeetingListResponseDto> meetings = meetingRepository.findDeliveryMeetingList(category, genderRestriction,
+			maxParticipant,
+			minParticipant, sortType, pageSize, lastMeetingId, lastDateTime);
+		return CursorResponseDto.of(meetings, pageSize, MeetingListResponseDto::getMeetingId,
+			MeetingListResponseDto::getCreatedAt, MeetingListResponseDto::getDueDateTime);
 
-		return meetings.map(meeting -> {
-			Long participantCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
-			return DeliveryMeetingListResponseDto.of(meeting, participantCount);
-		});
 	}
 
 	// 오프라인 모임 상세 조회 메소드
@@ -300,7 +297,7 @@ public class MeetingService {
 		LocalDateTime lastDateTime,
 		Long pageSize
 	) {
-		Member member = commonService.getMember(userDetails);
+		Member member = securityUtils.getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
 			member.getMemberId(),
 			role,
@@ -321,7 +318,7 @@ public class MeetingService {
 		LocalDateTime lastDateTime,
 		Long pageSize
 	) {
-		Member member = commonService.getMember(userDetails);
+		Member member = securityUtils.getMember(userDetails);
 		List<MyMeetingListResponseDto> meetings = meetingRepository.findMyMeetingList(
 			member.getMemberId(),
 			null,
@@ -337,7 +334,7 @@ public class MeetingService {
 	// 가장 최근 미팅 조회
 	@Transactional(readOnly = true)
 	public UpcomingMeetingResponseDto getUpcomingMeeting(UserDetails userDetails) {
-		Member member = commonService.getMember(userDetails);
+		Member member = securityUtils.getMember(userDetails);
 
 		// 임박한 미팅 조회
 		UpcomingMeetingResponseDto upcomingMeeting = meetingRepository.findUpcomingMeeting(member.getMemberId());

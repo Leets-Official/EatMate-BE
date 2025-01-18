@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.meeting.domain.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
@@ -26,4 +27,16 @@ public interface MeetingCustomRepository {
 		Long pageSize,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime);
+
+	List<MeetingListResponseDto> findDeliveryMeetingList(
+		FoodCategory category,
+		GenderRestriction genderRestriction,
+		Long maxParticipant,
+		Long minParticipant,
+		MeetingSortType sortType,
+		Long pageSize,
+		Long lastMeetingId,
+		LocalDateTime lastDateTime
+	);
 }
+
