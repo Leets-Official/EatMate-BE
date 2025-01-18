@@ -38,7 +38,7 @@ public class AuthController {
 	@Operation(summary = "회원가입", description = "회원가입을 합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> register(
 		@RequestPart(value = "data") @Valid MemberSignUpRequestDto memberSignUpRequestDto,
-		@RequestPart(value = "profileImage") MultipartFile profileImage,
+		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
 		@AuthenticationPrincipal UserDetails userDetails) {
 
 		log.info("Received profileImage in controller: {}",

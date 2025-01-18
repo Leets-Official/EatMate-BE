@@ -1,7 +1,5 @@
 package com.example.eatmate.app.domain.member.service;
 
-import java.util.List;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +35,7 @@ public class MemberService {
 		UserDetails userDetails) {
 
 		// 프로필 이미지 업로드 처리
-		Image profileImageEntity = imageSaveService.uploadImage(profileImage, ImageType.PROFILE);
+		Image profileImageEntity = uploadProfileImage(profileImage);
 
 		// 기존 회원가입 로직
 		String email = userDetails.getUsername();
@@ -74,12 +72,6 @@ public class MemberService {
 		// 닉네임 중복 확인
 		if (memberRepository.existsByNickname(signUpRequestDto.getNickname())) {
 			throw new CommonException(ErrorCode.DUPLICATE_NICKNAME);
-		}
-
-		// 파일 확장자 검증
-		String fileExtension = getFileExtension(profileImage.getOriginalFilename());
-		if (!isSupportedFileExtension(fileExtension)) {
-			throw new CommonException(ErrorCode.WRONG_IMAGE_FORMAT);
 		}
 
 	}
@@ -119,7 +111,8 @@ public class MemberService {
 			member.updateMbti(myInfoUpdateRequestDto.getMbti());
 		}
 
-		Image profileImageEntity = imageSaveService.uploadImage(profileImage, ImageType.PROFILE);
+		// 프로필 이미지 업로드 처리
+		Image profileImageEntity = uploadProfileImage(profileImage);
 		member.updateProfileImage(profileImageEntity);
 
 		// 업데이트된 Member 정보 반환
@@ -145,15 +138,11 @@ public class MemberService {
 		return MemberLoginResponseDto.of(accessToken, refreshToken);
 	}
 
-	private boolean isSupportedFileExtension(String fileExtension) {
-		return List.of("jpg", "jpeg", "png").contains(fileExtension.toLowerCase());
-	}
-
-	private String getFileExtension(String fileName) {
-		if (fileName == null || !fileName.contains(".")) {
-			return "";
+	private Image uploadProfileImage(MultipartFile profileImage) {
+		if (profileImage != null && !profileImage.isEmpty()) {
+			return imageSaveService.uploadImage(profileImage, ImageType.PROFILE);
 		}
-		return fileName.substring(fileName.lastIndexOf(".") + 1);
+		return null; // 프로필 이미지가 없으면 null 반환
 	}
 
 }

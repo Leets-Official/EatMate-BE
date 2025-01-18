@@ -39,7 +39,7 @@ public class MyInfoResponseDto {
 			.mbti(member.getMbti())
 			.birthDate(member.getBirthDate())
 			.phoneNumber(member.getPhoneNumber())
-			.profileImageUrl(member.getProfileImage().getImageUrl())
+			.profileImageUrl(member.getProfileImage() != null ? member.getProfileImage().getImageUrl() : null)
 			.build();
 	}
 }
