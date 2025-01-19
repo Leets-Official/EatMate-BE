@@ -35,6 +35,9 @@ public enum ErrorCode {
 	GENDER_RESTRICTED_MEETING(403, "GENDER_RESTRICTED_MEETING", "성별 제한으로 인해 참여할 수 없는 모임입니다."),
 	INVALID_GENDER_RESTRICTION(400, "INVALID_GENDER_RESTRICTION", "올바른 성별 제한을 입력해주세요."),
 	INVALID_SORT_TYPE(400, "INVALID_SORT_TYPE", "올바른 정렬 타입을 입력해주세요."),
+	NOT_MEETING_HOST(403, "NOT_MEETING_HOST", "모임의 호스트만 가능한 동작입니다."),
+	ALREADY_DELETED_MEETING(400, "ALREADY_DELETED_MEETING", "이미 삭제된 모임입니다."),
+	CANNOT_DELETE_MEETING_WITH_PARTICIPANTS(400, "CANNOT_DELETE_MEETING_WITH_PARTICIPANTS", "참가자가 있는 모임은 삭제할 수 없습니다."),
 
 	// 신고
 	SELF_REPORT_NOT_ALLOWED(400, "SELF_REPORT_NOT_ALLOWED", "자기 자신을 신고할 수 없습니다."),
@@ -49,7 +52,7 @@ public enum ErrorCode {
 	MEMBER_CHATROOM_NOT_FOUND(404, "MEMBER_CHATROOM_NOT_FOUND", "멤버채팅방을 찾을 수 없습니다."),
 	CHAT_NOT_FOUND(404, "CHAT_NOT_FOUND", "채팅을 찾을 수 없습니다."),
 	QUEUE_NOT_EXIST(404, "QUEUE_NOT_EXIST", "큐를 찾을 수 없습니다."),
-  
+
 	// 이미지
 	WRONG_IMAGE_FORMAT(400, "WRONG_IMAGE_FORMAT", "지원되지 않는 확장자 입니다. jpg, jpeg, png 파일만 업로드할 수 있습니다"),
 	IMAGE_UPLOAD_FAIL(400, "IMAGE_UPLOAD_FAIL", "이미지 업로드 중에 오류가 발생하였습니다.");
