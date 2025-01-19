@@ -30,6 +30,8 @@ import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDt
 import com.example.eatmate.app.domain.meeting.dto.MeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
 import com.example.eatmate.global.response.CursorResponseDto;
 import com.example.eatmate.global.response.GlobalResponseDto;
@@ -206,6 +208,30 @@ public class MeetingController {
 		@PathVariable Long meetingId,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		meetingService.deleteMeeting(meetingId, userDetails);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success());
+	}
+
+	@PatchMapping("/{meetingId}/offline")
+	@Operation(summary = "오프라인 모임 수정", description = "오프라인 모임을 수정합니다.")
+	public ResponseEntity<GlobalResponseDto<Void>> updateOfflineMeeting(
+		@PathVariable Long meetingId,
+		@ModelAttribute @Valid UpdateOfflineMeetingRequestDto updateOfflineMeetingRequestDto,
+		@AuthenticationPrincipal UserDetails userDetails
+	) {
+		meetingService.updateOfflineMeeting(meetingId, updateOfflineMeetingRequestDto, userDetails);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success());
+	}
+
+	@PatchMapping("/{meetingId}/delivery")
+	@Operation(summary = "배달 모임 수정", description = "배달 모임을 수정합니다.")
+	public ResponseEntity<GlobalResponseDto<Void>> updateDeliveryMeeting(
+		@PathVariable Long meetingId,
+		@RequestBody @Valid UpdateDeliveryMeetingRequestDto UpdateDeliveryMeetingRequestDto,
+		@AuthenticationPrincipal UserDetails userDetails
+	) {
+		meetingService.updateDeliveryMeeting(meetingId, UpdateDeliveryMeetingRequestDto, userDetails);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}

@@ -73,10 +73,16 @@ public abstract class Meeting {
 	@Column
 	private LocalDateTime updatedAt;
 
+	// 모임 수정
+	public void updateMeeting(String meetingName, String meetingDescription, Image backgroundImage) {
+		this.meetingName = meetingName;
+		this.meetingDescription = meetingDescription;
+		this.backgroundImage = backgroundImage;
+	}
+
 	// 모임 삭제
 	public void deleteMeeting() {
 		this.meetingStatus = MeetingStatus.INACTIVE;
 	}
-
 }
 

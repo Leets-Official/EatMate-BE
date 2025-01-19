@@ -39,6 +39,8 @@ import com.example.eatmate.app.domain.meeting.dto.MeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -209,7 +211,7 @@ public class MeetingService {
 		List<MeetingListResponseDto> meetings = meetingRepository.findDeliveryMeetingList(category, genderRestriction,
 			maxParticipant,
 			minParticipant, sortType, pageSize, lastMeetingId, lastDateTime);
-		
+
 		return getCursorResponseDto(sortType, pageSize, meetings);
 
 	}
@@ -426,4 +428,61 @@ public class MeetingService {
 
 		meeting.deleteMeeting();
 	}
+
+	// 오프라인 모임 수정
+	@Transactional
+	public void updateOfflineMeeting(Long meetingId, UpdateOfflineMeetingRequestDto updateOfflineMeetingRequestDto,
+		UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+
+		Image backgroundImage = Optional.ofNullable(updateOfflineMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
+
+		OfflineMeeting offlineMeeting = offlineMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (meetingParticipantRepository.findByMeetingAndMember(offlineMeeting, member).equals(PARTICIPANT)) {
+			throw new CommonException(ErrorCode.NOT_MEETING_HOST);
+		}
+
+		offlineMeeting.updateOfflineMeeting(
+			updateOfflineMeetingRequestDto.getMeetingName(),
+			updateOfflineMeetingRequestDto.getMeetingDescription(),
+			updateOfflineMeetingRequestDto.getMeetingPlace(),
+			updateOfflineMeetingRequestDto.getMeetingDate(),
+			updateOfflineMeetingRequestDto.getOfflineMeetingCategory(),
+			backgroundImage
+		);
+	}
+
+	// 배달 모임 수정
+	@Transactional
+	public void updateDeliveryMeeting(Long meetingId, UpdateDeliveryMeetingRequestDto updateDeliveryMeetingRequestDto,
+		UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+
+		Image backgroundImage = Optional.ofNullable(updateDeliveryMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
+
+		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (meetingParticipantRepository.findByMeetingAndMember(deliveryMeeting, member).equals(PARTICIPANT)) {
+			throw new CommonException(ErrorCode.NOT_MEETING_HOST);
+		}
+
+		deliveryMeeting.updateDeliveryMeeting(
+			updateDeliveryMeetingRequestDto.getMeetingName(),
+			updateDeliveryMeetingRequestDto.getMeetingDescription(),
+			updateDeliveryMeetingRequestDto.getFoodCategory(),
+			updateDeliveryMeetingRequestDto.getStoreName(),
+			updateDeliveryMeetingRequestDto.getPickupLocation(),
+			updateDeliveryMeetingRequestDto.getAccountNumber(),
+			updateDeliveryMeetingRequestDto.getAccountHolder(),
+			backgroundImage
+		);
+	}
 }
+

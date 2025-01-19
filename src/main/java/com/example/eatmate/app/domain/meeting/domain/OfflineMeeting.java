@@ -2,6 +2,8 @@ package com.example.eatmate.app.domain.meeting.domain;
 
 import java.time.LocalDateTime;
 
+import com.example.eatmate.app.domain.image.domain.Image;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -30,20 +32,18 @@ public class OfflineMeeting extends Meeting {
 	@Enumerated(EnumType.STRING)
 	private OfflineMeetingCategory offlineMeetingCategory;
 
-	// public static OfflineMeeting createOfflineMeeting(String meetingName, String description,
-	// 	GenderRestriction genderRestriction,
-	// 	boolean isUnlimited, Long maxParticipants, String meetingPlace, LocalDateTime meetingDate, Member member) {
-	// 	return OfflineMeeting.builder()
-	// 		.meetingName(meetingName)
-	// 		.description(description)
-	// 		.genderRestriction(genderRestriction)
-	// 		.participantLimit(ParticipantLimit.builder()
-	// 			.isUnlimited(isUnlimited)
-	// 			.maxParticipants(maxParticipants)
-	// 			.build())
-	// 		.meetingPlace(meetingPlace)
-	// 		.meetingDate(meetingDate)
-	// 		.createdBy(member)
-	// 		.build();
-	// }
+	public void updateOfflineMeeting(
+		String meetingName,
+		String description,
+		String meetingPlace,
+		LocalDateTime meetingDate,
+		OfflineMeetingCategory offlineMeetingCategory,
+		Image backgroundImage) {
+		
+		super.updateMeeting(meetingName, description, backgroundImage);
+
+		this.meetingPlace = meetingPlace;
+		this.meetingDate = meetingDate;
+		this.offlineMeetingCategory = offlineMeetingCategory;
+	}
 }
