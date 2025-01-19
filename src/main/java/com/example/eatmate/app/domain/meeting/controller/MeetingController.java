@@ -110,7 +110,7 @@ public class MeetingController {
 	@GetMapping("/delivery")
 	@Operation(summary = "배달 모임 목록 조회", description = "배달 모임 목록을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<CursorResponseDto>> getDeliveryMeetingList(
-		@RequestParam(required = true) FoodCategory category,
+		@RequestParam(required = false) FoodCategory category,
 		@RequestParam(value = "page-size", defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
 		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize,

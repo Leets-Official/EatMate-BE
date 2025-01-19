@@ -24,6 +24,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -209,7 +210,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			deliveryMeeting.foodCategory.eq(category) : null;
 
 		// 모임 시간 관련 expression
-		Expression<LocalDateTime> meetingTimeExpr = deliveryMeeting.orderDeadline;
+		DateTimeExpression<LocalDateTime> meetingTimeExpr = deliveryMeeting.orderDeadline;
 
 		return findMeetingList(
 			isCategory,
@@ -243,7 +244,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			offlineMeeting.offlineMeetingCategory.eq(category) : null;
 
 		// 모임 시간 관련 expression
-		Expression<LocalDateTime> meetingTimeExpr = offlineMeeting.meetingDate;
+		DateTimeExpression<LocalDateTime> meetingTimeExpr = offlineMeeting.meetingDate;
 
 		return findMeetingList(
 			isCategory,
@@ -270,7 +271,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		int pageSize,
 		Long lastMeetingId,
 		LocalDateTime lastDateTime,
-		Expression<LocalDateTime> meetingTimeExpr,
+		DateTimeExpression<LocalDateTime> meetingTimeExpr,
 		ConstructorExpression<MeetingListResponseDto> projection,
 		EntityPathBase<T> joinTable,
 		NumberPath<Long> joinTableId) {
@@ -285,7 +286,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		BooleanExpression participantCondition = createParticipantCondition(maxParticipant, minParticipant);
 
 		// No-offset 페이지네이션을 위한 동적 조건 추가
-		BooleanExpression cursorCondition = createCursorCondition(lastMeetingId, lastDateTime, sortType);
+		BooleanExpression cursorCondition = createCursorCondition(lastMeetingId, lastDateTime, sortType,
+			meetingTimeExpr);
 
 		return queryFactory
 			.select(projection)
@@ -365,7 +367,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 	}
 
 	private BooleanExpression createCursorCondition(Long lastMeetingId, LocalDateTime lastDateTime,
-		MeetingSortType sortType) {
+		MeetingSortType sortType, DateTimeExpression<LocalDateTime> meetingTimeExpr) {
 		if (lastMeetingId == null || lastDateTime == null) {
 			return null;
 		}
@@ -373,14 +375,14 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		// 정렬 타입에 따른 커서 조건 생성
 		switch (sortType) {
 			case CREATED_AT:
-				return meeting.createdAt.gt(lastDateTime)
+				return meeting.createdAt.lt(lastDateTime)
 					.or(meeting.createdAt.eq(lastDateTime)
-						.and(meeting.id.gt(lastMeetingId)));
+						.and(meeting.id.lt(lastMeetingId)));
 
 			case MEETING_TIME:
-				return offlineMeeting.meetingDate.gt(lastDateTime)
-					.or(offlineMeeting.meetingDate.eq(lastDateTime)
-						.and(meeting.id.lt(lastMeetingId)));
+				return meetingTimeExpr.gt(lastDateTime)
+					.or(meetingTimeExpr.eq(lastDateTime)
+						.and(meeting.id.gt(lastMeetingId)));
 
 			case PARTICIPANT_COUNT:
 				NumberExpression<Long> participantCount = calculateParticipantCount();

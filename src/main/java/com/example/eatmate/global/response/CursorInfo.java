@@ -9,31 +9,26 @@ import lombok.Getter;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CursorInfo {
-	private Long id;
+	private Long meetingId;
 	private LocalDateTime lastCreatedAt;
 	private LocalDateTime lastMeetingTime;
 
 	// 전체 필드 생성자
-	private CursorInfo(Long id, LocalDateTime lastCreatedAt, LocalDateTime lastMeetingTime) {
-		this.id = id;
+	private CursorInfo(Long meetingId, LocalDateTime lastCreatedAt, LocalDateTime lastMeetingTime) {
+		this.meetingId = meetingId;
 		this.lastCreatedAt = lastCreatedAt;
 		this.lastMeetingTime = lastMeetingTime;
 	}
 
-	// id만 필요한 경우
-	public CursorInfo(Long id) {
-		this.id = id;
+	public static CursorInfo withCreatedAt(Long meetingId, LocalDateTime createdAt) {
+		return new CursorInfo(meetingId, createdAt, null);
 	}
 
-	public static CursorInfo withCreatedAt(Long id, LocalDateTime createdAt) {
-		return new CursorInfo(id, createdAt, null);
+	public static CursorInfo withMeetingTime(Long meetingId, LocalDateTime meetingTime) {
+		return new CursorInfo(meetingId, null, meetingTime);
 	}
 
-	public static CursorInfo withMeetingTime(Long id, LocalDateTime meetingTime) {
-		return new CursorInfo(id, null, meetingTime);
-	}
-
-	public static CursorInfo onlyId(Long id) {
-		return new CursorInfo(id, null, null);
+	public static CursorInfo onlyId(Long meetingId) {
+		return new CursorInfo(meetingId, null, null);
 	}
 }
