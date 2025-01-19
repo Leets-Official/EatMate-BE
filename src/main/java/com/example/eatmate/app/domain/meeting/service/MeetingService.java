@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.meeting.service;
 
+import static com.example.eatmate.app.domain.image.domain.ImageType.*;
 import static com.example.eatmate.app.domain.meeting.domain.GenderRestriction.*;
 import static com.example.eatmate.app.domain.meeting.domain.MeetingStatus.*;
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
@@ -11,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.eatmate.app.domain.image.domain.Image;
+import com.example.eatmate.app.domain.image.service.ImageSaveService;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
@@ -51,6 +54,7 @@ public class MeetingService {
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
 	private final MeetingRepository meetingRepository;
+	private final ImageSaveService imageSaveService;
 	private final SecurityUtils securityUtils;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
@@ -81,6 +85,9 @@ public class MeetingService {
 			createDeliveryMeetingRequestDto.getIsLimited()
 		);
 
+		Image image = imageSaveService.uploadImage(createDeliveryMeetingRequestDto.getBackgroundImage(),
+			MEETING_BACKGROUND);
+
 		DeliveryMeeting deliveryMeeting = DeliveryMeeting.builder()
 			.meetingName(createDeliveryMeetingRequestDto.getMeetingName())
 			.meetingDescription(createDeliveryMeetingRequestDto.getMeetingDescription())
@@ -96,6 +103,7 @@ public class MeetingService {
 			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
+			.backgroundImage(image)
 			.build();
 
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
@@ -118,6 +126,9 @@ public class MeetingService {
 			createOfflineMeetingRequestDto.getIsLimited()
 		);
 
+		Image image = imageSaveService.uploadImage(createOfflineMeetingRequestDto.getBackgroundImage(),
+			MEETING_BACKGROUND);
+
 		OfflineMeeting offlineMeeting = OfflineMeeting.builder()
 			.meetingName(createOfflineMeetingRequestDto.getMeetingName())
 			.meetingDescription(createOfflineMeetingRequestDto.getMeetingDescription())
@@ -130,6 +141,7 @@ public class MeetingService {
 			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
 			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
+			.backgroundImage(image)
 			.build();
 
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
