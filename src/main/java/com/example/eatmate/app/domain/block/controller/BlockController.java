@@ -35,9 +35,9 @@ public class BlockController {
 				GlobalResponseDto.success(blockService.blockMeeting(userDetails, createMeetingBlockDto)));
 	}
 
-	@PostMapping("/meeting")
-	@Operation(summary = "모임을 차단합니다", description = "선택한 모임을 차단합니다.")
-	public ResponseEntity<GlobalResponseDto<BlockIdResponseDto>> createMeetingBlock(
+	@PostMapping("/member")
+	@Operation(summary = "유저를 차단합니다", description = "선택한 유저를 차단합니다.")
+	public ResponseEntity<GlobalResponseDto<BlockIdResponseDto>> createMemberBlock(
 		@RequestBody CreateMemberBlockDto createMemberBlockDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.CREATED)
