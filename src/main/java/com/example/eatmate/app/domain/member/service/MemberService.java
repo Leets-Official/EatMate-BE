@@ -3,7 +3,11 @@ package com.example.eatmate.app.domain.member.service;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.eatmate.app.domain.image.domain.Image;
+import com.example.eatmate.app.domain.image.domain.ImageType;
+import com.example.eatmate.app.domain.image.service.ImageSaveService;
 import com.example.eatmate.app.domain.member.domain.BirthDate;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
@@ -25,24 +29,35 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final JwtService jwtService;
+	private final ImageSaveService imageSaveService; // ImageSaveService 주입
 
-	// 회원 가입 완료시 , 기본 값에서 사용자 입력값으로 업데이트 해주는 메소드
-	public Void completeRegistration(MemberSignUpRequestDto signUpRequestDto, UserDetails userDetails) {
+	public Void completeRegistration(MemberSignUpRequestDto signUpRequestDto, MultipartFile profileImage,
+		UserDetails userDetails) {
+
+		// 프로필 이미지 업로드 처리
+		Image profileImageEntity = uploadProfileImage(profileImage);
+
+		// 기존 회원가입 로직
 		String email = userDetails.getUsername();
+		validateSignUpData(signUpRequestDto, profileImage);
 
-		validateSignUpData(signUpRequestDto);
-		// 이메일로 기존 사용자 조회
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
-		member.updateMemberDetails(signUpRequestDto.getNickname(), signUpRequestDto.getPhoneNumber(),
-			signUpRequestDto.getStudentNumber(), signUpRequestDto.getGender(),
+		member.updateMemberDetails(
+			signUpRequestDto.getNickname(),
+			signUpRequestDto.getPhoneNumber(),
+			signUpRequestDto.getStudentNumber(),
+			signUpRequestDto.getGender(),
 			BirthDate.of(signUpRequestDto.getYear(), signUpRequestDto.getMonth(), signUpRequestDto.getDay()),
-			signUpRequestDto.getMbti());
+			signUpRequestDto.getMbti(),
+			profileImageEntity
+		);
+
 		return null;
 	}
 
-	private void validateSignUpData(MemberSignUpRequestDto signUpRequestDto) {
+	private void validateSignUpData(MemberSignUpRequestDto signUpRequestDto, MultipartFile profileImage) {
 
 		// 전화번호 중복 검증
 		if (memberRepository.existsByPhoneNumber(signUpRequestDto.getPhoneNumber())) {
@@ -66,17 +81,18 @@ public class MemberService {
 
 		String email = userDetails.getUsername();
 
-		Member member = memberRepository.findByEmail(email)
+		Member member = memberRepository.findByEmailWithProfileImage(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		return MyInfoResponseDto.from(member);
 	}
 
 	//프로필 수정 메서드
-	public MyInfoResponseDto updateMyInfo(UserDetails userDetails, MyInfoUpdateRequestDto myInfoUpdateRequestDto) {
+	public MyInfoResponseDto updateMyInfo(UserDetails userDetails, MyInfoUpdateRequestDto myInfoUpdateRequestDto,
+		MultipartFile profileImage) {
 		// 로그인한 사용자의 이메일로 Member 조회
 		String email = userDetails.getUsername();
-		Member member = memberRepository.findByEmail(email)
+		Member member = memberRepository.findByEmailWithProfileImage(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		// 닉네임 중복 확인
@@ -94,6 +110,10 @@ public class MemberService {
 		if (myInfoUpdateRequestDto.getMbti() != null) {
 			member.updateMbti(myInfoUpdateRequestDto.getMbti());
 		}
+
+		// 프로필 이미지 업로드 처리
+		Image profileImageEntity = uploadProfileImage(profileImage);
+		member.updateProfileImage(profileImageEntity);
 
 		// 업데이트된 Member 정보 반환
 		return MyInfoResponseDto.from(member);
@@ -116,6 +136,13 @@ public class MemberService {
 		memberRepository.save(member);
 
 		return MemberLoginResponseDto.of(accessToken, refreshToken);
+	}
+
+	private Image uploadProfileImage(MultipartFile profileImage) {
+		if (profileImage != null && !profileImage.isEmpty()) {
+			return imageSaveService.uploadImage(profileImage, ImageType.PROFILE);
+		}
+		return null; // 프로필 이미지가 없으면 null 반환
 	}
 
 }

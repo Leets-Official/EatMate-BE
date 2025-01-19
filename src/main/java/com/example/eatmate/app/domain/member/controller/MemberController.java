@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.eatmate.app.domain.member.dto.MemberLoginRequestDto;
 import com.example.eatmate.app.domain.member.dto.MemberLoginResponseDto;
@@ -50,11 +52,12 @@ public class MemberController {
 	@PatchMapping("/myinfo")
 	@Operation(summary = "프로필 수정", description = "사용자의 닉네임, 전화번호, MBTI, 생년월일을 일부 수정합니다.")
 	public ResponseEntity<GlobalResponseDto<MyInfoResponseDto>> updateMyProfile(
-		@RequestBody @Valid MyInfoUpdateRequestDto updateRequestDto,
+		@RequestPart(value = "data") @Valid MyInfoUpdateRequestDto updateRequestDto,
+		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
 		return ResponseEntity.ok(
-			GlobalResponseDto.success(memberService.updateMyInfo(userDetails, updateRequestDto))
+			GlobalResponseDto.success(memberService.updateMyInfo(userDetails, updateRequestDto, profileImage))
 		);
 	}
 }
