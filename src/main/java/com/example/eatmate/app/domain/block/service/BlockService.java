@@ -35,6 +35,10 @@ public class BlockService {
 		Meeting meeting = meetingRepository.findById(createMeetingBlockDto.getMeetingId()).orElseThrow(
 			() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
+		if (blockRepository.existsByMemberMemberIdAndMeetingId(member.getMemberId(), meeting.getId())) {
+			throw new CommonException(ErrorCode.MEETING_ALREADY_BLOCKED);
+		}
+
 		Block block = Block.createMeetingBlock(member, meeting);
 		// 이미 차단한 모임인지 확인 필요
 
@@ -45,8 +49,13 @@ public class BlockService {
 	public BlockIdResponseDto blockMember(UserDetails userDetails, CreateMemberBlockDto createMemberBlockDto) {
 		Member member = securityUtils.getMember(userDetails);
 
-		Member blockedMember = memberRepository.findById(createMemberBlockDto.getBlockId()).orElseThrow(
+		Member blockedMember = memberRepository.findById(createMemberBlockDto.getMemberId()).orElseThrow(
 			() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		if (blockRepository.existsByMemberMemberIdAndBlockedMemberMemberId(member.getMemberId(),
+			blockedMember.getMemberId())) {
+			throw new CommonException(ErrorCode.MEMBER_ALREADY_BLOCKED);
+		}
 
 		Block block = Block.createMemberBlock(member, blockedMember);
 		// 이미 차단한 유저인지 확인 필요
