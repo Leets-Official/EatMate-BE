@@ -1,5 +1,8 @@
 package com.example.eatmate.app.domain.block.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
 import com.example.eatmate.app.domain.block.dto.BlockIdResponseDto;
+import com.example.eatmate.app.domain.block.dto.BlockMeetingResponseDto;
 import com.example.eatmate.app.domain.block.dto.CreateMeetingBlockDto;
 import com.example.eatmate.app.domain.block.dto.CreateMemberBlockDto;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
@@ -63,5 +67,15 @@ public class BlockService {
 		blockRepository.save(block);
 
 		return BlockIdResponseDto.from(block);
+	}
+
+	public List<BlockMeetingResponseDto> getMyBlockMeeting(UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+		List<Block> myBlockedMeetings = blockRepository.findAllByMemberMemberIdAndMeetingIsNotNull(
+			member.getMemberId());
+
+		return myBlockedMeetings.stream()
+			.map(BlockMeetingResponseDto::createBlockMeetingResponseDto) // Block 객체를 DTO로 변환
+			.collect(Collectors.toList());
 	}
 }
