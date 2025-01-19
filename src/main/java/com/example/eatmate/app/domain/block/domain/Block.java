@@ -29,17 +29,17 @@ public class Block extends BaseTimeEntity {
 	private Member member;
 
 	@ManyToOne
-	@JoinColumn(name = "blocked_user_id")
-	private Member blockedUser;
+	@JoinColumn(name = "blocked_member_id")
+	private Member blockedMember;
 
 	@ManyToOne
 	@JoinColumn(name = "meeting_id")
 	private Meeting meeting;
 
 	@Builder
-	private Block(Member member, Member blockedUser, Meeting meeting) {
+	private Block(Member member, Member blockedMember, Meeting meeting) {
 		this.member = member;
-		this.blockedUser = blockedUser;
+		this.blockedMember = blockedMember;
 		this.meeting = meeting;
 	}
 
@@ -53,7 +53,7 @@ public class Block extends BaseTimeEntity {
 	public static Block createMemberBlock(Member member, Member blockedMember) {
 		return Block.builder()
 			.member(member)
-			.blockedUser(blockedMember)
+			.blockedMember(blockedMember)
 			.build();
 	}
 }

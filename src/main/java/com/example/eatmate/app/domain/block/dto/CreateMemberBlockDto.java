@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 public class CreateMemberBlockDto {
 	@NotBlank
-	private Long blockId;
+	private Long memberId;
 }
