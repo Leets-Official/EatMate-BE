@@ -384,4 +384,31 @@ public class MeetingService {
 
 		return upcomingMeeting;
 	}
+
+	// 모임 주인의 모임 삭제(나가기)
+	@Transactional
+	public void deleteMeeting(Long meetingId, UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+		Meeting meeting = meetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndMember(meeting, member)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (meetingParticipant.getRole() != HOST) {
+			throw new CommonException(ErrorCode.NOT_MEETING_HOST);
+		}
+
+		if (meeting.getMeetingStatus() == MeetingStatus.INACTIVE) {
+			throw new CommonException(ErrorCode.ALREADY_DELETED_MEETING);
+		}
+
+		// 참가자 수 확인 (HOST 제외한 참가자가 있는지)
+		long participantCount = meetingParticipantRepository.countByMeetingAndRoleNot(meeting, HOST);
+		if (participantCount > 0) {
+			throw new CommonException(ErrorCode.CANNOT_DELETE_MEETING_WITH_PARTICIPANTS);
+		}
+
+		meeting.deleteMeeting();
+	}
 }

@@ -73,5 +73,10 @@ public abstract class Meeting {
 	@Column
 	private LocalDateTime updatedAt;
 
+	// 모임 삭제
+	public void deleteMeeting() {
+		this.meetingStatus = MeetingStatus.INACTIVE;
+	}
+
 }
 
