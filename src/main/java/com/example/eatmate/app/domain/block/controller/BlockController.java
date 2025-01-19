@@ -31,6 +31,6 @@ public class BlockController {
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(
-				GlobalResponseDto.success(blockService.blockMeeting(userDetails.getUsername(), createMeetingBlockDto)));
+				GlobalResponseDto.success(blockService.blockMeeting(userDetails, createMeetingBlockDto)));
 	}
 }

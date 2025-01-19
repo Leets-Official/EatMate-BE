@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.block.service;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,7 @@ import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingRepository;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
+import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
@@ -23,12 +25,12 @@ public class BlockService {
 	private final BlockRepository blockRepository;
 	private final MeetingRepository meetingRepository;
 	private final MemberRepository memberRepository;
+	private final SecurityUtils securityUtils;
 
 	@Transactional
-	public BlockIdResponseDto blockMeeting(String email, CreateMeetingBlockDto createMeetingBlockDto) {
-		Member member = memberRepository.findByEmail(email).orElseThrow(
-			() -> new CommonException(ErrorCode.USER_NOT_FOUND)
-		);
+	public BlockIdResponseDto blockMeeting(UserDetails userDetails, CreateMeetingBlockDto createMeetingBlockDto) {
+		Member member = securityUtils.getMember(userDetails);
+		
 		Meeting meeting = meetingRepository.findById(createMeetingBlockDto.getMeetingId()).orElseThrow(
 			() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
