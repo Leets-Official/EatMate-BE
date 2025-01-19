@@ -21,11 +21,12 @@ public class DeliveryMeetingDetailResponseDto {
 	private LocalDateTime orderDeadline;
 	private String meetingLeaderName;
 	private Long meetingLeaderHostedMeetingCount;
+	private String backgroundImage;
 
 	@Builder
 	private DeliveryMeetingDetailResponseDto(String meetingName, String meetingDescription, Long participantCount,
 		Long maxParticipants, GenderRestriction genderRestriction, String storeName, String pickupLocation,
-		LocalDateTime orderDeadline, Member meetingLeader, Long meetingLeaderHostedMeetingCount) {
+		LocalDateTime orderDeadline, Member meetingLeader, Long meetingLeaderHostedMeetingCount, String backgroundImg) {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
 		this.participantCount = participantCount;
@@ -36,6 +37,7 @@ public class DeliveryMeetingDetailResponseDto {
 		this.orderDeadline = orderDeadline;
 		this.meetingLeaderName = meetingLeader.getNickname();
 		this.meetingLeaderHostedMeetingCount = meetingLeaderHostedMeetingCount;
+		this.backgroundImage = backgroundImg;
 	}
 
 	public static DeliveryMeetingDetailResponseDto of(DeliveryMeeting deliveryMeeting, Long participantCount,
@@ -51,6 +53,7 @@ public class DeliveryMeetingDetailResponseDto {
 			.orderDeadline(deliveryMeeting.getOrderDeadline())
 			.meetingLeader(meetingLeader)
 			.meetingLeaderHostedMeetingCount(meetingLeaderHostedMeetingCount)
+			.backgroundImg(deliveryMeeting.getBackgroundImage().getImageUrl())
 			.build();
 	}
 }

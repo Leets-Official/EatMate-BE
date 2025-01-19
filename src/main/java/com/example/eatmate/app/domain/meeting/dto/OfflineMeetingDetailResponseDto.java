@@ -20,11 +20,12 @@ public class OfflineMeetingDetailResponseDto {
 	private LocalDateTime meetingDate;
 	private String meetingLeaderName;
 	private Long meetingLeaderHostedMeetingCount;
+	private String backgroundImage;
 
 	@Builder
 	private OfflineMeetingDetailResponseDto(String meetingName, String meetingDescription, Long participantCount,
 		Long maxParticipants, GenderRestriction genderRestriction, String meetingPlace,
-		LocalDateTime meetingDate, Member meetingLeader, Long meetingLeaderHostedMeetingCount) {
+		LocalDateTime meetingDate, Member meetingLeader, Long meetingLeaderHostedMeetingCount, String backgroundImage) {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
 		this.participantCount = participantCount;
@@ -34,6 +35,7 @@ public class OfflineMeetingDetailResponseDto {
 		this.meetingDate = meetingDate;
 		this.meetingLeaderName = meetingLeader.getName();
 		this.meetingLeaderHostedMeetingCount = meetingLeaderHostedMeetingCount;
+		this.backgroundImage = backgroundImage;
 
 	}
 
@@ -49,6 +51,7 @@ public class OfflineMeetingDetailResponseDto {
 			.meetingDate(offlineMeeting.getMeetingDate())
 			.meetingLeader(meetingLeader)
 			.meetingLeaderHostedMeetingCount(meetingLeaderHostedMeetingCount)
+			.backgroundImage(offlineMeeting.getBackgroundImage().getImageUrl())
 			.build();
 	}
 }
