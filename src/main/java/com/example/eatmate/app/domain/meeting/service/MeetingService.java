@@ -7,6 +7,7 @@ import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -85,8 +86,9 @@ public class MeetingService {
 			createDeliveryMeetingRequestDto.getIsLimited()
 		);
 
-		Image image = imageSaveService.uploadImage(createDeliveryMeetingRequestDto.getBackgroundImage(),
-			MEETING_BACKGROUND);
+		Image backgroundImage = Optional.ofNullable(createDeliveryMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
 
 		DeliveryMeeting deliveryMeeting = DeliveryMeeting.builder()
 			.meetingName(createDeliveryMeetingRequestDto.getMeetingName())
@@ -103,7 +105,7 @@ public class MeetingService {
 			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
-			.backgroundImage(image)
+			.backgroundImage(backgroundImage)
 			.build();
 
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
@@ -126,8 +128,9 @@ public class MeetingService {
 			createOfflineMeetingRequestDto.getIsLimited()
 		);
 
-		Image image = imageSaveService.uploadImage(createOfflineMeetingRequestDto.getBackgroundImage(),
-			MEETING_BACKGROUND);
+		Image backgroundImage = Optional.ofNullable(createOfflineMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
 
 		OfflineMeeting offlineMeeting = OfflineMeeting.builder()
 			.meetingName(createOfflineMeetingRequestDto.getMeetingName())
@@ -141,7 +144,7 @@ public class MeetingService {
 			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
 			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
-			.backgroundImage(image)
+			.backgroundImage(backgroundImage)
 			.build();
 
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
@@ -411,4 +414,84 @@ public class MeetingService {
 
 		meeting.deleteMeeting();
 	}
+
+	// 배달 모임 수정
+	@Transactional
+	public CreateDeliveryMeetingResponseDto updateDeliveryMeeting(
+		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+
+		validateGenderRestriction(createDeliveryMeetingRequestDto, member);
+
+		validateParticipantLimit(
+			createDeliveryMeetingRequestDto.getMaxParticipants(),
+			createDeliveryMeetingRequestDto.getIsLimited()
+		);
+
+		Image image = imageSaveService.uploadImage(createDeliveryMeetingRequestDto.getBackgroundImage(),
+			MEETING_BACKGROUND);
+
+		DeliveryMeeting deliveryMeeting = DeliveryMeeting.builder()
+			.meetingName(createDeliveryMeetingRequestDto.getMeetingName())
+			.meetingDescription(createDeliveryMeetingRequestDto.getMeetingDescription())
+			.genderRestriction(createDeliveryMeetingRequestDto.getGenderRestriction())
+			.participantLimit(ParticipantLimit.builder()
+				.isLimited(createDeliveryMeetingRequestDto.getIsLimited())
+				.maxParticipants(createDeliveryMeetingRequestDto.getMaxParticipants())
+				.build())
+			.meetingStatus(ACTIVE)
+			.foodCategory(createDeliveryMeetingRequestDto.getFoodCategory())
+			.storeName(createDeliveryMeetingRequestDto.getStoreName())
+			.pickupLocation(createDeliveryMeetingRequestDto.getPickupLocation())
+			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
+			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
+			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
+			.backgroundImage(image)
+			.build();
+
+		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
+
+		meetingParticipantRepository.save(
+			MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, HOST)); // 참여 등록
+		return CreateDeliveryMeetingResponseDto.from(deliveryMeeting);
+	}
+
+	// 밥, 술 모임 수정
+	@Transactional
+	public CreateOfflineMeetingResponseDto updateOfflineMeeting(
+		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+
+		validateGenderRestriction(createOfflineMeetingRequestDto, member);
+
+		validateParticipantLimit(
+			createOfflineMeetingRequestDto.getMaxParticipants(),
+			createOfflineMeetingRequestDto.getIsLimited()
+		);
+
+		Image image = imageSaveService.uploadImage(createOfflineMeetingRequestDto.getBackgroundImage(),
+			MEETING_BACKGROUND);
+
+		OfflineMeeting offlineMeeting = OfflineMeeting.builder()
+			.meetingName(createOfflineMeetingRequestDto.getMeetingName())
+			.meetingDescription(createOfflineMeetingRequestDto.getMeetingDescription())
+			.genderRestriction(createOfflineMeetingRequestDto.getGenderRestriction())
+			.participantLimit(ParticipantLimit.builder()
+				.isLimited(createOfflineMeetingRequestDto.getIsLimited())
+				.maxParticipants(createOfflineMeetingRequestDto.getMaxParticipants())
+				.build())
+			.meetingStatus(ACTIVE)
+			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
+			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
+			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
+			.backgroundImage(image)
+			.build();
+
+		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
+		meetingParticipantRepository.save(
+			MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST)); // 참여 등록
+
+		return CreateOfflineMeetingResponseDto.from(offlineMeeting);
+	}
+
 }
