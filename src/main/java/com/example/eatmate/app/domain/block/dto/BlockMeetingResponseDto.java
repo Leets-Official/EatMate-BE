@@ -9,10 +9,10 @@ import lombok.Getter;
 @Getter
 public class BlockMeetingResponseDto {
 	private final Long blockId;
-	private String meetingType;
-	private Long meetingId;
-	private String meetingName;
-	private MeetingStatus meetingStatus;
+	private final String meetingType;
+	private final Long meetingId;
+	private final String meetingName;
+	private final MeetingStatus meetingStatus;
 
 	@Builder
 	private BlockMeetingResponseDto(Long id, String meetingType, Long meetingId, String meetingName,

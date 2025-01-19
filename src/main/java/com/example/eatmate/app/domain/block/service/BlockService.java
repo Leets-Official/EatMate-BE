@@ -11,6 +11,7 @@ import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
 import com.example.eatmate.app.domain.block.dto.BlockIdResponseDto;
 import com.example.eatmate.app.domain.block.dto.BlockMeetingResponseDto;
+import com.example.eatmate.app.domain.block.dto.BlockMemberResponseDto;
 import com.example.eatmate.app.domain.block.dto.CreateMeetingBlockDto;
 import com.example.eatmate.app.domain.block.dto.CreateMemberBlockDto;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
@@ -77,5 +78,15 @@ public class BlockService {
 		return myBlockedMeetings.stream()
 			.map(BlockMeetingResponseDto::createBlockMeetingResponseDto) // Block 객체를 DTO로 변환
 			.collect(Collectors.toList());
+	}
+
+	public List<BlockMemberResponseDto> getMyBlockMember(UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+		List<Block> myBlockedMembers = blockRepository.findAllByMemberMemberIdAndBlockedMemberMemberIdIsNotNull(
+			member.getMemberId());
+
+		return myBlockedMembers.stream()
+			.map(BlockMemberResponseDto::createBlockMemberResponseDto)
+			.toList();
 	}
 }
