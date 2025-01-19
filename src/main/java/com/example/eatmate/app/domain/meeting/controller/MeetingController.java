@@ -27,9 +27,8 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
 import com.example.eatmate.global.response.CursorResponseDto;
@@ -128,22 +127,14 @@ public class MeetingController {
 					sortType, pageSize, lastMeetingId, lastDateTime)));
 	}
 
-	@GetMapping("/offline/{meetingId}")
-	@Operation(summary = "오프라인 모임 상세 조회", description = "오프라인 모임 상세 정보를 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<OfflineMeetingDetailResponseDto>> getOfflineMeetingDetail(
-		@PathVariable Long meetingId) {
+	@GetMapping("/{meetingId}")
+	@Operation(summary = "모임 상세 조회", description = "모임 상세 정보를 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<MeetingDetailResponseDto>> getOfflineMeetingDetail(
+		@PathVariable Long meetingId,
+		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getOfflineMeetingDetail(meetingId)));
-	}
-
-	@GetMapping("/delivery/{meetingId}")
-	@Operation(summary = "배달 모임 상세 조회", description = "배달 모임 상세 정보를 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<DeliveryMeetingDetailResponseDto>> getDeliveryMeetingDetail(
-		@PathVariable Long meetingId) {
-		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(
-				meetingService.getDeliveryMeetingDetail(meetingId)));
+				meetingService.getMeetingDetail(meetingId, userDetails)));
 	}
 
 	@GetMapping("/my/created")
