@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.eatmate.app.domain.block.dto.BlockIdResponseDto;
 import com.example.eatmate.app.domain.block.dto.CreateMeetingBlockDto;
+import com.example.eatmate.app.domain.block.dto.CreateMemberBlockDto;
 import com.example.eatmate.app.domain.block.service.BlockService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
@@ -32,5 +33,15 @@ public class BlockController {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(
 				GlobalResponseDto.success(blockService.blockMeeting(userDetails, createMeetingBlockDto)));
+	}
+
+	@PostMapping("/meeting")
+	@Operation(summary = "모임을 차단합니다", description = "선택한 모임을 차단합니다.")
+	public ResponseEntity<GlobalResponseDto<BlockIdResponseDto>> createMeetingBlock(
+		@RequestBody CreateMemberBlockDto createMemberBlockDto,
+		@AuthenticationPrincipal UserDetails userDetails) {
+		return ResponseEntity.status(HttpStatus.CREATED)
+			.body(
+				GlobalResponseDto.success(blockService.blockMember(userDetails, createMemberBlockDto)));
 	}
 }

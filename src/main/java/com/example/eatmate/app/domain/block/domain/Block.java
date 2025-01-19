@@ -50,4 +50,10 @@ public class Block extends BaseTimeEntity {
 			.build();
 	}
 
+	public static Block createMemberBlock(Member member, Member blockedMember) {
+		return Block.builder()
+			.member(member)
+			.blockedUser(blockedMember)
+			.build();
+	}
 }
