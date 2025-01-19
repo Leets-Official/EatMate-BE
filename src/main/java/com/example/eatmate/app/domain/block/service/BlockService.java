@@ -44,7 +44,7 @@ public class BlockService {
 		}
 
 		Block block = Block.createMeetingBlock(member, meeting);
-		// 이미 차단한 모임인지 확인 필요
+		// 이미 차단한 모임인지 확인
 
 		blockRepository.save(block);
 		return BlockIdResponseDto.from(block);
@@ -62,7 +62,7 @@ public class BlockService {
 		}
 
 		Block block = Block.createMemberBlock(member, blockedMember);
-		// 이미 차단한 유저인지 확인 필요
+		// 이미 차단한 유저인지 확인
 
 		blockRepository.save(block);
 
@@ -75,7 +75,7 @@ public class BlockService {
 			member.getMemberId());
 
 		return myBlockedMeetings.stream()
-			.map(BlockMeetingResponseDto::createBlockMeetingResponseDto) // Block 객체를 DTO로 변환
+			.map(BlockMeetingResponseDto::createBlockMeetingResponseDto)
 			.toList();
 	}
 
