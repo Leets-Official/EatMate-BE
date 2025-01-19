@@ -1,7 +1,6 @@
 package com.example.eatmate.app.domain.block.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -77,7 +76,7 @@ public class BlockService {
 
 		return myBlockedMeetings.stream()
 			.map(BlockMeetingResponseDto::createBlockMeetingResponseDto) // Block 객체를 DTO로 변환
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	public List<BlockMemberResponseDto> getMyBlockMember(UserDetails userDetails) {
