@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.example.eatmate.app.domain.image.domain.Image;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Embedded;
@@ -18,6 +20,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -56,6 +60,10 @@ public abstract class Meeting {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private MeetingStatus meetingStatus;
+
+	@OneToOne
+	@JoinColumn(name = "background_image_id")
+	private Image backgroundImage;
 
 	@CreatedDate
 	@Column(updatable = false)

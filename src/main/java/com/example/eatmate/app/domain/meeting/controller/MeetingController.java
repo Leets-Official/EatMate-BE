@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,7 +61,7 @@ public class MeetingController {
 	@PostMapping("/offline")
 	@Operation(summary = "오프라인 모임 생성", description = "오프라인 모임을 생성합니다.")
 	public ResponseEntity<GlobalResponseDto<CreateOfflineMeetingResponseDto>> createOfflineMeeting(
-		@RequestBody @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
+		@ModelAttribute @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(GlobalResponseDto.success(
