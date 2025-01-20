@@ -21,7 +21,7 @@ public class BlockMemberResponseDto {
 		this.profileImageUrl = profileImageUrl;
 	}
 
-	public static BlockMemberResponseDto createBlockMemberResponseDto(Block block) {
+	public static BlockMemberResponseDto from(Block block) {
 		return BlockMemberResponseDto.builder()
 			.blockId(block.getId())
 			.blockedMemberId(block.getBlockedMember().getMemberId())

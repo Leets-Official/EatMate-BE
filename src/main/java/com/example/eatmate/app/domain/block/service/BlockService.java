@@ -56,7 +56,7 @@ public class BlockService {
 			member.getMemberId());
 
 		return myBlockedMembers.stream()
-			.map(BlockMemberResponseDto::createBlockMemberResponseDto)
+			.map(BlockMemberResponseDto::from)
 			.toList();
 	}
 
