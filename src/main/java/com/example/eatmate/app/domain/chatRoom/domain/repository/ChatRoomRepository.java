@@ -11,8 +11,6 @@ import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
-	/*@Query("SELECT c FROM ChatRoom c WHERE c.meeting.id = :id AND c.deletedStatus = com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus")
-	Optional<ChatRoom> findByMeetingId(@Param("id") Long id);*/
 	@Query("SELECT c FROM ChatRoom c WHERE c.meeting.id = :id AND c.deletedStatus = :deletedStatus")
 	Optional<ChatRoom> findByMeetingId(@Param("id") Long id, @Param("deletedStatus") DeletedStatus deletedStatus);
 }
