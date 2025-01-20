@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
 import com.example.eatmate.app.domain.block.dto.BlockIdResponseDto;
+import com.example.eatmate.app.domain.block.dto.BlockMemberRequestDto;
 import com.example.eatmate.app.domain.block.dto.BlockMemberResponseDto;
-import com.example.eatmate.app.domain.block.dto.CreateMemberBlockDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.common.util.SecurityUtils;
@@ -28,10 +28,10 @@ public class BlockService {
 
 	private final SecurityUtils securityUtils;
 
-	public BlockIdResponseDto blockMember(UserDetails userDetails, CreateMemberBlockDto createMemberBlockDto) {
+	public BlockIdResponseDto blockMember(UserDetails userDetails, BlockMemberRequestDto blockMemberRequestDto) {
 		Member member = securityUtils.getMember(userDetails);
 
-		Member blockedMember = memberRepository.findById(createMemberBlockDto.getMemberId()).orElseThrow(
+		Member blockedMember = memberRepository.findById(blockMemberRequestDto.getMemberId()).orElseThrow(
 			() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		if (blockRepository.existsByMemberMemberIdAndBlockedMemberMemberId(member.getMemberId(),
