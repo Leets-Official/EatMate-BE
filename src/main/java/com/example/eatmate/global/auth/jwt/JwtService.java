@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 public class JwtService {
-  
+
 	private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
 	private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
 	private static final String EMAIL_CLAIM = "email";
@@ -44,7 +44,7 @@ public class JwtService {
 	/**
 	 * 토큰 생성 메서드
 	 */
-	private String createToken(String subject, long expirationTime, String email, String role) {
+	private String createToken(String subject, long expirationTime, String email, String role, String gender) {
 		Date now = new Date();
 		var jwtBuilder = JWT.create()
 			.withSubject(subject)
@@ -55,21 +55,26 @@ public class JwtService {
 			jwtBuilder.withClaim(ROLE_CLAIM, role); // Role 클레임 추가
 		}
 
+		// Role이 USER인 경우 Gender를 포함
+		if ("USER".equals(role) && gender != null) {
+			jwtBuilder.withClaim("gender", gender); // Gender 클레임 추가
+		}
+
 		return jwtBuilder.sign(Algorithm.HMAC512(secretKey));
 	}
 
 	/**
 	 * Access Token 생성 (Role 포함)
 	 */
-	public String createAccessToken(String email, String role) {
-		return createToken(ACCESS_TOKEN_SUBJECT, accessTokenExpirationPeriod, email, role);
+	public String createAccessToken(String email, String role, String gender) {
+		return createToken(ACCESS_TOKEN_SUBJECT, accessTokenExpirationPeriod, email, role, gender);
 	}
 
 	/**
 	 * Refresh Token 생성 (Role 정보 없음)
 	 */
 	public String createRefreshToken() {
-		return createToken(REFRESH_TOKEN_SUBJECT, refreshTokenExpirationPeriod, null, null);
+		return createToken(REFRESH_TOKEN_SUBJECT, refreshTokenExpirationPeriod, null, null, null);
 	}
 
 	/**
@@ -108,6 +113,13 @@ public class JwtService {
 	 */
 	public Optional<String> extractRole(String accessToken) {
 		return extractClaim(accessToken, ROLE_CLAIM);
+	}
+
+	/**
+	 * Access Token에서 Gender 추출
+	 */
+	public Optional<String> extractGender(String accessToken) {
+		return extractClaim(accessToken, "gender");
 	}
 
 	/**

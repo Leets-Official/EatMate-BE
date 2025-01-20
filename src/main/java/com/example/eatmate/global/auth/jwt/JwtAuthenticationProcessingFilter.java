@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.eatmate.app.domain.member.domain.Member;
+import com.example.eatmate.app.domain.member.domain.Role;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 
 import jakarta.servlet.FilterChain;
@@ -79,7 +80,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 		memberRepository.findByRefreshToken(refreshToken)
 			.ifPresentOrElse(
 				member -> {
-					String newAccessToken = jwtService.createAccessToken(member.getEmail(), member.getRole().name());
+					String newAccessToken = jwtService.createAccessToken(member.getEmail(), member.getRole().name(),
+						member.getRole() == Role.USER ? member.getGender().name() : null);
 					String newRefreshToken = jwtService.createRefreshToken();
 					member.updateRefreshToken(newRefreshToken);
 					memberRepository.saveAndFlush(member);

@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import com.example.eatmate.app.domain.member.domain.Gender;
 import com.example.eatmate.app.domain.member.domain.Role;
 import com.example.eatmate.global.auth.jwt.JwtService;
 
@@ -35,8 +36,10 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 			CustomOAuth2User oAuth2User = (CustomOAuth2User)authentication.getPrincipal();
 			// 사용자 Role 확인
 			Role userRole = oAuth2User.getRole();
+			Gender userGender = oAuth2User.getGender();
 			//토큰 생성
-			String accessToken = jwtService.createAccessToken(oAuth2User.getEmail(), oAuth2User.getRole().name());
+			String accessToken = jwtService.createAccessToken(oAuth2User.getEmail(), oAuth2User.getRole().name(),
+				userRole == Role.USER ? userGender.name() : null);
 			String refreshToken = null;
 			if (userRole == Role.USER) {
 				refreshToken = jwtService.createRefreshToken();
