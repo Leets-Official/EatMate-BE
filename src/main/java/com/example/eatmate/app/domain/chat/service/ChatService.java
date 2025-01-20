@@ -13,9 +13,9 @@ import com.example.eatmate.app.domain.chat.domain.repository.ChatRepository;
 import com.example.eatmate.app.domain.chat.dto.request.ChatMessageRequestDto;
 import com.example.eatmate.app.domain.chat.dto.response.ChatMessageResponseDto;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.global.common.DeletedStatus;
 import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
@@ -41,7 +41,7 @@ public class ChatService {
 
 	//채팅 저장
 	public void saveChat(ChatMessageRequestDto chatMessageDto, UserDetails userDetails) {
-		ChatRoom chatRoom = chatRoomRepository.findById(chatMessageDto.getChatRoomId())
+		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatMessageDto.getChatRoomId(), DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 		Member member = securityUtils.getMember(userDetails);
 
@@ -54,7 +54,7 @@ public class ChatService {
 
 	//불러오기(읽기 상태 없음)
 	public Page<ChatMessageResponseDto> loadChat(Long chatRoomId, Pageable pageable) {
-		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		Page<Chat> chats = chatRepository.findChatByChatRoom(chatRoom, pageable);

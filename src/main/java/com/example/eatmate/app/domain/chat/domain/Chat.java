@@ -1,9 +1,9 @@
 package com.example.eatmate.app.domain.chat.domain;
 
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.BaseTimeEntity;
-import com.example.eatmate.global.common.DeletedStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

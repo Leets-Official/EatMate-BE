@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.global.common.BaseTimeEntity;
-import com.example.eatmate.global.common.DeletedStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

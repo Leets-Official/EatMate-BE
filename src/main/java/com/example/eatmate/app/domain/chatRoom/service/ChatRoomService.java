@@ -14,6 +14,7 @@ import com.example.eatmate.app.domain.chat.dto.response.ChatMessageResponseDto;
 import com.example.eatmate.app.domain.chat.service.ChatService;
 import com.example.eatmate.app.domain.chat.service.QueueManager;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
 import com.example.eatmate.app.domain.chatRoom.domain.MemberChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.MemberChatRoomRepository;
@@ -27,7 +28,6 @@ import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.global.common.DeletedStatus;
 import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
@@ -61,7 +61,7 @@ public class ChatRoomService {
 
 	//모임 참여 -> 유저채팅방 생성 + 참가자 추가
 	public void joinChatRoom(Long meetingId, UserDetails userDetails) {
-		ChatRoom chatRoom = chatRoomRepository.findByMeetingIdAndDeletedStatusNot(meetingId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(meetingId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		Member participant = securityUtils.getMember(userDetails);
@@ -72,7 +72,7 @@ public class ChatRoomService {
 	//채팅방 입장(지난 로딩 위치는 클라이언트에서 조절)
 	public ChatRoomResponseDto enterChatRoomAndLoadMessage(Long chatRoomId, UserDetails userDetails, Pageable pageable) {
 		securityUtils.getMember(userDetails);
-		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		List<ChatMemberResponseDto> participants = chatRoom.getParticipant()
@@ -102,7 +102,7 @@ public class ChatRoomService {
 	//나가기(두 가지) + 큐 해제
 	public Void leaveChatRoom(Long chatRoomId, UserDetails userDetails) {
 		Member member = securityUtils.getMember(userDetails);
-		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		MemberChatRoom target = memberChatRoomRepository.findByMember_MemberId(member.getMemberId())
