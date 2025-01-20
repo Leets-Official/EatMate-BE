@@ -10,7 +10,8 @@ import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
 import com.example.eatmate.app.domain.block.dto.BlockIdResponseDto;
 import com.example.eatmate.app.domain.block.dto.BlockMemberRequestDto;
-import com.example.eatmate.app.domain.block.dto.BlockMemberResponseDto;
+import com.example.eatmate.app.domain.block.dto.BlockedMemberListResponseDto;
+import com.example.eatmate.app.domain.block.dto.UnblockMemberRequestDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.common.util.SecurityUtils;
@@ -49,13 +50,29 @@ public class BlockService {
 		return BlockIdResponseDto.from(block);
 	}
 
-	public List<BlockMemberResponseDto> getMyBlockMember(UserDetails userDetails) {
+	public List<BlockedMemberListResponseDto> getMyBlockMember(UserDetails userDetails) {
 		Member member = securityUtils.getMember(userDetails);
 		List<Block> myBlockedMembers = blockRepository.findAllByMemberMemberIdAndBlockedMemberMemberIdIsNotNull(
 			member.getMemberId());
 
 		return myBlockedMembers.stream()
-			.map(BlockMemberResponseDto::createBlockMemberResponseDto)
+			.map(BlockedMemberListResponseDto::from)
 			.toList();
+	}
+
+	public void unblockMember(UserDetails userDetails, UnblockMemberRequestDto unblockMemberRequestDto) {
+		Member member = securityUtils.getMember(userDetails);
+
+		Member blockedMember = memberRepository.findById(unblockMemberRequestDto.getMemberId()).orElseThrow(
+			() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		Block block = blockRepository.findByMemberMemberIdAndBlockedMemberMemberId(member.getMemberId(),
+			blockedMember.getMemberId());
+
+		if (block == null) {    // 차단하지 않은 멤버일 경우
+			throw new CommonException(ErrorCode.MEMBER_NOT_BLOCKED);
+		}
+
+		blockRepository.delete(block);
 	}
 }
