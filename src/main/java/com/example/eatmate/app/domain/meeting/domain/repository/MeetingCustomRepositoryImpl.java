@@ -51,8 +51,13 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 		BooleanExpression roleCondition = role != null ?
 			meetingParticipant.role.eq(role) : null;
 
+		DateTimeExpression<LocalDateTime> meetingTimeExpr = new CaseBuilder()
+			.when(meeting.type.eq("DELIVERY"))
+			.then(deliveryMeeting.orderDeadline)
+			.otherwise(offlineMeeting.meetingDate);
+
 		// No-Offset 페이징을 위한 동적 조건
-		BooleanExpression cursorCondition = getCursorCondition(lastMeetingId, lastDateTime);
+		BooleanExpression cursorCondition = getCursorCondition(lastMeetingId, lastDateTime, meetingTimeExpr);
 
 		return queryFactory
 			.select(Projections.constructor(MyMeetingListResponseDto.class,
@@ -92,6 +97,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 					"participantCount")
 			))
 			.from(meeting)
+			.leftJoin(deliveryMeeting).on(deliveryMeeting.id.eq(meeting.id))
+			.leftJoin(offlineMeeting).on(offlineMeeting.id.eq(meeting.id))
 			.join(meetingParticipant).on(
 				meetingParticipant.meeting.id.eq(meeting.id),
 				meetingParticipant.member.memberId.eq(memberId)
@@ -117,7 +124,9 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			.fetch();
 	}
 
-	private BooleanExpression getCursorCondition(Long lastMeetingId, LocalDateTime lastDateTime) {
+	private BooleanExpression getCursorCondition(Long lastMeetingId, LocalDateTime lastDateTime,
+		DateTimeExpression<LocalDateTime> meetingTimeExpr) {
+
 		if (lastMeetingId == null || lastDateTime == null) {
 			return null;
 		}
@@ -130,19 +139,9 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				.when(meeting.meetingStatus.ne(MeetingStatus.INACTIVE))
 				.then(1)
 				.otherwise(0))
-			.and(new CaseBuilder()
-				.when(meeting.type.eq("DELIVERY"))
-				.then(deliveryMeeting.orderDeadline)
-				.otherwise(offlineMeeting.meetingDate)
-				.gt(lastDateTime)
-				.or(new CaseBuilder()
-					.when(meeting.type.eq("DELIVERY"))
-					.then(deliveryMeeting.orderDeadline)
-					.otherwise(offlineMeeting.meetingDate)
-					.eq(lastDateTime)
-					.and(meeting.id.lt(lastMeetingId))
-				)
-			);
+			.and(meetingTimeExpr.gt(lastDateTime)
+				.or(meetingTimeExpr.eq(lastDateTime)
+					.and(meeting.id.lt(lastMeetingId))));
 	}
 
 	@Override
