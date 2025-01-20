@@ -1,16 +1,22 @@
 package com.example.eatmate.app.domain.meeting.service;
 
+import static com.example.eatmate.app.domain.image.domain.ImageType.*;
 import static com.example.eatmate.app.domain.meeting.domain.GenderRestriction.*;
 import static com.example.eatmate.app.domain.meeting.domain.MeetingStatus.*;
 import static com.example.eatmate.app.domain.meeting.domain.ParticipantRole.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.eatmate.app.domain.image.domain.Image;
+import com.example.eatmate.app.domain.image.service.ImageSaveService;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
@@ -30,11 +36,15 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.event.HostMeetingDeleteEvent;
+import com.example.eatmate.app.domain.meeting.event.MeetingCreatedEvent;
+import com.example.eatmate.app.domain.meeting.event.MeetingJoinedEvent;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -51,7 +61,9 @@ public class MeetingService {
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
 	private final MeetingRepository meetingRepository;
+	private final ImageSaveService imageSaveService;
 	private final SecurityUtils securityUtils;
+	private final ApplicationEventPublisher eventPublisher;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
 	private void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
@@ -69,6 +81,7 @@ public class MeetingService {
 	}
 
 	// 배달 모임 생성
+	// TODO: 채팅방 생성시 호스트는 동시에 채팅방에 참여되어야 함
 	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
@@ -80,6 +93,10 @@ public class MeetingService {
 			createDeliveryMeetingRequestDto.getMaxParticipants(),
 			createDeliveryMeetingRequestDto.getIsLimited()
 		);
+
+		Image backgroundImage = Optional.ofNullable(createDeliveryMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
 
 		DeliveryMeeting deliveryMeeting = DeliveryMeeting.builder()
 			.meetingName(createDeliveryMeetingRequestDto.getMeetingName())
@@ -96,16 +113,21 @@ public class MeetingService {
 			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
+			.backgroundImage(backgroundImage)
 			.build();
 
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
 
+		eventPublisher.publishEvent(new MeetingCreatedEvent(deliveryMeeting.getId(), member)); // 채팅방 생성
+
 		meetingParticipantRepository.save(
 			MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, HOST)); // 참여 등록
+
 		return CreateDeliveryMeetingResponseDto.from(deliveryMeeting);
 	}
 
 	// 밥, 술 모임 생성
+	// TODO: 모임생성시 호스트는 동시에 채팅방에 참여되어야 함
 	@Transactional
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
@@ -117,6 +139,10 @@ public class MeetingService {
 			createOfflineMeetingRequestDto.getMaxParticipants(),
 			createOfflineMeetingRequestDto.getIsLimited()
 		);
+
+		Image backgroundImage = Optional.ofNullable(createOfflineMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
 
 		OfflineMeeting offlineMeeting = OfflineMeeting.builder()
 			.meetingName(createOfflineMeetingRequestDto.getMeetingName())
@@ -130,9 +156,13 @@ public class MeetingService {
 			.meetingPlace(createOfflineMeetingRequestDto.getMeetingPlace())
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
 			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
+			.backgroundImage(backgroundImage)
 			.build();
 
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
+
+		eventPublisher.publishEvent(new MeetingCreatedEvent(offlineMeeting.getId(), member)); // 채팅방 생성
+
 		meetingParticipantRepository.save(
 			MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST)); // 참여 등록
 
@@ -161,6 +191,7 @@ public class MeetingService {
 		validateDuplicateParticipant(meeting, member);
 
 		meetingParticipantRepository.save(MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT));
+		eventPublisher.publishEvent(new MeetingJoinedEvent(meeting.getId(), userDetails)); // 채팅방 참여
 	}
 
 	// 배달 모임 참여
@@ -183,21 +214,7 @@ public class MeetingService {
 		List<MeetingListResponseDto> meetings = meetingRepository.findOfflineMeetingList(category, genderRestriction,
 			maxParticipant, minParticipant, sortType, pageSize, lasMeetingId, lastDateTime);
 
-		if (sortType == MeetingSortType.CREATED_AT) {
-			return CursorResponseDto.ofIdAndCreatedAt(meetings, pageSize, MeetingListResponseDto::getMeetingId,
-				MeetingListResponseDto::getCreatedAt);
-		}
-
-		if (sortType == MeetingSortType.MEETING_TIME) {
-			return CursorResponseDto.ofIdAndMeetingTime(meetings, pageSize, MeetingListResponseDto::getMeetingId,
-				MeetingListResponseDto::getDueDateTime);
-		}
-
-		if (sortType == MeetingSortType.PARTICIPANT_COUNT) {
-			return CursorResponseDto.ofId(meetings, pageSize, MeetingListResponseDto::getMeetingId);
-		}
-
-		throw new CommonException(ErrorCode.INVALID_SORT_TYPE);
+		return getCursorResponseDto(sortType, pageSize, meetings);
 	}
 
 	// 배달 모임 목록 조회 메소드
@@ -208,6 +225,13 @@ public class MeetingService {
 		List<MeetingListResponseDto> meetings = meetingRepository.findDeliveryMeetingList(category, genderRestriction,
 			maxParticipant,
 			minParticipant, sortType, pageSize, lastMeetingId, lastDateTime);
+
+		return getCursorResponseDto(sortType, pageSize, meetings);
+
+	}
+
+	private CursorResponseDto getCursorResponseDto(MeetingSortType sortType, int pageSize,
+		List<MeetingListResponseDto> meetings) {
 		if (sortType == MeetingSortType.CREATED_AT) {
 			return CursorResponseDto.ofIdAndCreatedAt(meetings, pageSize, MeetingListResponseDto::getMeetingId,
 				MeetingListResponseDto::getCreatedAt);
@@ -223,53 +247,72 @@ public class MeetingService {
 		}
 
 		throw new CommonException(ErrorCode.INVALID_SORT_TYPE);
-
 	}
 
-	// 오프라인 모임 상세 조회 메소드
-	@Transactional(readOnly = true)
-	public OfflineMeetingDetailResponseDto getOfflineMeetingDetail(Long meetingId) {
-
-		OfflineMeeting offlinemeeting = offlineMeetingRepository.findById(meetingId)
+	// 모임 상세조회(공통)
+	public MeetingDetailResponseDto getMeetingDetail(Long meetingId, UserDetails userDetails) {
+		Meeting meeting = meetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
-		if (offlinemeeting.getMeetingStatus() == MeetingStatus.INACTIVE) {
-			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
-		}
+		Long currentUserId = securityUtils.getMember(userDetails).getMemberId();
 
-		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndRole(offlinemeeting, HOST)
-			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 컬럼 확인
+		List<MeetingDetailResponseDto.ParticipantDto> participants = getParticipants(meeting, currentUserId);
 
-		Member member = meetingParticipant.getMember(); // 모임 주인 확인
-
-		Long hostedMeetings = meetingParticipantRepository.countByMemberAndRole(meetingParticipant.getMember(),
-			HOST); // 주인이 개최한 모임 수 확인
-
-		Long participantCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 참여 인원 수
-
-		return OfflineMeetingDetailResponseDto.of(offlinemeeting, participantCount, member, hostedMeetings);
+		return MeetingDetailResponseDto.builder()
+			.meetingType(meeting.getType())
+			.meetingName(meeting.getMeetingName())
+			.meetingDescription(meeting.getMeetingDescription())
+			.genderRestriction(meeting.getGenderRestriction())
+			.location(getLocation(meeting))
+			.dueDateTime(getDueDateTime(meeting))
+			.backgroundImage(Optional.ofNullable(meeting.getBackgroundImage()).map(Image::getImageUrl).orElse(null))
+			.isOwner(isOwner(meeting, currentUserId))
+			.participants(participants)
+			.build();
 	}
 
-	// 배달 모임 상세 조회 메소드
-	@Transactional(readOnly = true)
-	public DeliveryMeetingDetailResponseDto getDeliveryMeetingDetail(Long meetingId) {
-		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)
-			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
-
-		if (deliveryMeeting.getMeetingStatus() == MeetingStatus.INACTIVE) {
-			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
+	private String getLocation(Meeting meeting) {
+		if (meeting instanceof DeliveryMeeting) {
+			return ((DeliveryMeeting)meeting).getPickupLocation();
+		} else if (meeting instanceof OfflineMeeting) {
+			return ((OfflineMeeting)meeting).getMeetingPlace();
 		}
+		throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
+	}
 
-		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndRole(deliveryMeeting, HOST)
-			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND)); // 모임 주인 컬럼 확인
+	private LocalDateTime getDueDateTime(Meeting meeting) {
+		if (meeting instanceof DeliveryMeeting) {
+			return ((DeliveryMeeting)meeting).getOrderDeadline();
+		} else if (meeting instanceof OfflineMeeting) {
+			return ((OfflineMeeting)meeting).getMeetingDate();
+		}
+		throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
+	}
 
-		Member member = meetingParticipant.getMember(); // 모임 주인 확인
+	private Boolean isOwner(Meeting meeting, Long currentUserId) {
+		return meetingParticipantRepository.findByMeetingAndRole(meeting, ParticipantRole.HOST)
+			.map(participant -> participant.getMember().getMemberId().equals(currentUserId))
+			.orElse(false);
+	}
 
-		Long hostedMeetings = meetingParticipantRepository.countByMemberAndRole(member, HOST); // 주인이 개최한 모임 수 확인
-
-		Long participantCount = meetingParticipantRepository.countByMeeting_Id(meetingId); // 참여 인원 수
-
-		return DeliveryMeetingDetailResponseDto.of(deliveryMeeting, participantCount, member, hostedMeetings);
+	private List<MeetingDetailResponseDto.ParticipantDto> getParticipants(Meeting meeting, Long currentUserId) {
+		return meetingParticipantRepository.findByMeeting(meeting).stream()
+			.sorted((p1, p2) -> {
+				// HOST가 있으면 먼저 정렬
+				if (p1.getRole() == ParticipantRole.HOST)
+					return -1;
+				if (p2.getRole() == ParticipantRole.HOST)
+					return 1;
+				// 그 외에는 참가 시간 순으로 정렬
+				return p1.getCreatedAt().compareTo(p2.getCreatedAt());
+			})
+			.map(participant -> MeetingDetailResponseDto.ParticipantDto.createParticipantDto(
+				participant.getMember().getMemberId(),
+				participant.getMember().getNickname(),
+				participant.getRole() == ParticipantRole.HOST,
+				participant.getMember().getMemberId().equals(currentUserId)
+			))
+			.collect(Collectors.toList());
 	}
 
 	// 참여 인원 제한 검증 로직
@@ -372,4 +415,109 @@ public class MeetingService {
 
 		return upcomingMeeting;
 	}
+
+	// 모임 주인의 모임 삭제(나가기) / 컨트롤러에서 직접 사용할 메소드
+	@Transactional
+	public void hostMeetingDelete(Long meetingId, UserDetails userDetails, boolean isPublishedByChatRoom) {
+		Member member = securityUtils.getMember(userDetails);
+		Meeting meeting = meetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndMember(meeting, member)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (meetingParticipant.getRole() != HOST) {
+			throw new CommonException(ErrorCode.NOT_MEETING_HOST);
+		}
+
+		if (meeting.getMeetingStatus() == MeetingStatus.INACTIVE) {
+			throw new CommonException(ErrorCode.ALREADY_DELETED_MEETING);
+		}
+
+		// 참가자 수 확인 (HOST 제외한 참가자가 있는지)
+		long participantCount = meetingParticipantRepository.countByMeetingAndRoleNot(meeting, HOST);
+		if (participantCount > 0) {
+			throw new CommonException(ErrorCode.CANNOT_DELETE_MEETING_WITH_PARTICIPANTS);
+		}
+
+		/* 채팅방에서 호출된 경우가 아니라면, 채팅방에서 채팅방 삭제 이벤트 발생
+		 * 만약 채팅방에서 호출된 경우, 채팅방 삭제 로직이 채팅방 도메인에서 이미 실행됐으므로 삭제 이벤트 호출 X*/
+
+		if (!isPublishedByChatRoom) {
+			eventPublisher.publishEvent(new HostMeetingDeleteEvent(meeting.getChatRoom().getId(), userDetails));
+		}
+
+		meeting.deleteMeeting();
+	}
+
+	//채팅방 메소드에서 호출할 모임 참가자의 모임 나가기 메소드
+	@Transactional
+	public void participantMeetingDelete(Long meetingId, UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+		Meeting meeting = meetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndMember(meeting, member)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		meetingParticipantRepository.delete(meetingParticipant);
+	}
+
+	// 오프라인 모임 수정
+	@Transactional
+	public void updateOfflineMeeting(Long meetingId, UpdateOfflineMeetingRequestDto updateOfflineMeetingRequestDto,
+		UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+
+		Image backgroundImage = Optional.ofNullable(updateOfflineMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
+
+		OfflineMeeting offlineMeeting = offlineMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (meetingParticipantRepository.findByMeetingAndMember(offlineMeeting, member).equals(PARTICIPANT)) {
+			throw new CommonException(ErrorCode.NOT_MEETING_HOST);
+		}
+
+		offlineMeeting.updateOfflineMeeting(
+			updateOfflineMeetingRequestDto.getMeetingName(),
+			updateOfflineMeetingRequestDto.getMeetingDescription(),
+			updateOfflineMeetingRequestDto.getMeetingPlace(),
+			updateOfflineMeetingRequestDto.getMeetingDate(),
+			updateOfflineMeetingRequestDto.getOfflineMeetingCategory(),
+			backgroundImage
+		);
+	}
+
+	// 배달 모임 수정
+	@Transactional
+	public void updateDeliveryMeeting(Long meetingId, UpdateDeliveryMeetingRequestDto updateDeliveryMeetingRequestDto,
+		UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+
+		Image backgroundImage = Optional.ofNullable(updateDeliveryMeetingRequestDto.getBackgroundImage())
+			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+			.orElse(null);
+
+		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		if (meetingParticipantRepository.findByMeetingAndMember(deliveryMeeting, member).equals(PARTICIPANT)) {
+			throw new CommonException(ErrorCode.NOT_MEETING_HOST);
+		}
+
+		deliveryMeeting.updateDeliveryMeeting(
+			updateDeliveryMeetingRequestDto.getMeetingName(),
+			updateDeliveryMeetingRequestDto.getMeetingDescription(),
+			updateDeliveryMeetingRequestDto.getFoodCategory(),
+			updateDeliveryMeetingRequestDto.getStoreName(),
+			updateDeliveryMeetingRequestDto.getPickupLocation(),
+			updateDeliveryMeetingRequestDto.getAccountNumber(),
+			updateDeliveryMeetingRequestDto.getAccountHolder(),
+			backgroundImage
+		);
+	}
+
 }
+

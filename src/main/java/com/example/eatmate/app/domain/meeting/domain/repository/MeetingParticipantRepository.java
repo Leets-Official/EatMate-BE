@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.meeting.domain.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +16,12 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
 	Optional<MeetingParticipant> findByMeetingAndRole(Meeting meeting, ParticipantRole role);
 
-	Long countByMemberAndRole(Member member, ParticipantRole role);
+	Optional<MeetingParticipant> findByMeetingAndMember(Meeting meeting, Member member);
 
 	boolean existsByMeetingAndMember(Meeting meeting, Member member);
+
+	Long countByMeetingAndRoleNot(Meeting meeting, ParticipantRole role);
+
+	List<MeetingParticipant> findByMeeting(Meeting meeting);
+
 }

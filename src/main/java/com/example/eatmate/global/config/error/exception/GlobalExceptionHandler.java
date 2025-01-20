@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,7 +19,6 @@ import com.example.eatmate.global.response.GlobalResponseDto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<GlobalResponseDto> handleGenericException(Exception ex) {
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode);
-		log.error(ex.getMessage());
+		log.error(ex.getMessage(), ex);
 		log.error(ex.getClass().getSimpleName());
 
 		handleUnexpectedError(ex);
@@ -104,6 +104,19 @@ public class GlobalExceptionHandler {
 		}
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
+	}
+
+	@ExceptionHandler(TransactionSystemException.class) // 트랜잭션 처리 중 예외 발생
+	public ResponseEntity<GlobalResponseDto<String>> handleTransactionSystemException(TransactionSystemException ex) {
+		ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
+		Throwable cause = ex.getCause();
+
+		if (cause instanceof ConstraintViolationException) {
+			return handleConstraintViolationException((ConstraintViolationException)cause);
+		}
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorCode.getMessage()));
 	}
 
 	public void handleUnexpectedError(Exception ex) {

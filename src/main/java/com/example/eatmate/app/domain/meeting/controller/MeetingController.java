@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,10 +27,11 @@ import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingRequestDt
 import com.example.eatmate.app.domain.meeting.dto.CreateDeliveryMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.DeliveryMeetingDetailResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.MeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.OfflineMeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
 import com.example.eatmate.global.response.CursorResponseDto;
 import com.example.eatmate.global.response.GlobalResponseDto;
@@ -60,7 +63,7 @@ public class MeetingController {
 	@PostMapping("/offline")
 	@Operation(summary = "오프라인 모임 생성", description = "오프라인 모임을 생성합니다.")
 	public ResponseEntity<GlobalResponseDto<CreateOfflineMeetingResponseDto>> createOfflineMeeting(
-		@RequestBody @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
+		@ModelAttribute @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(GlobalResponseDto.success(
@@ -126,22 +129,14 @@ public class MeetingController {
 					sortType, pageSize, lastMeetingId, lastDateTime)));
 	}
 
-	@GetMapping("/offline/{meetingId}")
-	@Operation(summary = "오프라인 모임 상세 조회", description = "오프라인 모임 상세 정보를 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<OfflineMeetingDetailResponseDto>> getOfflineMeetingDetail(
-		@PathVariable Long meetingId) {
+	@GetMapping("/{meetingId}")
+	@Operation(summary = "모임 상세 조회", description = "모임 상세 정보를 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<MeetingDetailResponseDto>> getOfflineMeetingDetail(
+		@PathVariable Long meetingId,
+		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getOfflineMeetingDetail(meetingId)));
-	}
-
-	@GetMapping("/delivery/{meetingId}")
-	@Operation(summary = "배달 모임 상세 조회", description = "배달 모임 상세 정보를 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<DeliveryMeetingDetailResponseDto>> getDeliveryMeetingDetail(
-		@PathVariable Long meetingId) {
-		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(
-				meetingService.getDeliveryMeetingDetail(meetingId)));
+				meetingService.getMeetingDetail(meetingId, userDetails)));
 	}
 
 	@GetMapping("/my/created")
@@ -207,4 +202,37 @@ public class MeetingController {
 				meetingService.getUpcomingMeeting(userDetails)));
 	}
 
+	@PatchMapping("/{meetingId}")
+	@Operation(summary = "모임 삭제", description = "모임을 삭제합니다.")
+	public ResponseEntity<GlobalResponseDto<Void>> deleteMeeting(
+		@PathVariable Long meetingId,
+		@AuthenticationPrincipal UserDetails userDetails) {
+		meetingService.hostMeetingDelete(meetingId, userDetails, false);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success());
+	}
+
+	@PatchMapping("/{meetingId}/offline")
+	@Operation(summary = "오프라인 모임 수정", description = "오프라인 모임을 수정합니다.")
+	public ResponseEntity<GlobalResponseDto<Void>> updateOfflineMeeting(
+		@PathVariable Long meetingId,
+		@ModelAttribute @Valid UpdateOfflineMeetingRequestDto updateOfflineMeetingRequestDto,
+		@AuthenticationPrincipal UserDetails userDetails
+	) {
+		meetingService.updateOfflineMeeting(meetingId, updateOfflineMeetingRequestDto, userDetails);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success());
+	}
+
+	@PatchMapping("/{meetingId}/delivery")
+	@Operation(summary = "배달 모임 수정", description = "배달 모임을 수정합니다.")
+	public ResponseEntity<GlobalResponseDto<Void>> updateDeliveryMeeting(
+		@PathVariable Long meetingId,
+		@RequestBody @Valid UpdateDeliveryMeetingRequestDto UpdateDeliveryMeetingRequestDto,
+		@AuthenticationPrincipal UserDetails userDetails
+	) {
+		meetingService.updateDeliveryMeeting(meetingId, UpdateDeliveryMeetingRequestDto, userDetails);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success());
+	}
 }

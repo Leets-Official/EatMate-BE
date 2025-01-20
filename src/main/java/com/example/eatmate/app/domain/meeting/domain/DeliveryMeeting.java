@@ -2,6 +2,8 @@ package com.example.eatmate.app.domain.meeting.domain;
 
 import java.time.LocalDateTime;
 
+import com.example.eatmate.app.domain.image.domain.Image;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -40,25 +42,22 @@ public class DeliveryMeeting extends Meeting {
 	@Column(nullable = false)
 	private String accountHolder;
 
-	// public static DeliveryMeeting createDeliveryMeeting(String meetingName, String description,
-	// 	GenderRestriction genderRestriction, boolean isUnlimited, Long maxParticipants, FoodCategory foodCategory,
-	// 	String storeName, String pickupLocation, LocalDateTime orderDeadline, String accountNumber,
-	// 	String accountHolder, Member member) {
-	// 	return DeliveryMeeting.builder()
-	// 		.meetingName(meetingName)
-	// 		.description(description)
-	// 		.genderRestriction(genderRestriction)
-	// 		.participantLimit(ParticipantLimit.builder()
-	// 			.isUnlimited(isUnlimited)
-	// 			.maxParticipants(maxParticipants)
-	// 			.build())
-	// 		.foodCategory(foodCategory)
-	// 		.storeName(storeName)
-	// 		.pickupLocation(pickupLocation)
-	// 		.orderDeadline(orderDeadline)
-	// 		.accountNumber(accountNumber)
-	// 		.accountHolder(accountHolder)
-	// 		.createdBy(member)
-	// 		.build();
-	// }
+	public void updateDeliveryMeeting(
+		String meetingName,
+		String description,
+		FoodCategory foodCategory,
+		String storeName,
+		String pickupLocation,
+		String accountNumber,
+		String accountHolder,
+		Image backgroundImage
+	) {
+		super.updateMeeting(meetingName, description, backgroundImage);
+
+		this.foodCategory = foodCategory;
+		this.storeName = storeName;
+		this.pickupLocation = pickupLocation;
+		this.accountNumber = accountNumber;
+		this.accountHolder = accountHolder;
+	}
 }

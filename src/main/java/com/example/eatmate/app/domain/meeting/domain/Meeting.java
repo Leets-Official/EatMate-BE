@@ -6,6 +6,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.image.domain.Image;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Embedded;
@@ -13,11 +16,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -57,6 +63,14 @@ public abstract class Meeting {
 	@Enumerated(EnumType.STRING)
 	private MeetingStatus meetingStatus;
 
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "background_image_id")
+	private Image backgroundImage;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "chat_room_id")
+	private ChatRoom chatRoom;
+
 	@CreatedDate
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
@@ -65,5 +79,21 @@ public abstract class Meeting {
 	@Column
 	private LocalDateTime updatedAt;
 
+	// 모임 수정
+	public void updateMeeting(String meetingName, String meetingDescription, Image backgroundImage) {
+		this.meetingName = meetingName;
+		this.meetingDescription = meetingDescription;
+		this.backgroundImage = backgroundImage;
+	}
+
+	// 모임 삭제
+	public void deleteMeeting() {
+		this.meetingStatus = MeetingStatus.INACTIVE;
+	}
+
+	// 채팅방 등록
+	public void setChatRoom(ChatRoom chatRoom) {
+		this.chatRoom = chatRoom;
+	}
 }
 
