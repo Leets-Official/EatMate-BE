@@ -14,15 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatRoomResponseDto {
 	private Page<ChatMessageResponseDto> chats;
-	private List<ChatMemberDto> participants;
+	private List<ChatMemberResponseDto> participants;
 
 	@Builder
-	private ChatRoomResponseDto(Page<ChatMessageResponseDto> chats, List<ChatMemberDto> participants) {
+	private ChatRoomResponseDto(Page<ChatMessageResponseDto> chats, List<ChatMemberResponseDto> participants) {
 		this.chats = chats;
 		this.participants = participants;
 	}
 
-	public static ChatRoomResponseDto of(List<ChatMemberDto> participants, Page<ChatMessageResponseDto> chatPage) {
+	public static ChatRoomResponseDto of(List<ChatMemberResponseDto> participants, Page<ChatMessageResponseDto> chatPage) {
 		return ChatRoomResponseDto.builder()
 			.chats(chatPage)
 			.participants(participants)
