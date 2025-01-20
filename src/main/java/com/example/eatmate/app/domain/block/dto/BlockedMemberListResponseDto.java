@@ -6,14 +6,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class BlockMemberResponseDto {
+public class BlockedMemberListResponseDto {
 	private final Long blockId;
 	private final Long blockedMemberId;
 	private final String blockedUserNickname;
 	private final String profileImageUrl;
 
 	@Builder
-	private BlockMemberResponseDto(Long blockId, Long blockedMemberId, String blockedUserNickname,
+	private BlockedMemberListResponseDto(Long blockId, Long blockedMemberId, String blockedUserNickname,
 		String profileImageUrl) {
 		this.blockId = blockId;
 		this.blockedMemberId = blockedMemberId;
@@ -21,8 +21,8 @@ public class BlockMemberResponseDto {
 		this.profileImageUrl = profileImageUrl;
 	}
 
-	public static BlockMemberResponseDto from(Block block) {
-		return BlockMemberResponseDto.builder()
+	public static BlockedMemberListResponseDto from(Block block) {
+		return BlockedMemberListResponseDto.builder()
 			.blockId(block.getId())
 			.blockedMemberId(block.getBlockedMember().getMemberId())
 			.blockedUserNickname(block.getBlockedMember().getNickname())

@@ -10,7 +10,7 @@ import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
 import com.example.eatmate.app.domain.block.dto.BlockIdResponseDto;
 import com.example.eatmate.app.domain.block.dto.BlockMemberRequestDto;
-import com.example.eatmate.app.domain.block.dto.BlockMemberResponseDto;
+import com.example.eatmate.app.domain.block.dto.BlockedMemberListResponseDto;
 import com.example.eatmate.app.domain.block.dto.UnblockMemberRequestDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
@@ -50,13 +50,13 @@ public class BlockService {
 		return BlockIdResponseDto.from(block);
 	}
 
-	public List<BlockMemberResponseDto> getMyBlockMember(UserDetails userDetails) {
+	public List<BlockedMemberListResponseDto> getMyBlockMember(UserDetails userDetails) {
 		Member member = securityUtils.getMember(userDetails);
 		List<Block> myBlockedMembers = blockRepository.findAllByMemberMemberIdAndBlockedMemberMemberIdIsNotNull(
 			member.getMemberId());
 
 		return myBlockedMembers.stream()
-			.map(BlockMemberResponseDto::from)
+			.map(BlockedMemberListResponseDto::from)
 			.toList();
 	}
 
