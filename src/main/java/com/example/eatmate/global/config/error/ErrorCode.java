@@ -60,7 +60,7 @@ public enum ErrorCode {
 	// 차단
 	MEETING_ALREADY_BLOCKED(400, "MEETING_ALREADY_BLOCKED", "이미 차단한 모임입니다."),
 	MEMBER_ALREADY_BLOCKED(400, "MEMBER_ALREADY_BLOCKED", "이미 차단한 멤버입니다."),
-	UNBLOCK_UNBLOCKED_MEMBER(400, "UNBLOCK_UNBLOCKED_MEMBER", "차단하지 않은 멤버를 차단 해제할 수 없습니다");
+	MEMBER_NOT_BLOCKED(400, "MEMBER_NOT_BLOCKED", "차단하지 않은 멤버를 차단 해제할 수 없습니다");
 
 	private final int status;
 	private final String code;

@@ -70,7 +70,7 @@ public class BlockService {
 			blockedMember.getMemberId());
 
 		if (block == null) {    // 차단하지 않은 멤버일 경우
-			throw new CommonException(ErrorCode.UNBLOCK_UNBLOCKED_MEMBER);
+			throw new CommonException(ErrorCode.MEMBER_NOT_BLOCKED);
 		}
 
 		blockRepository.delete(block);
