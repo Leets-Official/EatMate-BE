@@ -39,7 +39,7 @@ public class OfflineMeeting extends Meeting {
 		LocalDateTime meetingDate,
 		OfflineMeetingCategory offlineMeetingCategory,
 		Image backgroundImage) {
-		
+
 		super.updateMeeting(meetingName, description, backgroundImage);
 
 		this.meetingPlace = meetingPlace;

@@ -58,5 +58,5 @@ public class LoginService implements UserDetailsService {
 		// 사용자 정보 반환
 		return new UserLoginResponseDto(email, Role.valueOf(role));
 	}
-  
+
 }
