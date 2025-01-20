@@ -12,5 +12,5 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
 
 	List<Block> findAllByMemberMemberIdAndBlockedMemberMemberIdIsNotNull(Long memberId);
 
-	Block findByMemberMemberIdAndBlockedMemberMemberId(Long memberId, Long memberId1);
+	Block findByMemberMemberIdAndBlockedMemberMemberId(Long memberId, Long blockedMemberId);
 }
