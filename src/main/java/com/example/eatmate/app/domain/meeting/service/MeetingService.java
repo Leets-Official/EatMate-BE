@@ -42,6 +42,7 @@ import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.event.HostMeetingDeleteEvent;
 import com.example.eatmate.app.domain.meeting.event.MeetingCreatedEvent;
 import com.example.eatmate.app.domain.meeting.event.MeetingJoinedEvent;
 import com.example.eatmate.app.domain.member.domain.Member;
@@ -80,6 +81,7 @@ public class MeetingService {
 	}
 
 	// 배달 모임 생성
+	// TODO: 채팅방 생성시 호스트는 동시에 채팅방에 참여되어야 함
 	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
@@ -121,11 +123,11 @@ public class MeetingService {
 		meetingParticipantRepository.save(
 			MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, HOST)); // 참여 등록
 
-		eventPublisher.publishEvent(new MeetingJoinedEvent(deliveryMeeting.getId(), userDetails)); // 채팅방 참여
 		return CreateDeliveryMeetingResponseDto.from(deliveryMeeting);
 	}
 
 	// 밥, 술 모임 생성
+	// TODO: 모임생성시 호스트는 동시에 채팅방에 참여되어야 함
 	@Transactional
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
@@ -415,9 +417,9 @@ public class MeetingService {
 		return upcomingMeeting;
 	}
 
-	// 모임 주인의 모임 삭제(나가기)
+	// 모임 주인의 모임 삭제(나가기) / 컨트롤러에서 직접 사용할 메소드
 	@Transactional
-	public void deleteMeeting(Long meetingId, UserDetails userDetails) {
+	public void hostMeetingDelete(Long meetingId, UserDetails userDetails, boolean isPublishedByChatRoom) {
 		Member member = securityUtils.getMember(userDetails);
 		Meeting meeting = meetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
@@ -439,7 +441,27 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.CANNOT_DELETE_MEETING_WITH_PARTICIPANTS);
 		}
 
+		/* 채팅방에서 호출된 경우가 아니라면, 채팅방에서 채팅방 삭제 이벤트 발생
+		 * 만약 채팅방에서 호출된 경우, 채팅방 삭제 로직이 채팅방 도메인에서 이미 실행됐으므로 삭제 이벤트 호출 X*/
+
+		if (!isPublishedByChatRoom) {
+			eventPublisher.publishEvent(new HostMeetingDeleteEvent(meeting.getChatRoom().getId(), userDetails));
+		}
+
 		meeting.deleteMeeting();
+	}
+
+	//채팅방 메소드에서 호출할 모임 참가자의 모임 나가기 메소드
+	@Transactional
+	public void participantMeetingDelete(Long meetingId, UserDetails userDetails) {
+		Member member = securityUtils.getMember(userDetails);
+		Meeting meeting = meetingRepository.findById(meetingId)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		MeetingParticipant meetingParticipant = meetingParticipantRepository.findByMeetingAndMember(meeting, member)
+			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+
+		meetingParticipantRepository.delete(meetingParticipant);
 	}
 
 	// 오프라인 모임 수정
@@ -497,5 +519,6 @@ public class MeetingService {
 			backgroundImage
 		);
 	}
+
 }
 

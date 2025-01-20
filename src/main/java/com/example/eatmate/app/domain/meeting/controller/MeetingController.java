@@ -207,7 +207,7 @@ public class MeetingController {
 	public ResponseEntity<GlobalResponseDto<Void>> deleteMeeting(
 		@PathVariable Long meetingId,
 		@AuthenticationPrincipal UserDetails userDetails) {
-		meetingService.deleteMeeting(meetingId, userDetails);
+		meetingService.hostMeetingDelete(meetingId, userDetails, false);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
