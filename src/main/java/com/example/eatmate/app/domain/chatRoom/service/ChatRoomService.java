@@ -18,10 +18,14 @@ import com.example.eatmate.app.domain.chatRoom.domain.MemberChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.MemberChatRoomRepository;
 import com.example.eatmate.app.domain.chatRoom.dto.response.ChatMemberResponseDto;
+import com.example.eatmate.app.domain.chatRoom.dto.response.ChatRoomDeliveryNoticeDto;
+import com.example.eatmate.app.domain.chatRoom.dto.response.ChatRoomOfflineNoticeDto;
 import com.example.eatmate.app.domain.chatRoom.dto.response.ChatRoomResponseDto;
 import com.example.eatmate.app.domain.chatRoom.event.HostChatRoomLeftEvent;
 import com.example.eatmate.app.domain.chatRoom.event.ParticipantChatRoomLeftEvent;
+import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
+import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.DeletedStatus;
 import com.example.eatmate.global.common.util.SecurityUtils;
@@ -77,7 +81,22 @@ public class ChatRoomService {
 			.collect(Collectors.toList());
 
 		Page<ChatMessageResponseDto> chatList =  chatService.loadChat(chatRoomId, pageable);
-		return ChatRoomResponseDto.of(participants, chatList);
+
+		//채팅방 공지 처리
+		Meeting meeting = chatRoom.getMeeting();
+		if(meeting instanceof OfflineMeeting) {
+			OfflineMeeting offlineMeeting = (OfflineMeeting) meeting;
+			ChatRoomOfflineNoticeDto notice = ChatRoomOfflineNoticeDto.of(offlineMeeting.getMeetingPlace(), offlineMeeting.getMeetingDate());
+
+			return ChatRoomResponseDto.ofWithOffline(participants, chatList, notice);
+		}
+		else{
+			DeliveryMeeting deliveryMeeting = (DeliveryMeeting) meeting;
+			ChatRoomDeliveryNoticeDto notice = ChatRoomDeliveryNoticeDto
+				.of(deliveryMeeting.getStoreName(), deliveryMeeting.getAccountNumber(), deliveryMeeting.getAccountHolder(), deliveryMeeting.getPickupLocation());
+
+			return ChatRoomResponseDto.ofWithDelivery(participants, chatList, notice);
+		}
 	}
 
 	//나가기(두 가지) + 큐 해제
