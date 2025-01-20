@@ -1,6 +1,5 @@
 package com.example.eatmate.app.domain.block.domain;
 
-import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.BaseTimeEntity;
 
@@ -32,22 +31,10 @@ public class Block extends BaseTimeEntity {
 	@JoinColumn(name = "blocked_member_id")
 	private Member blockedMember;
 
-	@ManyToOne
-	@JoinColumn(name = "meeting_id")
-	private Meeting meeting;
-
 	@Builder
-	private Block(Member member, Member blockedMember, Meeting meeting) {
+	private Block(Member member, Member blockedMember) {
 		this.member = member;
 		this.blockedMember = blockedMember;
-		this.meeting = meeting;
-	}
-
-	public static Block createMeetingBlock(Member member, Meeting meeting) {
-		return Block.builder()
-			.member(member)
-			.meeting(meeting)
-			.build();
 	}
 
 	public static Block createMemberBlock(Member member, Member blockedMember) {
