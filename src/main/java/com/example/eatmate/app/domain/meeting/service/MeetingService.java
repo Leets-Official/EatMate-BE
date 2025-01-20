@@ -166,7 +166,6 @@ public class MeetingService {
 		meetingParticipantRepository.save(
 			MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST)); // 참여 등록
 
-		eventPublisher.publishEvent(new MeetingJoinedEvent(offlineMeeting.getId(), userDetails)); // 채팅방 참여
 		return CreateOfflineMeetingResponseDto.from(offlineMeeting);
 	}
 
