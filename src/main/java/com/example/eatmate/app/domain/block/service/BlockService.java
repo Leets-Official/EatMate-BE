@@ -34,13 +34,13 @@ public class BlockService {
 		Member blockedMember = memberRepository.findById(blockMemberRequestDto.getMemberId()).orElseThrow(
 			() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
+		// 이미 차단한 유저인지 확인
 		if (blockRepository.existsByMemberMemberIdAndBlockedMemberMemberId(member.getMemberId(),
 			blockedMember.getMemberId())) {
 			throw new CommonException(ErrorCode.MEMBER_ALREADY_BLOCKED);
 		}
 
 		Block block = Block.createMemberBlock(member, blockedMember);
-		// 이미 차단한 유저인지 확인
 
 		blockRepository.save(block);
 
