@@ -1,10 +1,10 @@
 package com.example.eatmate.app.domain.block.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
 public class BlockMemberRequestDto {
-	@NotBlank
+	@NotNull
 	private Long memberId;
 }

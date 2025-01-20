@@ -21,6 +21,7 @@ import com.example.eatmate.app.domain.block.service.BlockService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -41,7 +42,7 @@ public class BlockController {
 	@PostMapping("/member")
 	@Operation(summary = "유저를 차단합니다", description = "선택한 유저를 차단합니다.")
 	public ResponseEntity<GlobalResponseDto<BlockIdResponseDto>> createMemberBlock(
-		@RequestBody BlockMemberRequestDto blockMemberRequestDto,
+		@RequestBody @Valid BlockMemberRequestDto blockMemberRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(GlobalResponseDto.success(blockService.blockMember(userDetails, blockMemberRequestDto)));
@@ -50,7 +51,7 @@ public class BlockController {
 	@DeleteMapping("/member")
 	@Operation(summary = "차단 해제합니다", description = "선택한 유저를 차단 해제합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> deleteMemberBlock(
-		@RequestBody UnblockMemberRequestDto unblockMemberRequestDto,
+		@RequestBody @Valid UnblockMemberRequestDto unblockMemberRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		blockService.unblockMember(userDetails, unblockMemberRequestDto);
 		return ResponseEntity.status(HttpStatus.OK)
