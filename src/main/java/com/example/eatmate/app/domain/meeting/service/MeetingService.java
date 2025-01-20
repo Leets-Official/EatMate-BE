@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,8 @@ import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
+import com.example.eatmate.app.domain.meeting.event.MeetingCreatedEvent;
+import com.example.eatmate.app.domain.meeting.event.MeetingJoinedEvent;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -59,6 +62,7 @@ public class MeetingService {
 	private final MeetingRepository meetingRepository;
 	private final ImageSaveService imageSaveService;
 	private final SecurityUtils securityUtils;
+	private final ApplicationEventPublisher eventPublisher;
 
 	// 참여자와 모임 성별제한 일치 여부 확인 메소드
 	private void validateGenderRestriction(CreateOfflineMeetingRequestDto requestDto, Member member) {
@@ -112,8 +116,12 @@ public class MeetingService {
 
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
 
+		eventPublisher.publishEvent(new MeetingCreatedEvent(deliveryMeeting.getId(), member)); // 채팅방 생성
+
 		meetingParticipantRepository.save(
 			MeetingParticipant.createMeetingParticipant(member, deliveryMeeting, HOST)); // 참여 등록
+
+		eventPublisher.publishEvent(new MeetingJoinedEvent(deliveryMeeting.getId(), userDetails)); // 채팅방 참여
 		return CreateDeliveryMeetingResponseDto.from(deliveryMeeting);
 	}
 
@@ -150,9 +158,13 @@ public class MeetingService {
 			.build();
 
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
+
+		eventPublisher.publishEvent(new MeetingCreatedEvent(offlineMeeting.getId(), member)); // 채팅방 생성
+
 		meetingParticipantRepository.save(
 			MeetingParticipant.createMeetingParticipant(member, offlineMeeting, HOST)); // 참여 등록
 
+		eventPublisher.publishEvent(new MeetingJoinedEvent(offlineMeeting.getId(), userDetails)); // 채팅방 참여
 		return CreateOfflineMeetingResponseDto.from(offlineMeeting);
 	}
 
@@ -178,6 +190,7 @@ public class MeetingService {
 		validateDuplicateParticipant(meeting, member);
 
 		meetingParticipantRepository.save(MeetingParticipant.createMeetingParticipant(member, meeting, PARTICIPANT));
+		eventPublisher.publishEvent(new MeetingJoinedEvent(meeting.getId(), userDetails)); // 채팅방 참여
 	}
 
 	// 배달 모임 참여
@@ -251,7 +264,7 @@ public class MeetingService {
 			.genderRestriction(meeting.getGenderRestriction())
 			.location(getLocation(meeting))
 			.dueDateTime(getDueDateTime(meeting))
-			.backgroundImage(meeting.getBackgroundImage().getImageUrl())
+			.backgroundImage(Optional.ofNullable(meeting.getBackgroundImage()).map(Image::getImageUrl).orElse(null))
 			.isOwner(isOwner(meeting, currentUserId))
 			.participants(participants)
 			.build();
