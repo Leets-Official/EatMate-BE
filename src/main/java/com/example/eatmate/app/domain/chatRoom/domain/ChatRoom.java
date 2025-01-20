@@ -3,7 +3,6 @@ package com.example.eatmate.app.domain.chatRoom.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.eatmate.app.domain.chat.domain.Chat;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.global.common.BaseTimeEntity;
 import com.example.eatmate.global.common.DeletedStatus;
@@ -15,7 +14,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
@@ -38,8 +36,7 @@ public class ChatRoom extends BaseTimeEntity {
 	private Long ownerId;
 
 	@NotNull
-	@OneToOne
-	@JoinColumn(name = "meeting_id")
+	@OneToOne(mappedBy = "chatRoom")
 	private Meeting meeting;
 
 	@NotNull
@@ -69,7 +66,7 @@ public class ChatRoom extends BaseTimeEntity {
 	}
 
 	public void addParticipant(MemberChatRoom participant) {
-		if(this.participant == null) {
+		if (this.participant == null) {
 			this.participant = new ArrayList<>();
 		}
 		this.participant.add(participant);

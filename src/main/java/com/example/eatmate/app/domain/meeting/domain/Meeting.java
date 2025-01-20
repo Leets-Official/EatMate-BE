@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 import com.example.eatmate.app.domain.image.domain.Image;
 
 import jakarta.persistence.Column;
@@ -66,6 +67,10 @@ public abstract class Meeting {
 	@JoinColumn(name = "background_image_id")
 	private Image backgroundImage;
 
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "chat_room_id")
+	private ChatRoom chatRoom;
+
 	@CreatedDate
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
@@ -84,6 +89,11 @@ public abstract class Meeting {
 	// 모임 삭제
 	public void deleteMeeting() {
 		this.meetingStatus = MeetingStatus.INACTIVE;
+	}
+
+	// 채팅방 등록
+	public void setChatRoom(ChatRoom chatRoom) {
+		this.chatRoom = chatRoom;
 	}
 }
 
