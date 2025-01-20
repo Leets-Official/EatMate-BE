@@ -15,7 +15,6 @@ import com.example.eatmate.app.domain.chat.dto.response.ChatMessageResponseDto;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.common.DeletedStatus;
 import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -40,16 +39,20 @@ public class ChatService {
 		saveChat(chatMessageDto, userDetail);
 	}
 
-	//채팅 저장 -> 추후 몽고디비 고려
+	//채팅 저장
 	public void saveChat(ChatMessageRequestDto chatMessageDto, UserDetails userDetails) {
 		ChatRoom chatRoom = chatRoomRepository.findById(chatMessageDto.getChatRoomId())
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 		Member member = securityUtils.getMember(userDetails);
+
 		Chat chat = Chat.createChat(chatMessageDto.getContent(), member, chatRoom);
 		chatRepository.save(chat);
+
+		chatRoom.updateLastChat(chat.getContent());
+		chatRoom.updateLastChatAt(chat.getCreatedAt());
 	}
 
-	//불러오기(읽기 상태 제외)
+	//불러오기(읽기 상태 없음)
 	public Page<ChatMessageResponseDto> loadChat(Long chatRoomId, Pageable pageable) {
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatusNot(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
