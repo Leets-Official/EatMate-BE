@@ -8,7 +8,7 @@ import com.example.eatmate.app.domain.block.domain.Block;
 
 public interface BlockRepository extends JpaRepository<Block, Long> {
 
-	boolean existsByMemberMemberIdAndBlockedMemberMemberId(Long memberId, Long memberId1);
+	boolean existsByMemberMemberIdAndBlockedMemberMemberId(Long memberId, Long blockedMemberId);
 
 	List<Block> findAllByMemberMemberIdAndBlockedMemberMemberIdIsNotNull(Long memberId);
 }
