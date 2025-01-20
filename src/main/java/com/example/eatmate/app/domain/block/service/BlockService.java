@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
@@ -28,6 +29,7 @@ public class BlockService {
 
 	private final SecurityUtils securityUtils;
 
+	@Transactional
 	public BlockIdResponseDto blockMember(UserDetails userDetails, BlockMemberRequestDto blockMemberRequestDto) {
 		Member member = securityUtils.getMember(userDetails);
 
