@@ -37,12 +37,12 @@ public class ChatRoomController {
 		@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(chatRoomService.enterChatRoom(chatRoomId, userDetails, pageable)));
+			.body(GlobalResponseDto.success(chatRoomService.enterChatRoomAndLoadMessage(chatRoomId, userDetails, pageable)));
 	}
 
 	@PatchMapping("/{chatRoomId}")
 	@Operation(summary = "채팅방 나가기", description = "채팅방을 나갑니다.")
-	public ResponseEntity<GlobalResponseDto<String>> quitChatRoom(
+	public ResponseEntity<GlobalResponseDto<Void>> leftChatRoom(
 		@PathVariable Long chatRoomId,
 		@AuthenticationPrincipal UserDetails userDetails) {
 
