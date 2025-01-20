@@ -16,6 +16,7 @@ import com.example.eatmate.app.domain.member.dto.MemberLoginResponseDto;
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
 import com.example.eatmate.app.domain.member.dto.MyInfoResponseDto;
 import com.example.eatmate.app.domain.member.dto.MyInfoUpdateRequestDto;
+import com.example.eatmate.app.domain.member.dto.UserInfoResponseDto;
 import com.example.eatmate.global.auth.jwt.JwtService;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
@@ -85,6 +86,16 @@ public class MemberService {
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		return MyInfoResponseDto.from(member);
+	}
+
+	// 상대방 프로필 조회 메서드
+	public UserInfoResponseDto getProfileInfo(Long memberId) {
+		// 1. Member 엔티티 조회
+		Member member = memberRepository.findByIdWithProfileImage(memberId)
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		// 2. DTO 변환 후 반환
+		return UserInfoResponseDto.from(member);
 	}
 
 	//프로필 수정 메서드
