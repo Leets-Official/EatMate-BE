@@ -84,7 +84,7 @@ public class MeetingService {
 	}
 
 	// 배달 모임 생성
-	// TODO: 채팅방 생성시 호스트는 동시에 채팅방에 참여되어야 함
+	//채팅방 생성시 호스트는 동시에 채팅방에 참여되어야 함
 	@Transactional
 	public CreateDeliveryMeetingResponseDto createDeliveryMeeting(
 		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto, UserDetails userDetails) {
@@ -131,7 +131,7 @@ public class MeetingService {
 	}
 
 	// 밥, 술 모임 생성
-	// TODO: 모임생성시 호스트는 동시에 채팅방에 참여되어야 함
+	//모임생성시 호스트는 동시에 채팅방에 참여되어야 함
 	@Transactional
 	public CreateOfflineMeetingResponseDto createOfflineMeeting(
 		CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto, UserDetails userDetails) {
