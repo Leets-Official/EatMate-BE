@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.chatRoom.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,12 @@ public class ChatRoom extends BaseTimeEntity {
 	@NotNull
 	@Column
 	private Long ownerId;
+
+	@Column
+	private String lastChat;
+
+	@Column
+	private LocalDateTime lastChatAt;
 
 	@NotNull
 	@OneToOne(mappedBy = "chatRoom")
@@ -70,5 +77,13 @@ public class ChatRoom extends BaseTimeEntity {
 			this.participant = new ArrayList<>();
 		}
 		this.participant.add(participant);
+	}
+
+	public void updateLastChat(String lastChat) {
+		this.lastChat = lastChat;
+	}
+
+	public void updateLastChatAt(LocalDateTime lastChatAt) {
+		this.lastChatAt = lastChatAt;
 	}
 }
