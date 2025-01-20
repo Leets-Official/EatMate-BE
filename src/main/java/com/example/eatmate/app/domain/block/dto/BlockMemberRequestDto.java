@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class CreateMemberBlockDto {
+public class BlockMemberRequestDto {
 	@NotBlank
 	private Long memberId;
 }
