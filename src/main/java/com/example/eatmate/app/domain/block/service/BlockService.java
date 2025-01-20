@@ -11,6 +11,7 @@ import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
 import com.example.eatmate.app.domain.block.dto.BlockIdResponseDto;
 import com.example.eatmate.app.domain.block.dto.BlockMemberRequestDto;
 import com.example.eatmate.app.domain.block.dto.BlockMemberResponseDto;
+import com.example.eatmate.app.domain.block.dto.UnblockMemberRequestDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.common.util.SecurityUtils;
@@ -57,5 +58,21 @@ public class BlockService {
 		return myBlockedMembers.stream()
 			.map(BlockMemberResponseDto::createBlockMemberResponseDto)
 			.toList();
+	}
+
+	public void unblockMember(UserDetails userDetails, UnblockMemberRequestDto unblockMemberRequestDto) {
+		Member member = securityUtils.getMember(userDetails);
+
+		Member blockedMember = memberRepository.findById(unblockMemberRequestDto.getMemberId()).orElseThrow(
+			() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		Block block = blockRepository.findByMemberMemberIdAndBlockedMemberMemberId(member.getMemberId(),
+			blockedMember.getMemberId());
+
+		if (block == null) { // Corrected comparison
+			throw new CommonException(ErrorCode.UNBLOCK_UNBLOCKED_MEMBER);
+		}
+
+		blockRepository.delete(block);
 	}
 }

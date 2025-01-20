@@ -11,4 +11,6 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
 	boolean existsByMemberMemberIdAndBlockedMemberMemberId(Long memberId, Long blockedMemberId);
 
 	List<Block> findAllByMemberMemberIdAndBlockedMemberMemberIdIsNotNull(Long memberId);
+
+	Block findByMemberMemberIdAndBlockedMemberMemberId(Long memberId, Long memberId1);
 }
