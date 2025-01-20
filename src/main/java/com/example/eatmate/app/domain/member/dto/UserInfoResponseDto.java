@@ -1,13 +1,35 @@
 package com.example.eatmate.app.domain.member.dto;
 
-import lombok.AllArgsConstructor;
+import com.example.eatmate.app.domain.member.domain.Mbti;
+import com.example.eatmate.app.domain.member.domain.Member;
+
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class UserInfoResponseDto {
-    private final String userNickname;
-    // 프로필 사진
-    // 차단 여부
-    // 레벨
+	private Long memberId;        // memberId 추가
+	private String profileImageUrl;
+	private String nickname;
+	private Mbti mbti;
+
+	@Builder
+	public UserInfoResponseDto(Long memberId, String profileImageUrl, String nickname, Mbti mbti) {
+		this.memberId = memberId;
+		this.profileImageUrl = profileImageUrl;
+		this.nickname = nickname;
+		this.mbti = mbti;
+	}
+
+	// 정적 팩토리 메서드
+	public static UserInfoResponseDto from(Member member) {
+		return UserInfoResponseDto.builder()
+			.memberId(member.getMemberId())
+			.profileImageUrl(
+				member.getProfileImage() != null ? member.getProfileImage().getImageUrl() : null
+			)
+			.nickname(member.getNickname())
+			.mbti(member.getMbti())
+			.build();
+	}
 }

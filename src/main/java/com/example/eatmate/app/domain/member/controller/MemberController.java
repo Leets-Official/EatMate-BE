@@ -5,6 +5,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.example.eatmate.app.domain.member.dto.MemberLoginRequestDto;
 import com.example.eatmate.app.domain.member.dto.MemberLoginResponseDto;
 import com.example.eatmate.app.domain.member.dto.MyInfoResponseDto;
 import com.example.eatmate.app.domain.member.dto.MyInfoUpdateRequestDto;
+import com.example.eatmate.app.domain.member.dto.UserInfoResponseDto;
 import com.example.eatmate.app.domain.member.service.MemberService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
@@ -46,6 +48,15 @@ public class MemberController {
 		// 서비스 호출 및 응답 반환
 		return ResponseEntity.ok(
 			GlobalResponseDto.success(memberService.getMyInfo(userDetails))
+		);
+	}
+
+	@GetMapping("/info/{memberId}")
+	@Operation(summary = "상대방 정보 조회", description = "상대방 프로필 정보를 조회합니다.")
+	public ResponseEntity<GlobalResponseDto<UserInfoResponseDto>> getProfileInfo(
+		@PathVariable Long memberId) {
+		return ResponseEntity.ok(
+			GlobalResponseDto.success(memberService.getProfileInfo(memberId))
 		);
 	}
 

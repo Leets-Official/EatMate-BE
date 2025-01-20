@@ -21,5 +21,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	@Query("SELECT m FROM Member m LEFT JOIN FETCH m.profileImage WHERE m.email = :email")
 	Optional<Member> findByEmailWithProfileImage(@Param("email") String email);
+
+	@Query("SELECT m FROM Member m LEFT JOIN FETCH m.profileImage WHERE m.memberId = :memberId")
+	Optional<Member> findByIdWithProfileImage(@Param("memberId") Long id);
 }
 
