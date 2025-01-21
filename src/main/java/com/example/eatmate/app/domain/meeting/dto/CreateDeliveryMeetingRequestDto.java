@@ -2,6 +2,7 @@ package com.example.eatmate.app.domain.meeting.dto;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.eatmate.app.domain.meeting.domain.BankName;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 
@@ -55,6 +56,9 @@ public class CreateDeliveryMeetingRequestDto {
 
 	@NotBlank(message = "예금주명은 필수입니다")
 	private String accountHolder;
+
+	@NotBlank(message = "은행명은 필수입니다")
+	private BankName bankName;
 
 	private MultipartFile backgroundImage;
 }

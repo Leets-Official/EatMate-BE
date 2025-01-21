@@ -116,6 +116,7 @@ public class MeetingService {
 			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
+			.bankName(createDeliveryMeetingRequestDto.getBankName())
 			.backgroundImage(backgroundImage)
 			.build();
 
