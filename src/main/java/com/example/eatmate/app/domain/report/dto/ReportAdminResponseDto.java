@@ -11,42 +11,56 @@ import lombok.Getter;
 
 @Getter
 public class ReportAdminResponseDto {
+	private final Long reportId;
 
 	// 신고한 유저 정보
-	private String reporterName;
-	private String reporterEmail;
-	private Long reporterId;
+	private final Long reporterMemberId;
+	private final String reporterName;
+	private final String reporterEmail;
 
 	// 신고 받은 유저 정보
-	private String reportedName;
-	private String reportedEmail;
-	private Long reportedId;
+	private final Long reportedMemberId;
+	private final String reportedName;
+	private final String reportedEmail;
 
-	private List<ReportType> reportTypes;
+	private final List<ReportType> reportTypes;
 
-	private String reportingReasonDescription;
+	private final String reportingReasonDescription;
 
-	private LocalDateTime time;
+	private final LocalDateTime time;
 
-	private boolean isProcessed;
+	private final boolean isProcessed;
 
 	@Builder
-	private ReportAdminResponseDto(Report report) {
-		this.reporterName = report.getReporter().getNickname();
-		this.reporterEmail = report.getReporter().getEmail();
-		this.reporterId = report.getReporter().getMemberId();
-		this.reportedName = report.getReported().getNickname();
-		this.reportedEmail = report.getReported().getEmail();
-		this.reportedId = report.getReported().getMemberId();
-		this.reportTypes = report.getReportTypes();
-		this.reportingReasonDescription = report.getReportingReasonDescription();
-		this.time = report.getCreatedAt();
-		this.isProcessed = isProcessed();
+	private ReportAdminResponseDto(Long reportId, Long reporterMemberId, String reporterName, String reporterEmail,
+		Long reportedMemberId, String reportedName, String reportedEmail, List<ReportType> reportTypes,
+		String reportingReasonDescription, LocalDateTime time, boolean isProcessed) {
+		this.reportId = reportId;
+		this.reporterMemberId = reporterMemberId;
+		this.reporterName = reporterName;
+		this.reporterEmail = reporterEmail;
+		this.reportedMemberId = reportedMemberId;
+		this.reportedName = reportedName;
+		this.reportedEmail = reportedEmail;
+		this.reportTypes = reportTypes;
+		this.reportingReasonDescription = reportingReasonDescription;
+		this.time = time;
+		this.isProcessed = isProcessed;
 	}
 
 	public static ReportAdminResponseDto createReportAdminResponseDto(Report report) {
 		return ReportAdminResponseDto.builder()
-			.report(report)
+			.reportId(report.getId())
+			.reporterMemberId(report.getReporter().getMemberId())
+			.reporterName(report.getReporter().getNickname())
+			.reporterEmail(report.getReporter().getEmail())
+			.reportedMemberId(report.getReported().getMemberId())
+			.reportedName(report.getReported().getNickname())
+			.reportedEmail(report.getReported().getEmail())
+			.reportTypes(report.getReportTypes())
+			.reportingReasonDescription(report.getReportingReasonDescription())
+			.time(report.getCreatedAt())
+			.isProcessed(report.isProcessed())
 			.build();
 	}
 
