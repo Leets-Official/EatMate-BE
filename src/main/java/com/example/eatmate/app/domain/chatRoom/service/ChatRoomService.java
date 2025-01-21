@@ -18,7 +18,6 @@ import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
 import com.example.eatmate.app.domain.chatRoom.domain.MemberChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.MemberChatRoomRepository;
-import com.example.eatmate.app.domain.chatRoom.dto.response.ChatMemberResponseDto;
 import com.example.eatmate.app.domain.chatRoom.dto.response.ChatRoomDeliveryNoticeDto;
 import com.example.eatmate.app.domain.chatRoom.dto.response.ChatRoomOfflineNoticeDto;
 import com.example.eatmate.app.domain.chatRoom.dto.response.ChatRoomResponseDto;
@@ -61,7 +60,7 @@ public class ChatRoomService {
 
 	//모임 참여 -> 유저채팅방 생성 + 참가자 추가
 	public void joinChatRoom(Long meetingId, UserDetails userDetails) {
-		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(meetingId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByMeetingIdAndDeletedStatus(meetingId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		Member participant = securityUtils.getMember(userDetails);
@@ -72,12 +71,12 @@ public class ChatRoomService {
 	//채팅방 입장(지난 로딩 위치는 클라이언트에서 조절)
 	public ChatRoomResponseDto enterChatRoomAndLoadMessage(Long chatRoomId, UserDetails userDetails, Pageable pageable) {
 		securityUtils.getMember(userDetails);
-		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatRoomId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
-		List<ChatMemberResponseDto> participants = chatRoom.getParticipant()
+		List<ChatRoomResponseDto.ChatMemberResponseDto> participants = chatRoom.getParticipant()
 			.stream()
-			.map(memberChatRoom -> ChatMemberResponseDto.from(memberChatRoom.getMember()))
+			.map(memberChatRoom -> ChatRoomResponseDto.ChatMemberResponseDto.from(memberChatRoom.getMember()))
 			.collect(Collectors.toList());
 
 		Page<ChatMessageResponseDto> chatList =  chatService.loadChat(chatRoomId, pageable);
@@ -90,19 +89,22 @@ public class ChatRoomService {
 
 			return ChatRoomResponseDto.ofWithOffline(participants, chatList, notice);
 		}
-		else{
+
+		if(meeting instanceof DeliveryMeeting) {
 			DeliveryMeeting deliveryMeeting = (DeliveryMeeting) meeting;
 			ChatRoomDeliveryNoticeDto notice = ChatRoomDeliveryNoticeDto
 				.of(deliveryMeeting.getStoreName(), deliveryMeeting.getAccountNumber(), deliveryMeeting.getAccountHolder(), deliveryMeeting.getPickupLocation());
 
 			return ChatRoomResponseDto.ofWithDelivery(participants, chatList, notice);
 		}
+
+		throw new CommonException(ErrorCode.INVALID_MEETING_TYPE);
 	}
 
 	//나가기(두 가지) + 큐 해제
 	public Void leaveChatRoom(Long chatRoomId, UserDetails userDetails) {
 		Member member = securityUtils.getMember(userDetails);
-		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatRoomId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		MemberChatRoom target = memberChatRoomRepository.findByMember_MemberId(member.getMemberId())
@@ -117,6 +119,7 @@ public class ChatRoomService {
 			eventPublisher.publishEvent(new HostChatRoomLeftEvent(chatRoom.getMeeting().getId(), userDetails));
 		}
 		else {
+			chatRoom.removeParticipant(target);
 			memberChatRoomRepository.delete(target);
 			eventPublisher.publishEvent(new ParticipantChatRoomLeftEvent(chatRoom.getMeeting().getId(), userDetails));
 		}
