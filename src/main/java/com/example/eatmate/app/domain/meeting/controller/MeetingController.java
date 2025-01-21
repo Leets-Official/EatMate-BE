@@ -75,7 +75,7 @@ public class MeetingController {
 	@Operation(summary = "오프라인 모임 생성", description = "오프라인 모임을 생성합니다.")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(
 		mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-		schema = @Schema(implementation = CreateOfflineMeetingResponseDto.class)))
+		schema = @Schema(implementation = CreateOfflineMeetingRequestDto.class)))
 	public ResponseEntity<GlobalResponseDto<CreateOfflineMeetingResponseDto>> createOfflineMeeting(
 		@ModelAttribute @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
