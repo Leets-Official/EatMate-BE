@@ -10,8 +10,8 @@ import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.report.domain.Report;
 import com.example.eatmate.app.domain.report.domain.repository.ReportRepository;
 import com.example.eatmate.app.domain.report.dto.ReportAdminResponseDto;
+import com.example.eatmate.app.domain.report.dto.ReportMemberListResponseDto;
 import com.example.eatmate.app.domain.report.dto.ReportRequestDto;
-import com.example.eatmate.app.domain.report.dto.ReportResponseDto;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
@@ -51,11 +51,11 @@ public class ReportService {
 
 	// 내 신고 내역 불러오기
 	@Transactional(readOnly = true)
-	public List<ReportResponseDto> getMyReports(String email) {
+	public List<ReportMemberListResponseDto> getMyReports(String email) {
 
 		List<Report> myReports = reportRepository.findAllByReporterEmail(email);
 		return myReports.stream()
-			.map(ReportResponseDto::createReportResponseDto)
+			.map(ReportMemberListResponseDto::createReportResponseDto)
 			.toList();
 	}
 

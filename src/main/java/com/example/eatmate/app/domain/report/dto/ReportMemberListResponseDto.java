@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class ReportResponseDto {
+public class ReportMemberListResponseDto {
 
 	private String reportedUserName;
 
@@ -23,7 +23,7 @@ public class ReportResponseDto {
 	private boolean isProcessed;
 
 	@Builder
-	private ReportResponseDto(Report report) {
+	private ReportMemberListResponseDto(Report report) {
 		this.reportedUserName = report.getReported().getNickname();
 		this.reportTypes = report.getReportTypes();
 		this.reportingReasonDescription = report.getReportingReasonDescription();
@@ -31,8 +31,8 @@ public class ReportResponseDto {
 		this.isProcessed = report.isProcessed();
 	}
 
-	public static ReportResponseDto createReportResponseDto(Report report) {
-		return ReportResponseDto.builder()
+	public static ReportMemberListResponseDto createReportResponseDto(Report report) {
+		return ReportMemberListResponseDto.builder()
 			.report(report)
 			.build();
 	}

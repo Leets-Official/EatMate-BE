@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.eatmate.app.domain.report.dto.ReportMemberListResponseDto;
 import com.example.eatmate.app.domain.report.dto.ReportRequestDto;
-import com.example.eatmate.app.domain.report.dto.ReportResponseDto;
 import com.example.eatmate.app.domain.report.service.ReportService;
 import com.example.eatmate.global.response.GlobalResponseDto;
 
@@ -42,7 +42,7 @@ public class ReportController {
 
 	@GetMapping("/all")
 	@Operation(summary = "신고 내역 불러오기", description = "신고 내역을 불러옵니다.")
-	public ResponseEntity<GlobalResponseDto<List<ReportResponseDto>>> getMyReports(
+	public ResponseEntity<GlobalResponseDto<List<ReportMemberListResponseDto>>> getMyReports(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(reportService.getMyReports(userDetails.getUsername())));
