@@ -93,7 +93,7 @@ public class ChatRoomService {
 		if (meeting instanceof DeliveryMeeting) {
 			DeliveryMeeting deliveryMeeting = (DeliveryMeeting) meeting;
 			ChatRoomDeliveryNoticeDto notice = ChatRoomDeliveryNoticeDto
-				.of(deliveryMeeting.getStoreName(), deliveryMeeting.getAccountNumber(), deliveryMeeting.getAccountHolder(), deliveryMeeting.getPickupLocation());
+				.of(deliveryMeeting.getStoreName(), deliveryMeeting.getAccountNumber(), deliveryMeeting.getBankName().toString(), deliveryMeeting.getPickupLocation());
 
 			return ChatRoomResponseDto.ofWithDelivery(participants, chatList, notice);
 		}
