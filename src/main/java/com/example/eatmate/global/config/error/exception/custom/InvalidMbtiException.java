@@ -4,8 +4,8 @@ import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
 public class InvalidMbtiException extends CommonException {
-    public InvalidMbtiException() {
+	public InvalidMbtiException() {
 
-        super(ErrorCode.INVALID_MBTI);
-    }
+		super(ErrorCode.INVALID_MBTI);
+	}
 }

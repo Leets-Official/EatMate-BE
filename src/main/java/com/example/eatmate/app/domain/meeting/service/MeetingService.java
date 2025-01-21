@@ -15,6 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.eatmate.app.domain.block.domain.Block;
+import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
 import com.example.eatmate.app.domain.image.domain.Image;
 import com.example.eatmate.app.domain.image.service.ImageSaveService;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
@@ -61,6 +63,7 @@ public class MeetingService {
 	private final OfflineMeetingRepository offlineMeetingRepository;
 	private final MeetingParticipantRepository meetingParticipantRepository;
 	private final MeetingRepository meetingRepository;
+	private final BlockRepository blockRepository;
 	private final ImageSaveService imageSaveService;
 	private final SecurityUtils securityUtils;
 	private final ApplicationEventPublisher eventPublisher;
@@ -113,6 +116,7 @@ public class MeetingService {
 			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
+			.bankName(createDeliveryMeetingRequestDto.getBankName())
 			.backgroundImage(backgroundImage)
 			.build();
 
@@ -173,13 +177,28 @@ public class MeetingService {
 	private void joinMeeting(Long meetingId, UserDetails userDetails, boolean isDeliveryMeeting) {
 		Member member = securityUtils.getMember(userDetails);
 		Meeting meeting;
-
 		if (isDeliveryMeeting) {
 			meeting = deliveryMeetingRepository.findById(meetingId)
 				.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 		} else {
 			meeting = offlineMeetingRepository.findById(meetingId)
 				.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
+		}
+
+		List<MeetingParticipant> meetingParticipant = meetingParticipantRepository.findByMeeting(meeting);
+		List<Block> blocks = blockRepository.findAllByMember(member);
+
+		boolean isBlocked = meetingParticipant.stream()
+			.map(MeetingParticipant::getMember)  // 참여자들의 Member 추출
+			.anyMatch(participantMember ->        // 참여자 중에 차단된 사용자가 있는지 확인
+				blocks.stream()
+					.anyMatch(block ->
+						block.getBlockedMember().equals(participantMember)
+					)
+			);
+
+		if (isBlocked) {
+			throw new CommonException(ErrorCode.BLOCKED_MEMBER_CANNOT_JOIN);
 		}
 
 		if (meeting.getMeetingStatus() == MeetingStatus.INACTIVE) {

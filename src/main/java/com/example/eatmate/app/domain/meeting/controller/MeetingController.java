@@ -113,7 +113,7 @@ public class MeetingController {
 	@GetMapping("/delivery")
 	@Operation(summary = "배달 모임 목록 조회", description = "배달 모임 목록을 조회합니다.")
 	public ResponseEntity<GlobalResponseDto<CursorResponseDto>> getDeliveryMeetingList(
-		@RequestParam(required = true) FoodCategory category,
+		@RequestParam(required = false) FoodCategory category,
 		@RequestParam(value = "page-size", defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
 		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize,
@@ -141,14 +141,14 @@ public class MeetingController {
 
 	@GetMapping("/my/created")
 	@Operation(summary = "내가 생성한 모임 목록 조회", description = "마이페이지에서 내가 생성한 모임 목록(과거 포함)을 조회합니다.")
-	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
-	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
-	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
+	@Parameter(name = "last-meeting-id", description = "마지막으로 조회한 모임 ID", required = false)
+	@Parameter(name = "last-date-time", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
+	@Parameter(name = "page-size", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
 	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MyMeetingListResponseDto>>> getMyCreatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam(required = false) Long lastMeetingId,
-		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
-		@RequestParam(defaultValue = "20")
+		@RequestParam(value = "last-meeting-id", required = false) Long lastMeetingId,
+		@RequestParam(value = "last-date-time", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
+		@RequestParam(value = "page-size", defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
 		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
@@ -159,14 +159,14 @@ public class MeetingController {
 
 	@GetMapping("/my/participated")
 	@Operation(summary = "내가 참여한 모임 목록 조회", description = "마이페이지에서 내가 참여한 모임 목록(과거 포함)을 조회합니다.")
-	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
-	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
-	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
+	@Parameter(name = "last-meeting-id", description = "마지막으로 조회한 모임 ID", required = false)
+	@Parameter(name = "last-date-time", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
+	@Parameter(name = "page-size", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
 	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MyMeetingListResponseDto>>> getMyParticipatedMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam(required = false) Long lastMeetingId,
-		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
-		@RequestParam(defaultValue = "20")
+		@RequestParam(value = "last-meeting-id", required = false) Long lastMeetingId,
+		@RequestParam(value = "last-date-time", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDateTime,
+		@RequestParam(value = "page-size", defaultValue = "20")
 		@Positive(message = "페이지 크기는 양수여야 합니다")
 		@Max(value = 100, message = "페이지 크기는 최대 100을 초과할 수 없습니다") int pageSize
 	) {
@@ -177,9 +177,9 @@ public class MeetingController {
 
 	@GetMapping("/my/participating")
 	@Operation(summary = "내가 참여 중인 모임 목록 조회", description = "내가 참여중인 활성화된 모임 목록을 조회합니다.")
-	@Parameter(name = "lastMeetingId", description = "마지막으로 조회한 모임 ID", required = false)
-	@Parameter(name = "lastDateTime", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
-	@Parameter(name = "pageSize", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
+	@Parameter(name = "last-meeting-id", description = "마지막으로 조회한 모임 ID", required = false)
+	@Parameter(name = "last-date-time", description = "마지막으로 조회한 모임의 날짜시간(ISO 형식: yyyy-MM-dd'T'HH:mm:ss)", required = false)
+	@Parameter(name = "page-size", description = "페이지당 조회할 항목 수 (기본값: 20, 최대: 100)", required = false)
 	public ResponseEntity<GlobalResponseDto<CursorResponseDto<MyMeetingListResponseDto>>> getMyActiveMeetingList(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long lastMeetingId,

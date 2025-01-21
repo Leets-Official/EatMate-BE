@@ -5,10 +5,9 @@ import com.example.eatmate.global.config.error.exception.CommonException;
 
 public class MemberAlreadyExistsException extends CommonException {
 
-    public MemberAlreadyExistsException() {
+	public MemberAlreadyExistsException() {
 
-        super(ErrorCode.MEMBER_ALREADY_EXISTS);
-    }
-
+		super(ErrorCode.MEMBER_ALREADY_EXISTS);
+	}
 
 }

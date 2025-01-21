@@ -4,8 +4,8 @@ import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
 public class UserNotFoundException extends CommonException {
-    public UserNotFoundException() {
+	public UserNotFoundException() {
 
-        super(ErrorCode.USER_NOT_FOUND);
-    }
+		super(ErrorCode.USER_NOT_FOUND);
+	}
 }
