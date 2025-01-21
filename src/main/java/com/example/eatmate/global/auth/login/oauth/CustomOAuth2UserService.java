@@ -11,6 +11,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+
+import com.example.eatmate.app.domain.member.domain.Gender;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.Role;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
@@ -49,13 +51,19 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		// 사용자 정보 조회 또는 저장
 		Member member = getMember(extractAttributes);
 
+
+		Gender gender = member.getGender();
+
+
 		// 사용자 정보를 CustomOAuth2User로 반환
 		return new CustomOAuth2User(
 			Collections.singleton(new SimpleGrantedAuthority(member.getRole() != null
 				? member.getRole().getRoleType() : Role.GUEST.getRoleType())), // 권한 설정
 			attributes, // 사용자 속성
 			extractAttributes.getNameAttributeKey(), // 기본 식별자 키
-			member.getRole() != null ? member.getRole() : Role.GUEST // Role 전달
+
+			member.getRole() != null ? member.getRole() : Role.GUEST, // Role 전달
+			gender
 		);
 
 	}

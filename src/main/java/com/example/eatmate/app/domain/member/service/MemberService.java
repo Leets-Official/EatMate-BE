@@ -10,6 +10,7 @@ import com.example.eatmate.app.domain.image.domain.ImageType;
 import com.example.eatmate.app.domain.image.service.ImageSaveService;
 import com.example.eatmate.app.domain.member.domain.BirthDate;
 import com.example.eatmate.app.domain.member.domain.Member;
+import com.example.eatmate.app.domain.member.domain.Role;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.member.dto.MemberLoginRequestDto;
 import com.example.eatmate.app.domain.member.dto.MemberLoginResponseDto;
@@ -139,7 +140,8 @@ public class MemberService {
 				memberLoginRequestDto.getNickname(), memberLoginRequestDto.getName(),
 				memberLoginRequestDto.getGender()));
 
-		String accessToken = jwtService.createAccessToken(member.getEmail(), member.getRole().name());
+		String accessToken = jwtService.createAccessToken(member.getEmail(), member.getRole().name(),
+			member.getRole() == Role.USER ? member.getGender().name() : null);
 		String refreshToken = jwtService.createRefreshToken();
 
 		member.updateRefreshToken(refreshToken);

@@ -55,8 +55,12 @@ public class LoginService implements UserDetailsService {
 		String role = jwtService.extractRole(accessToken)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVALID_TOKEN));
 
+		// 이메일로 Member 조회
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
 		// 사용자 정보 반환
-		return new UserLoginResponseDto(email, Role.valueOf(role));
+		return new UserLoginResponseDto(email, Role.valueOf(role), member.getGender());
 	}
 
 }
