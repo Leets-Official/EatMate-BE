@@ -1,4 +1,4 @@
-package com.example.eatmate.global.common;
+package com.example.eatmate.app.domain.chatRoom.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

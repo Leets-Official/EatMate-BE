@@ -27,17 +27,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 
-		//queue: 1:1 개인 메시징 기능이 필요하다면 추가.
-		//topic: 1:N 메시지 브로드캐스트(예: 채팅방, 알림 시스템)라면 필수.
-		//exchange: RabbitMQ의 Exchange에 대한 세밀한 라우팅이 필요할 경우 추가.
-		//amq/queue: 특정 Queue에 직접 접근해야 하는 경우에만 추가.
 		registry.enableStompBrokerRelay("/queue", "/topic", "/exchange", "/amq/queue")
 			.setRelayHost(host)
 			.setRelayPort(Integer.parseInt(port))
 			.setClientLogin(userName)
 			.setClientPasscode(userPw);
 
-		//발행
 		registry.setPathMatcher(new AntPathMatcher("."));
 		registry.setApplicationDestinationPrefixes("/pub");
 	}
@@ -46,6 +41,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws/chat")
 			.setAllowedOriginPatterns("*");
-		//.withSockJS();
 	}
 }

@@ -14,10 +14,13 @@ import lombok.NoArgsConstructor;
 public class ChatMessageRequestDto {
 	@NotNull
 	Long senderId;
+
 	@NotNull
 	Long chatRoomId;
+
 	@NotNull
 	String content;
+
 	@NotNull
 	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	LocalDateTime regDate;

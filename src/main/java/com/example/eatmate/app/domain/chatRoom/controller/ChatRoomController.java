@@ -34,33 +34,19 @@ public class ChatRoomController {
 	public ResponseEntity<GlobalResponseDto<ChatRoomResponseDto>> enterChatRoom(
 		@PathVariable Long chatRoomId,
 		@AuthenticationPrincipal UserDetails userDetails,
-		@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+		@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
 
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(chatRoomService.enterChatRoom(chatRoomId, userDetails, pageable)));
+			.body(GlobalResponseDto.success(chatRoomService.enterChatRoomAndLoadMessage(chatRoomId, userDetails, pageable)));
 	}
 
 	@PatchMapping("/{chatRoomId}")
 	@Operation(summary = "채팅방 나가기", description = "채팅방을 나갑니다.")
-	public ResponseEntity<GlobalResponseDto<String>> quitChatRoom(
+	public ResponseEntity<GlobalResponseDto<Void>> leftChatRoom(
 		@PathVariable Long chatRoomId,
 		@AuthenticationPrincipal UserDetails userDetails) {
 
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(chatRoomService.leaveChatRoom(chatRoomId, userDetails)));
 	}
-	//알림 관련
-	/*@MessageMapping("chat.enter.{chatRoomId}")
-	@Operation(summary = "채팅방 입장", description = "채팅에 입장합니다.")
-	public void enter(ChatDto chatDto, @DestinationVariable Long chatRoomId) {
-		chatDto.of(chatDto.chatId(), chatDto.senderId(), chatRoomId, "입장하셨습니다.", chatDto.regDate());
-		chatPublisher.sendMessage(chatDto.chatRoomId(), chatDto);
-	}
-
-	@MessageMapping("chat.leave.{chatRoomId}")
-	@Operation(summary = "채팅방 퇴장", description = "채팅에 입장합니다.")
-	public void leave(ChatDto chatDto, @DestinationVariable Long chatRoomId) {
-		chatDto.of(chatDto.chatId(), chatDto.senderId(), chatRoomId, "퇴장하셨습니다.", chatDto.regDate());
-		chatPublisher.sendMessage(chatDto.chatRoomId(), chatDto);
-	}*/
 }

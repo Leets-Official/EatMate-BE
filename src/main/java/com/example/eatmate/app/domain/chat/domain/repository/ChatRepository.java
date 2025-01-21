@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.eatmate.app.domain.chat.domain.Chat;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
-import com.example.eatmate.global.common.DeletedStatus;
+import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
 
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
