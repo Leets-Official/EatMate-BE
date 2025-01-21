@@ -1,39 +1,47 @@
 package com.example.eatmate.app.domain.report.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.example.eatmate.app.domain.report.domain.Report;
-import com.example.eatmate.app.domain.report.domain.ReportType;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class ReportMemberListResponseDto {
+	private final Long reportId;
 
-	private String reportedUserName;
+	private final Long reportedMemberId;
 
-	private List<ReportType> reportTypes;
+	private final String reportedUserName;
 
-	private String reportingReasonDescription;
+	private final String profileImageUrl;
 
-	private LocalDateTime time;
+	private final LocalDateTime time;
 
-	private boolean isProcessed;
+	private final boolean isProcessed;
 
 	@Builder
-	private ReportMemberListResponseDto(Report report) {
-		this.reportedUserName = report.getReported().getNickname();
-		this.reportTypes = report.getReportTypes();
-		this.reportingReasonDescription = report.getReportingReasonDescription();
-		this.time = report.getCreatedAt();
-		this.isProcessed = report.isProcessed();
+	private ReportMemberListResponseDto(Long reportId, Long reportedMemberId, String reportedUserName,
+		String profileImageUrl, LocalDateTime time,
+		boolean isProcessed) {
+		this.reportId = reportId;
+		this.reportedMemberId = reportedMemberId;
+		this.reportedUserName = reportedUserName;
+		this.profileImageUrl = profileImageUrl;
+		this.time = time;
+		this.isProcessed = isProcessed;
 	}
 
 	public static ReportMemberListResponseDto createReportResponseDto(Report report) {
 		return ReportMemberListResponseDto.builder()
-			.report(report)
+			.reportId(report.getId())
+			.reportedMemberId(report.getReported().getMemberId())
+			.reportedUserName(report.getReported().getNickname())
+			.profileImageUrl(report.getReported().getProfileImage() != null ?
+				report.getReported().getProfileImage().getImageUrl() : null)
+			.time(report.getCreatedAt())
+			.isProcessed(report.isProcessed())
 			.build();
 	}
 
