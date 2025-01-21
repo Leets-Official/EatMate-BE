@@ -42,6 +42,9 @@ public class DeliveryMeeting extends Meeting {
 	@Column(nullable = false)
 	private String accountHolder;
 
+	@Column(nullable = false)
+	private BankName bankName;
+
 	public void updateDeliveryMeeting(
 		String meetingName,
 		String description,

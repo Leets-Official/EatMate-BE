@@ -37,6 +37,7 @@ public class ChatService {
 		chatPublisher.sendMessage(chatMessageDto.getChatRoomId(), chatMessageDto);
 		saveChat(chatMessageDto);
 	}
+
 	//채팅 저장 -> 추후 몽고디비 고려
 	public void saveChat(ChatMessageRequestDto chatMessageDto) {
 		ChatRoom chatRoom = chatRoomRepository.findById(chatMessageDto.getChatRoomId())

@@ -39,10 +39,10 @@ public class ChatRoomService {
 	private final QueueManager queueManager;
 
 	//채팅방 생성
-	public ChatRoom createChatRoom(Member host, Meeting meeting){
+	public ChatRoom createChatRoom(Member host, Meeting meeting) {
 		ChatRoom newChatRoom = ChatRoom.createChatRoom(host.getMemberId(), meeting);
 		chatRoomRepository.save(newChatRoom);
-		memberChatRoomRepository.save(MemberChatRoom.create(newChatRoom,host));
+		memberChatRoomRepository.save(MemberChatRoom.create(newChatRoom, host));
 		queueManager.createQueueForChatRoom(newChatRoom.getId());
 		return newChatRoom;
 	}
@@ -66,7 +66,7 @@ public class ChatRoomService {
 			.map(memberChatRoom -> ChatMemberDto.from(memberChatRoom.getMember()))
 			.collect(Collectors.toList());
 
-		Page<ChatMessageResponseDto> chatList =  chatService.loadChat(chatRoomId, pageable);
+		Page<ChatMessageResponseDto> chatList = chatService.loadChat(chatRoomId, pageable);
 		return ChatRoomResponseDto.of(participants, chatList);
 	}
 
@@ -81,14 +81,13 @@ public class ChatRoomService {
 			.orElseThrow(() -> new CommonException(ErrorCode.MEMBER_CHATROOM_NOT_FOUND));
 
 		//모임삭제, 참여자 삭제 로직이 추가로 필요합니다.
-		if(chatRoom.getOwnerId().equals(member.getMemberId())) {
+		if (chatRoom.getOwnerId().equals(member.getMemberId())) {
 			chatRoom.deleteChatRoom();
 			chatRoom.getParticipant().forEach(memberChatRoomRepository::delete);
 			chatService.deleteChat(chatRoom);
 			queueManager.deleteQueueForChatRoom(chatRoomId);
 			queueManager.stopChatRoomListener(chatRoomId);
-		}
-		else {
+		} else {
 			memberChatRoomRepository.delete(target);
 		}
 		return "퇴장 완료";

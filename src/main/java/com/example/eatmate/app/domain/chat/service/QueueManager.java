@@ -33,20 +33,17 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class QueueManager {
 
-	@Value("${rabbitmq.queue-prefix}")
-	private String queuePrefix;
-
-	@Value("${rabbitmq.binding-key-prefix}")
-	private String bindingKeyPrefix;
-
-	@Value("${rabbitmq.exchange}")
-	private String exchangeName;
-
 	private final AmqpAdmin amqpAdmin;
 	private final SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final Map<Long, SimpleMessageListenerContainer> activeListeners = new ConcurrentHashMap<>();
+	@Value("${rabbitmq.queue-prefix}")
+	private String queuePrefix;
+	@Value("${rabbitmq.binding-key-prefix}")
+	private String bindingKeyPrefix;
+	@Value("${rabbitmq.exchange}")
+	private String exchangeName;
 
 	//큐 생성(채팅방 생성과 동시에)
 	public void createQueueForChatRoom(Long chatRoomId) {

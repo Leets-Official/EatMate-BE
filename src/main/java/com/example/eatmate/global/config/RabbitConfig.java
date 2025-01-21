@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableRabbit
-public class  RabbitConfig {
+public class RabbitConfig {
 
 	@Value("${rabbitmq.exchange}")
 	private String CHAT_EXCHANGE_NAME;
@@ -77,7 +77,7 @@ public class  RabbitConfig {
 	}
 
 	@Bean
-	public Jackson2JsonMessageConverter jsonMessageConverter(){
+	public Jackson2JsonMessageConverter jsonMessageConverter() {
 		return new Jackson2JsonMessageConverter();
 	}
 
