@@ -78,6 +78,12 @@ public class ChatRoom extends BaseTimeEntity {
 		this.participant.add(participant);
 	}
 
+	public void removeParticipant(MemberChatRoom participant) {
+		if (this.participant != null) {
+			this.participant.remove(participant);
+		}
+	}
+
 	public void updateLastChat(String lastChat) {
 		this.lastChat = lastChat;
 	}
