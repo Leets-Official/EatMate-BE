@@ -41,7 +41,7 @@ public class ChatService {
 
 	//채팅 저장
 	public void saveChat(ChatMessageRequestDto chatMessageDto, UserDetails userDetails) {
-		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatMessageDto.getChatRoomId(), DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatMessageDto.getChatRoomId(), DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 		Member member = securityUtils.getMember(userDetails);
 
@@ -54,7 +54,7 @@ public class ChatService {
 
 	//불러오기(읽기 상태 없음)
 	public Page<ChatMessageResponseDto> loadChat(Long chatRoomId, Pageable pageable) {
-		ChatRoom chatRoom = chatRoomRepository.findByMeetingId(chatRoomId, DeletedStatus.NOT_DELETED)
+		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		Page<Chat> chats = chatRepository.findChatByChatRoom(chatRoom, pageable);
