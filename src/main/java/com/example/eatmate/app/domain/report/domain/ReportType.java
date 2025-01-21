@@ -4,9 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ReportType {
-	SPAM("스팸"),
-	HARASSMENT("괴롭힘"),
-	INAPPROPRIATE_CONTENT("부적절한 내용"),
+	OFFENSIVE("욕설"),
+	HARASSMENT("성희롱"),
 	OTHER("기타");
 
 	private final String description;

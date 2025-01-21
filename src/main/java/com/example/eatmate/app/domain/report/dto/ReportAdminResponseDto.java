@@ -1,7 +1,6 @@
 package com.example.eatmate.app.domain.report.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.example.eatmate.app.domain.report.domain.Report;
 import com.example.eatmate.app.domain.report.domain.ReportType;
@@ -23,7 +22,7 @@ public class ReportAdminResponseDto {
 	private final String reportedName;
 	private final String reportedEmail;
 
-	private final List<ReportType> reportTypes;
+	private final ReportType reportType;
 
 	private final String reportingReasonDescription;
 
@@ -33,7 +32,7 @@ public class ReportAdminResponseDto {
 
 	@Builder
 	private ReportAdminResponseDto(Long reportId, Long reporterMemberId, String reporterName, String reporterEmail,
-		Long reportedMemberId, String reportedName, String reportedEmail, List<ReportType> reportTypes,
+		Long reportedMemberId, String reportedName, String reportedEmail, ReportType reportType,
 		String reportingReasonDescription, LocalDateTime time, boolean isProcessed) {
 		this.reportId = reportId;
 		this.reporterMemberId = reporterMemberId;
@@ -42,7 +41,7 @@ public class ReportAdminResponseDto {
 		this.reportedMemberId = reportedMemberId;
 		this.reportedName = reportedName;
 		this.reportedEmail = reportedEmail;
-		this.reportTypes = reportTypes;
+		this.reportType = reportType;
 		this.reportingReasonDescription = reportingReasonDescription;
 		this.time = time;
 		this.isProcessed = isProcessed;
@@ -57,7 +56,7 @@ public class ReportAdminResponseDto {
 			.reportedMemberId(report.getReported().getMemberId())
 			.reportedName(report.getReported().getNickname())
 			.reportedEmail(report.getReported().getEmail())
-			.reportTypes(report.getReportTypes())
+			.reportType(report.getReportType())
 			.reportingReasonDescription(report.getReportingReasonDescription())
 			.time(report.getCreatedAt())
 			.isProcessed(report.isProcessed())
