@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +39,8 @@ import com.example.eatmate.global.response.GlobalResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
@@ -51,8 +54,16 @@ public class MeetingController {
 
 	@PostMapping("/delivery")
 	@Operation(summary = "배달 모임 생성", description = "배달 모임을 생성합니다.")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(
+		mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+		schema = @Schema(implementation = CreateDeliveryMeetingRequestDto.class)))
 	public ResponseEntity<GlobalResponseDto<CreateDeliveryMeetingResponseDto>> createDeliveryMeeting(
-		@RequestBody @Valid CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto,
+		@ModelAttribute @Valid
+		@Parameter(
+			description = "배달 모임 생성 정보",
+			content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+		)
+		CreateDeliveryMeetingRequestDto createDeliveryMeetingRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(GlobalResponseDto.success(
@@ -62,6 +73,9 @@ public class MeetingController {
 
 	@PostMapping("/offline")
 	@Operation(summary = "오프라인 모임 생성", description = "오프라인 모임을 생성합니다.")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(
+		mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+		schema = @Schema(implementation = CreateDeliveryMeetingRequestDto.class)))
 	public ResponseEntity<GlobalResponseDto<CreateOfflineMeetingResponseDto>> createOfflineMeeting(
 		@ModelAttribute @Valid CreateOfflineMeetingRequestDto createOfflineMeetingRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
