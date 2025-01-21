@@ -48,11 +48,11 @@ public class ChatRoomService {
 	private final ApplicationEventPublisher eventPublisher;
 
 	//채팅방 생성 + 호스트 채팅방 참가
-	public ChatRoom createChatRoom(Member host, Meeting meeting){
+	public ChatRoom createChatRoom(Member host, Meeting meeting) {
 		ChatRoom newChatRoom = ChatRoom.createChatRoom(host.getMemberId(), meeting);
 		chatRoomRepository.save(newChatRoom);
 
-		newChatRoom.addParticipant(memberChatRoomRepository.save(MemberChatRoom.create(newChatRoom,host)));
+		newChatRoom.addParticipant(memberChatRoomRepository.save(MemberChatRoom.create(newChatRoom, host)));
 		queueManager.createQueueForChatRoom(newChatRoom.getId());
 
 		return newChatRoom;
@@ -79,18 +79,18 @@ public class ChatRoomService {
 			.map(memberChatRoom -> ChatRoomResponseDto.ChatMemberResponseDto.from(memberChatRoom.getMember()))
 			.collect(Collectors.toList());
 
-		Page<ChatMessageResponseDto> chatList =  chatService.loadChat(chatRoomId, pageable);
+		Page<ChatMessageResponseDto> chatList = chatService.loadChat(chatRoomId, pageable);
 
 		//채팅방 공지 처리
 		Meeting meeting = chatRoom.getMeeting();
-		if(meeting instanceof OfflineMeeting) {
+		if (meeting instanceof OfflineMeeting) {
 			OfflineMeeting offlineMeeting = (OfflineMeeting) meeting;
 			ChatRoomOfflineNoticeDto notice = ChatRoomOfflineNoticeDto.of(offlineMeeting.getMeetingPlace(), offlineMeeting.getMeetingDate());
 
 			return ChatRoomResponseDto.ofWithOffline(participants, chatList, notice);
 		}
 
-		if(meeting instanceof DeliveryMeeting) {
+		if (meeting instanceof DeliveryMeeting) {
 			DeliveryMeeting deliveryMeeting = (DeliveryMeeting) meeting;
 			ChatRoomDeliveryNoticeDto notice = ChatRoomDeliveryNoticeDto
 				.of(deliveryMeeting.getStoreName(), deliveryMeeting.getAccountNumber(), deliveryMeeting.getAccountHolder(), deliveryMeeting.getPickupLocation());

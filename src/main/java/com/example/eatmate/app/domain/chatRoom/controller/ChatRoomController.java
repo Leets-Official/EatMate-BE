@@ -34,7 +34,7 @@ public class ChatRoomController {
 	public ResponseEntity<GlobalResponseDto<ChatRoomResponseDto>> enterChatRoom(
 		@PathVariable Long chatRoomId,
 		@AuthenticationPrincipal UserDetails userDetails,
-		@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable){
+		@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
 
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(chatRoomService.enterChatRoomAndLoadMessage(chatRoomId, userDetails, pageable)));
