@@ -36,11 +36,9 @@ public class SwaggerConfig {
 
 	private SecurityScheme getSecurityScheme() {
 		return new SecurityScheme()
-			.type(SecurityScheme.Type.HTTP)
-			.scheme("bearer")
-			.bearerFormat("JWT")
-			.in(SecurityScheme.In.HEADER)
-			.name("Authorization");
+			.type(SecurityScheme.Type.APIKEY)
+			.in(SecurityScheme.In.COOKIE)
+			.name("AccessToken");
 	}
 
 	private SecurityRequirement getSecurityRequirement() {
