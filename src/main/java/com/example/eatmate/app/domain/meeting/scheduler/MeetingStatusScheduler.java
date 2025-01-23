@@ -26,38 +26,41 @@ public class MeetingStatusScheduler {
 
 	@Transactional
 	@Scheduled(fixedRate = 60000)
-	public void updateMeetingStatus() {
-		LocalDateTime now = LocalDateTime.now();
+	public void updateOfflineMeetingStatus(LocalDateTime now) {
 		try {
-			updateDeliveryMeetingStatus(now);
-		} catch (Exception e) {
-			log.error("Meeting status update failed: now={}", now, e);
-		}
+			List<OfflineMeeting> expiredOfflineMeetings = offlineMeetingRepository
+				.findByMeetingStatusAndMeetingDateBefore(MeetingStatus.ACTIVE, now);
 
-		try {
-			updateOfflineMeetingStatus(now);
+			for (OfflineMeeting meeting : expiredOfflineMeetings) {
+				try {
+					meeting.deleteMeeting();
+					log.info("OfflineMeeting status updated to INACTIVE: meetingId={}", meeting.getId());
+				} catch (Exception e) {
+					log.error("OfflineMeeting status update failed: meetingId={}", meeting.getId());
+				}
+			}
 		} catch (Exception e) {
-			log.error("Meeting status update failed: now={}", now, e);
+			log.error("Failed to fetch expired offline meetings: {}", e.getMessage());
 		}
 	}
 
-	private void updateDeliveryMeetingStatus(LocalDateTime now) {
-		List<DeliveryMeeting> expiredDeliveryMeetings = deliveryMeetingRepository
-			.findByMeetingStatusAndOrderDeadlineBefore(MeetingStatus.ACTIVE, now);
+	@Transactional
+	@Scheduled(fixedRate = 60000)
+	public void updateDeliveryMeetingStatus(LocalDateTime now) {
+		try {
+			List<DeliveryMeeting> expiredDeliveryMeetings = deliveryMeetingRepository
+				.findByMeetingStatusAndOrderDeadlineBefore(MeetingStatus.ACTIVE, now);
 
-		for (DeliveryMeeting meeting : expiredDeliveryMeetings) {
-			meeting.deleteMeeting();
-			log.info("DeliveryMeeting status updated to INACTIVE: meetingId={}", meeting.getId());
-		}
-	}
-
-	private void updateOfflineMeetingStatus(LocalDateTime now) {
-		List<OfflineMeeting> expiredOfflineMeetings = offlineMeetingRepository
-			.findByMeetingStatusAndMeetingDateBefore(MeetingStatus.ACTIVE, now);
-
-		for (OfflineMeeting meeting : expiredOfflineMeetings) {
-			meeting.deleteMeeting();
-			log.info("OfflineMeeting status updated to INACTIVE: meetingId={}", meeting.getId());
+			for (DeliveryMeeting meeting : expiredDeliveryMeetings) {
+				try {
+					meeting.deleteMeeting();
+					log.info("DeliveryMeeting status updated to INACTIVE: meetingId={}", meeting.getId());
+				} catch (Exception e) {
+					log.error("DeliveryMeeting status update failed: meetingId={}", meeting.getId());
+				}
+			}
+		} catch (Exception e) {
+			log.error("Failed to fetch expired delivery meetings: {}", e.getMessage());
 		}
 	}
 }

@@ -78,7 +78,7 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(List.of(expiredDeliveryMeeting));
 
 		// when
-		scheduler.updateMeetingStatus();
+		scheduler.updateDeliveryMeetingStatus(now);
 
 		// then
 		assertEquals(MeetingStatus.INACTIVE, expiredDeliveryMeeting.getMeetingStatus());
@@ -95,7 +95,7 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(List.of(expiredOfflineMeeting));
 
 		// when
-		scheduler.updateMeetingStatus();
+		scheduler.updateOfflineMeetingStatus(now);
 
 		// then
 		assertEquals(MeetingStatus.INACTIVE, expiredOfflineMeeting.getMeetingStatus());
@@ -115,7 +115,8 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(Collections.emptyList());
 
 		// when
-		scheduler.updateMeetingStatus();
+		scheduler.updateOfflineMeetingStatus(now);
+		scheduler.updateDeliveryMeetingStatus(now);
 
 		// then
 		assertEquals(MeetingStatus.ACTIVE, activeDeliveryMeeting.getMeetingStatus());
@@ -127,22 +128,56 @@ class MeetingStatusSchedulerTest {
 	}
 
 	@Test
-	@DisplayName("예외가 발생해도 다른 처리에 영향을 주지 않아야 한다")
-	void shouldHandleExceptionsGracefully() {
+	@DisplayName("오프라인 미팅 상태 업데이트 중 예외가 발생해도 배달 미팅 처리는 정상 동작해야 한다")
+	void shouldHandleOfflineMeetingExceptionsIndependently() {
 		// given
+		// 오프라인 미팅 조회 시 예외 발생 설정
+		when(offlineMeetingRepository.findByMeetingStatusAndMeetingDateBefore(any(), any()))
+			.thenThrow(new RuntimeException("Offline meeting database error"));
+
+		// 배달 미팅은 정상 동작 설정
 		when(deliveryMeetingRepository.findByMeetingStatusAndOrderDeadlineBefore(any(), any()))
-			.thenThrow(new RuntimeException("Database error"));
+			.thenReturn(List.of(expiredDeliveryMeeting));
+
+		// when
+		scheduler.updateOfflineMeetingStatus(now);
+		scheduler.updateDeliveryMeetingStatus(now);
+
+		// then
+		// 오프라인 미팅 조회 시도 확인
+		verify(offlineMeetingRepository, times(1))
+			.findByMeetingStatusAndMeetingDateBefore(any(), any());
+
+		// 배달 미팅은 정상적으로 처리되었는지 확인
+		verify(deliveryMeetingRepository, times(1))
+			.findByMeetingStatusAndOrderDeadlineBefore(any(), any());
+		assertEquals(MeetingStatus.INACTIVE, expiredDeliveryMeeting.getMeetingStatus());
+	}
+
+	@Test
+	@DisplayName("배달 미팅 상태 업데이트 중 예외가 발생해도 오프라인 미팅 처리는 정상 동작해야 한다")
+	void shouldHandleDeliveryMeetingExceptionsIndependently() {
+		// given
+		// 배달 미팅 조회 시 예외 발생 설정
+		when(deliveryMeetingRepository.findByMeetingStatusAndOrderDeadlineBefore(any(), any()))
+			.thenThrow(new RuntimeException("Delivery meeting database error"));
+
+		// 오프라인 미팅은 정상 동작 설정
 		when(offlineMeetingRepository.findByMeetingStatusAndMeetingDateBefore(any(), any()))
 			.thenReturn(List.of(expiredOfflineMeeting));
 
 		// when
-		scheduler.updateMeetingStatus();
+		scheduler.updateOfflineMeetingStatus(now);
+		scheduler.updateDeliveryMeetingStatus(now);
 
 		// then
-		assertEquals(MeetingStatus.INACTIVE, expiredOfflineMeeting.getMeetingStatus());
+		// 배달 미팅 조회 시도 확인
 		verify(deliveryMeetingRepository, times(1))
 			.findByMeetingStatusAndOrderDeadlineBefore(any(), any());
+
+		// 오프라인 미팅은 정상적으로 처리되었는지 확인
 		verify(offlineMeetingRepository, times(1))
 			.findByMeetingStatusAndMeetingDateBefore(any(), any());
+		assertEquals(MeetingStatus.INACTIVE, expiredOfflineMeeting.getMeetingStatus());
 	}
 }
