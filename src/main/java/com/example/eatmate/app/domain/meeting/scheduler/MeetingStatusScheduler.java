@@ -25,7 +25,7 @@ public class MeetingStatusScheduler {
 	private final OfflineMeetingRepository offlineMeetingRepository;
 
 	@Transactional
-	@Scheduled(fixedRate = 300000) // 5분마다 실행
+	@Scheduled(fixedRate = 60000)
 	public void updateMeetingStatus() {
 		LocalDateTime now = LocalDateTime.now();
 		try {
