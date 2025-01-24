@@ -9,7 +9,6 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.Future;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +32,6 @@ public class DeliveryMeeting extends Meeting {
 	private String pickupLocation; // 현재 지도 API 관련 정보가 없어 임시로 String 자료형 선언
 
 	@Column(nullable = false)
-	@Future
 	private LocalDateTime orderDeadline;
 
 	@Column(nullable = false)
