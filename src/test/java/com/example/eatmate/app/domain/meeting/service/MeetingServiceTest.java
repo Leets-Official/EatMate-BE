@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.meeting.service;
 
+import static com.example.eatmate.app.domain.meeting.domain.BankName.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
@@ -15,11 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
+import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
@@ -30,16 +36,12 @@ import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
-import jakarta.persistence.EntityManager;
-
+@Transactional
 @SpringBootTest
 class MeetingServiceTest {
 
 	@Autowired
 	private MeetingService meetingService;
-
-	@Autowired
-	private EntityManager entityManager;
 
 	@Autowired
 	private DeliveryMeetingRepository deliveryMeetingRepository;
@@ -50,10 +52,15 @@ class MeetingServiceTest {
 	@Autowired
 	private MemberRepository memberRepository;
 
+	@Autowired
+	private ChatRoomRepository chatRoomRepository;
+
 	private DeliveryMeeting testMeeting;
 	private Member hostMember;    // 호스트 멤버
 	private Member member2;       // 참여 시도할 첫 번째 멤버
-	private Member member3;       // 참여 시도할 두 번째 멤버
+	private Member member3;  // 참여 시도할 두 번째 멤버
+	private UserDetails member2Details;  // 첫 번째 멤버의 UserDetails
+	private UserDetails member3Details;  // 두 번째 멤버의 UserDetails
 
 	@BeforeEach
 	void setUp() {
@@ -68,6 +75,8 @@ class MeetingServiceTest {
 				.build())
 			.foodCategory(FoodCategory.CHICKEN)
 			.storeName("Test Store")
+			.meetingStatus(MeetingStatus.ACTIVE)
+			.bankName(국민은행)
 			.pickupLocation("Test Location")
 			.orderDeadline(LocalDateTime.now().plusHours(1))
 			.accountNumber("1234-5678")
@@ -95,32 +104,43 @@ class MeetingServiceTest {
 			.gender(Gender.MALE)
 			.build();
 
+		member2Details = User.withUsername(member2.getEmail())
+			.password("password")
+			.roles("USER")
+			.build();
+
+		member3Details = User.withUsername(member3.getEmail())
+			.password("password")
+			.roles("USER")
+			.build();
+
 		// 데이터 저장
-		memberRepository.save(hostMember);
-		memberRepository.save(member2);
-		memberRepository.save(member3);
+		memberRepository.saveAndFlush(hostMember);
+		memberRepository.saveAndFlush(member2);
+		memberRepository.saveAndFlush(member3);
+		deliveryMeetingRepository.saveAndFlush(testMeeting);
+
+		// 채팅방 생성
+		ChatRoom chatRoom = ChatRoom.createChatRoom(hostMember.getMemberId(), testMeeting);
+		chatRoomRepository.save(chatRoom);
+
+		// Meeting에 채팅방 연결
+		testMeeting.setChatRoom(chatRoom);
 		deliveryMeetingRepository.save(testMeeting);
 
 		// 호스트를 참가자로 등록
 		MeetingParticipant hostParticipant = MeetingParticipant.createMeetingParticipant(
 			hostMember, testMeeting, ParticipantRole.HOST);
 		meetingParticipantRepository.save(hostParticipant);
+
+		TestTransaction.flagForCommit();
+		TestTransaction.end();
 	}
 
 	@Test
 	@DisplayName("동시에 마지막 자리 참여 시도 테스트")
 	void concurrentJoinTest() throws InterruptedException {
 
-		UserDetails member2Details = User.withUsername(member2.getEmail())
-			.password("")
-			.roles("USER")
-			.build();
-
-		UserDetails member3Details = User.withUsername(member3.getEmail())
-			.password("")
-			.roles("USER")
-			.build();
-		
 		// 동시에 실행할 스레드 개수 설정 (2개: member2, member3의 요청)
 		int numberOfThreads = 2;
 
@@ -143,9 +163,12 @@ class MeetingServiceTest {
 				meetingService.joinDeliveryMeeting(testMeeting.getId(), member2Details);
 				// 참여 성공시 successCount 증가
 				successCount.incrementAndGet();
-			} catch (CommonException e) {
+			} catch (Exception e) {
 				// 인원 초과로 실패시 failCount 증가
-				if (e.getErrorCode() == ErrorCode.PARTICIPANT_LIMIT_EXCEEDED) {
+				System.out.println("Member2 join failed: " + e.getMessage());  // 로깅 추가
+				e.printStackTrace();  // 스택 트레이스 출력 추가
+				if (e instanceof CommonException &&
+					((CommonException)e).getErrorCode() == ErrorCode.PARTICIPANT_LIMIT_EXCEEDED) {
 					failCount.incrementAndGet();
 				}
 			} finally {
