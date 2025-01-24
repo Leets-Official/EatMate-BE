@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.meeting.scheduler;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,43 +25,39 @@ public class MeetingStatusScheduler {
 	private final DeliveryMeetingRepository deliveryMeetingRepository;
 	private final OfflineMeetingRepository offlineMeetingRepository;
 
-	@Transactional
+	@Async
 	@Scheduled(fixedRate = 60000)
-	public void updateOfflineMeetingStatus(LocalDateTime now) {
+	@Transactional
+	public void updateOfflineMeetingStatus() {
 		try {
 			List<OfflineMeeting> expiredOfflineMeetings = offlineMeetingRepository
-				.findByMeetingStatusAndMeetingDateBefore(MeetingStatus.ACTIVE, now);
+				.findByMeetingStatusAndMeetingDateBefore(MeetingStatus.ACTIVE, LocalDateTime.now());
 
 			for (OfflineMeeting meeting : expiredOfflineMeetings) {
-				try {
-					meeting.deleteMeeting();
-					log.info("OfflineMeeting status updated to INACTIVE: meetingId={}", meeting.getId());
-				} catch (Exception e) {
-					log.error("OfflineMeeting status update failed: meetingId={}", meeting.getId());
-				}
+				meeting.deleteMeeting();
+				log.info("OfflineMeeting status updated to INACTIVE: meetingId={}, thread={}", meeting.getId(),
+					Thread.currentThread().getName());
 			}
 		} catch (Exception e) {
-			log.error("Failed to fetch expired offline meetings: {}", e.getMessage());
+			log.error("Failed to update offline meetings status: {}", e.getMessage());
 		}
 	}
 
-	@Transactional
+	@Async
 	@Scheduled(fixedRate = 60000)
-	public void updateDeliveryMeetingStatus(LocalDateTime now) {
+	@Transactional
+	public void updateDeliveryMeetingStatus() {
 		try {
 			List<DeliveryMeeting> expiredDeliveryMeetings = deliveryMeetingRepository
-				.findByMeetingStatusAndOrderDeadlineBefore(MeetingStatus.ACTIVE, now);
+				.findByMeetingStatusAndOrderDeadlineBefore(MeetingStatus.ACTIVE, LocalDateTime.now());
 
 			for (DeliveryMeeting meeting : expiredDeliveryMeetings) {
-				try {
-					meeting.deleteMeeting();
-					log.info("DeliveryMeeting status updated to INACTIVE: meetingId={}", meeting.getId());
-				} catch (Exception e) {
-					log.error("DeliveryMeeting status update failed: meetingId={}", meeting.getId());
-				}
+				meeting.deleteMeeting();
+				log.info("Delivery status updated to INACTIVE: meetingId={}, thread={}", meeting.getId(),
+					Thread.currentThread().getName());
 			}
 		} catch (Exception e) {
-			log.error("Failed to fetch expired delivery meetings: {}", e.getMessage());
+			log.error("Failed to update delivery meetings status: {}", e.getMessage());
 		}
 	}
 }

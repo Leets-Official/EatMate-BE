@@ -11,10 +11,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
@@ -22,7 +21,7 @@ import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.OfflineMeetingRepository;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class MeetingStatusSchedulerTest {
 
 	@Mock
@@ -43,7 +42,6 @@ class MeetingStatusSchedulerTest {
 	@BeforeEach
 	void setUp() {
 		now = LocalDateTime.now();
-
 		expiredDeliveryMeeting = DeliveryMeeting.builder()
 			.meetingStatus(MeetingStatus.ACTIVE)
 			.id(1L)
@@ -78,7 +76,7 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(List.of(expiredDeliveryMeeting));
 
 		// when
-		scheduler.updateDeliveryMeetingStatus(now);
+		scheduler.updateDeliveryMeetingStatus();
 
 		// then
 		assertEquals(MeetingStatus.INACTIVE, expiredDeliveryMeeting.getMeetingStatus());
@@ -95,7 +93,7 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(List.of(expiredOfflineMeeting));
 
 		// when
-		scheduler.updateOfflineMeetingStatus(now);
+		scheduler.updateOfflineMeetingStatus();
 
 		// then
 		assertEquals(MeetingStatus.INACTIVE, expiredOfflineMeeting.getMeetingStatus());
@@ -115,8 +113,8 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(Collections.emptyList());
 
 		// when
-		scheduler.updateOfflineMeetingStatus(now);
-		scheduler.updateDeliveryMeetingStatus(now);
+		scheduler.updateOfflineMeetingStatus();
+		scheduler.updateDeliveryMeetingStatus();
 
 		// then
 		assertEquals(MeetingStatus.ACTIVE, activeDeliveryMeeting.getMeetingStatus());
@@ -140,8 +138,8 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(List.of(expiredDeliveryMeeting));
 
 		// when
-		scheduler.updateOfflineMeetingStatus(now);
-		scheduler.updateDeliveryMeetingStatus(now);
+		scheduler.updateOfflineMeetingStatus();
+		scheduler.updateDeliveryMeetingStatus();
 
 		// then
 		// 오프라인 미팅 조회 시도 확인
@@ -167,8 +165,8 @@ class MeetingStatusSchedulerTest {
 			.thenReturn(List.of(expiredOfflineMeeting));
 
 		// when
-		scheduler.updateOfflineMeetingStatus(now);
-		scheduler.updateDeliveryMeetingStatus(now);
+		scheduler.updateOfflineMeetingStatus();
+		scheduler.updateDeliveryMeetingStatus();
 
 		// then
 		// 배달 미팅 조회 시도 확인
