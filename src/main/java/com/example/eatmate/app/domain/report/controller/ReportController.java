@@ -35,7 +35,7 @@ public class ReportController {
 	public ResponseEntity<GlobalResponseDto<Void>> reportUser(
 		@RequestBody @Valid ReportRequestDto reportRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails) {
-		reportService.createReport(reportRequestDto, userDetails.getUsername());
+		reportService.createReport(reportRequestDto, userDetails);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
@@ -45,6 +45,6 @@ public class ReportController {
 	public ResponseEntity<GlobalResponseDto<List<ReportMemberListResponseDto>>> getMyReports(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(reportService.getMyReports(userDetails.getUsername())));
+			.body(GlobalResponseDto.success(reportService.getMyReports(userDetails)));
 	}
 }

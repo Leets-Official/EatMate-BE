@@ -2,6 +2,7 @@ package com.example.eatmate.app.domain.report.service;
 
 import java.util.List;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import com.example.eatmate.app.domain.report.domain.repository.ReportRepository;
 import com.example.eatmate.app.domain.report.dto.ReportAdminResponseDto;
 import com.example.eatmate.app.domain.report.dto.ReportMemberListResponseDto;
 import com.example.eatmate.app.domain.report.dto.ReportRequestDto;
+import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
@@ -26,12 +28,15 @@ public class ReportService {
 
 	private final MemberRepository memberRepository;
 
+	private final SecurityUtils securityUtils;
+
 	// 신고하기 메소드
 	@Transactional
-	public void createReport(ReportRequestDto reportRequestDto, String email) {
+	public void createReport(ReportRequestDto reportRequestDto, UserDetails userDetails) {
 
-		Member member = findMemberByEmail(email);
-		Member reported = findMemberByEmail(reportRequestDto.getReportedMemberEmail());
+		Member member = securityUtils.getMember(userDetails);
+		Member reported = memberRepository.findById(reportRequestDto.getReportedMemberId()).orElseThrow(
+			() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		if (member.equals(reported)) {
 			throw new CommonException(ErrorCode.SELF_REPORT_NOT_ALLOWED);
@@ -51,9 +56,10 @@ public class ReportService {
 
 	// 내 신고 내역 불러오기
 	@Transactional(readOnly = true)
-	public List<ReportMemberListResponseDto> getMyReports(String email) {
+	public List<ReportMemberListResponseDto> getMyReports(UserDetails userDetails) {
 
-		List<Report> myReports = reportRepository.findAllByReporterEmail(email);
+		List<Report> myReports = reportRepository.findAllByReporterMemberId(
+			securityUtils.getMember(userDetails).getMemberId());
 		return myReports.stream()
 			.map(ReportMemberListResponseDto::createReportResponseDto)
 			.toList();
@@ -67,11 +73,6 @@ public class ReportService {
 			.map(ReportAdminResponseDto::createReportAdminResponseDto
 			)
 			.toList();
-	}
-
-	private Member findMemberByEmail(String email) {
-		return memberRepository.findByEmail(email)
-			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 
 }

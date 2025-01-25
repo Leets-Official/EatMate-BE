@@ -15,7 +15,7 @@ public class ReportRequestDto {
 	@NotBlank
 	private String reportingReasonDescription;    // 구체적인 신고 사유
 
-	@NotBlank
-	private String reportedMemberEmail;
+	@NotNull(message = "신고 대상이 비어있을 수 없습니다.")
+	private Long reportedMemberId;
 
 }
