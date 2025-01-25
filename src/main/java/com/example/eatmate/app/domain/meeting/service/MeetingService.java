@@ -92,7 +92,7 @@ public class MeetingService {
 
 		validateGenderRestriction(createDeliveryMeetingRequestDto, member);
 
-		validateParticipantLimit(
+		validateParticipantLimitConfiguration(
 			createDeliveryMeetingRequestDto.getMaxParticipants(),
 			createDeliveryMeetingRequestDto.getIsLimited()
 		);
@@ -139,7 +139,7 @@ public class MeetingService {
 
 		validateGenderRestriction(createOfflineMeetingRequestDto, member);
 
-		validateParticipantLimit(
+		validateParticipantLimitConfiguration(
 			createOfflineMeetingRequestDto.getMaxParticipants(),
 			createOfflineMeetingRequestDto.getIsLimited()
 		);
@@ -205,7 +205,7 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
 		}
 
-		validateParticipantLimit(meeting);
+		validateMeetingParticipantCapacity(meeting);
 		validateGenderRestriction(meeting, member);
 		validateDuplicateParticipant(meeting, member);
 
@@ -334,8 +334,8 @@ public class MeetingService {
 			.collect(Collectors.toList());
 	}
 
-	// 참여 인원 제한 검증 로직
-	private void validateParticipantLimit(Long participantLimit, Boolean isLimited) {
+	// 모임 생성시 참여 인원 제한 검증 로직
+	private void validateParticipantLimitConfiguration(Long participantLimit, Boolean isLimited) {
 		// isLimited가 false(무제한)인데 participantLimit가 null이 아닌 경우
 		if (!isLimited && participantLimit != null) {
 			throw new CommonException(ErrorCode.INVALID_PARTICIPANT_LIMIT);
@@ -350,9 +350,11 @@ public class MeetingService {
 		}
 	}
 
-	// 참여 인원 제한 검증
-	private void validateParticipantLimit(Meeting meeting) {
-		Long meetingCount = meetingParticipantRepository.countByMeeting_Id(meeting.getId());
+	// 참여시 인원 제한 검증
+	private void validateMeetingParticipantCapacity(Meeting meeting) {
+		List<MeetingParticipant> participants = meetingParticipantRepository.findParticipantsByMeetingIdWithLock(
+			meeting.getId());
+		Long meetingCount = Long.valueOf(participants.size());
 		Long participantLimit = meeting.getParticipantLimit().getMaxParticipants();
 		Boolean isLimited = meeting.getParticipantLimit().isLimited();
 

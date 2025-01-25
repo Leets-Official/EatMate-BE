@@ -17,6 +17,5 @@ public interface DeliveryMeetingRepository extends JpaRepository<DeliveryMeeting
 
 	List<DeliveryMeeting> findByMeetingStatusAndOrderDeadlineBefore(MeetingStatus meetingStatus,
 		LocalDateTime orderDeadline);
-
 }
 
