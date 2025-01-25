@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
+import com.example.eatmate.app.domain.chatRoom.domain.repository.MemberChatRoomRepository;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
@@ -30,13 +30,13 @@ import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
+import com.example.eatmate.app.domain.meeting.domain.repository.MeetingRepository;
 import com.example.eatmate.app.domain.member.domain.Gender;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
-@Transactional
 @SpringBootTest
 class MeetingServiceTest {
 
@@ -61,6 +61,10 @@ class MeetingServiceTest {
 	private Member member3;  // 참여 시도할 두 번째 멤버
 	private UserDetails member2Details;  // 첫 번째 멤버의 UserDetails
 	private UserDetails member3Details;  // 두 번째 멤버의 UserDetails
+	@Autowired
+	private MemberChatRoomRepository memberChatRoomRepository;
+	@Autowired
+	private MeetingRepository meetingRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -133,8 +137,17 @@ class MeetingServiceTest {
 			hostMember, testMeeting, ParticipantRole.HOST);
 		meetingParticipantRepository.save(hostParticipant);
 
-		TestTransaction.flagForCommit();
-		TestTransaction.end();
+	}
+
+	@AfterEach
+	void tearDown() {
+		// 테스트 종료 후 데이터 초기화
+		meetingParticipantRepository.deleteAll();
+		deliveryMeetingRepository.deleteAll();
+		meetingRepository.deleteAll();
+		memberChatRoomRepository.deleteAll();
+		chatRoomRepository.deleteAll();
+		memberRepository.deleteAll();
 	}
 
 	@Test
@@ -165,8 +178,6 @@ class MeetingServiceTest {
 				successCount.incrementAndGet();
 			} catch (Exception e) {
 				// 인원 초과로 실패시 failCount 증가
-				System.out.println("Member2 join failed: " + e.getMessage());  // 로깅 추가
-				e.printStackTrace();  // 스택 트레이스 출력 추가
 				if (e instanceof CommonException &&
 					((CommonException)e).getErrorCode() == ErrorCode.PARTICIPANT_LIMIT_EXCEEDED) {
 					failCount.incrementAndGet();
@@ -204,5 +215,6 @@ class MeetingServiceTest {
 		// 최종 참가자 수 확인
 		Long finalParticipantCount = meetingParticipantRepository.countByMeeting_Id(testMeeting.getId());
 		assertEquals(2, finalParticipantCount, "최종 참가자 수는 2명이어야 합니다 (호스트 1명 + 성공한 참가자 1명)");
+
 	}
 }
