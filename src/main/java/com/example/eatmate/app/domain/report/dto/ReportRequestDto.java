@@ -20,4 +20,7 @@ public class ReportRequestDto {
 	@NotNull(message = "신고 대상이 비어있을 수 없습니다.")
 	private Long reportedMemberId;
 
+	@NotBlank(message = "채팅 메세지가 비어있을 수 없습니다.")
+	private String chatMessage;
+
 }

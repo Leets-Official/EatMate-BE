@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -46,16 +47,21 @@ public class Report extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String reportingReasonDescription;
 
+	@NotBlank
+	private String chatMessage;
+
 	// 처리 여부
 	@Column(nullable = false)
 	private boolean isProcessed = false;
 
 	@Builder
-	private Report(Member reporter, Member reported, ReportType reportType, String reportingReasonDescription) {
+	private Report(Member reporter, Member reported, ReportType reportType, String reportingReasonDescription,
+		String chatMessage) {
 		this.reporter = reporter;
 		this.reported = reported;
 		this.reportType = reportType;
 		this.reportingReasonDescription = reportingReasonDescription;
+		this.chatMessage = chatMessage;
 		this.isProcessed = false;
 	}
 
@@ -65,6 +71,7 @@ public class Report extends BaseTimeEntity {
 			.reported(reported)
 			.reportType(reportRequestDto.getReportType())
 			.reportingReasonDescription(reportRequestDto.getReportingReasonDescription())
+			.chatMessage(reportRequestDto.getChatMessage())
 			.build();
 	}
 

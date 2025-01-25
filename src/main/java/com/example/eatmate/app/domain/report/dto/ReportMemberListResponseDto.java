@@ -17,13 +17,15 @@ public class ReportMemberListResponseDto {
 
 	private final String profileImageUrl;
 
+	private final String chatMessage;
+
 	private final LocalDateTime time;
 
 	private final boolean isProcessed;
 
 	@Builder
 	private ReportMemberListResponseDto(Long reportId, Long reportedMemberId, String reportedUserName,
-		String profileImageUrl, LocalDateTime time,
+		String profileImageUrl, LocalDateTime time, String chatMessage,
 		boolean isProcessed) {
 		this.reportId = reportId;
 		this.reportedMemberId = reportedMemberId;
@@ -31,6 +33,7 @@ public class ReportMemberListResponseDto {
 		this.profileImageUrl = profileImageUrl;
 		this.time = time;
 		this.isProcessed = isProcessed;
+		this.chatMessage = chatMessage;
 	}
 
 	public static ReportMemberListResponseDto createReportResponseDto(Report report) {
@@ -42,6 +45,7 @@ public class ReportMemberListResponseDto {
 				report.getReported().getProfileImage().getImageUrl() : null)
 			.time(report.getCreatedAt())
 			.isProcessed(report.isProcessed())
+			.chatMessage(report.getChatMessage())
 			.build();
 	}
 

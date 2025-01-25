@@ -26,6 +26,8 @@ public class ReportAdminResponseDto {
 
 	private final String reportingReasonDescription;
 
+	private final String chatMessage;
+
 	private final LocalDateTime time;
 
 	private final boolean isProcessed;
@@ -33,7 +35,7 @@ public class ReportAdminResponseDto {
 	@Builder
 	private ReportAdminResponseDto(Long reportId, Long reporterMemberId, String reporterName, String reporterEmail,
 		Long reportedMemberId, String reportedName, String reportedEmail, ReportType reportType,
-		String reportingReasonDescription, LocalDateTime time, boolean isProcessed) {
+		String reportingReasonDescription, LocalDateTime time, boolean isProcessed, String chatMessage) {
 		this.reportId = reportId;
 		this.reporterMemberId = reporterMemberId;
 		this.reporterName = reporterName;
@@ -45,6 +47,7 @@ public class ReportAdminResponseDto {
 		this.reportingReasonDescription = reportingReasonDescription;
 		this.time = time;
 		this.isProcessed = isProcessed;
+		this.chatMessage = chatMessage;
 	}
 
 	public static ReportAdminResponseDto createReportAdminResponseDto(Report report) {
@@ -60,6 +63,7 @@ public class ReportAdminResponseDto {
 			.reportingReasonDescription(report.getReportingReasonDescription())
 			.time(report.getCreatedAt())
 			.isProcessed(report.isProcessed())
+			.chatMessage(report.getChatMessage())
 			.build();
 	}
 
