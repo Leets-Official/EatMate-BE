@@ -11,7 +11,7 @@ import lombok.Getter;
 public class ReportRequestDto {
 
 	@NotNull(message = "신고 유형이 비어있을 수 없습니다.")
-	@JsonProperty("ReportType")
+	@JsonProperty("reportType")
 	private ReportType reportType;
 
 	@NotBlank(message = "신고 사유는 비어있을 수 없습니다.")
