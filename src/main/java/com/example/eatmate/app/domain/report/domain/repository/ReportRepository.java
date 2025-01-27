@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.eatmate.app.domain.report.domain.Report;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
-	List<Report> findAllByReporterEmail(String email);
+	List<Report> findAllByReporterMemberId(Long memberId);
 
 	List<Report> findAllByReporterMemberIdAndReportedMemberId(Long reporterId, Long reportedId);
 }
