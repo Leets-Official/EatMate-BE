@@ -37,7 +37,10 @@ import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
+import lombok.extern.slf4j.Slf4j;
+
 @SpringBootTest
+@Slf4j
 class MeetingServiceTest {
 
 	@Autowired
@@ -208,13 +211,15 @@ class MeetingServiceTest {
 		// 더 이상 필요없는 스레드 풀 종료
 		executorService.shutdown();
 
-		// 검증
+		// 성공/실패 카운트 로깅
+		log.info("성공 참가 횟수 - 기대값: {}, 실제값: {}", 1, successCount.get());
+		log.info("실패 참가 횟수 - 기대값: {}, 실제값: {}", 1, failCount.get());
 		assertEquals(1, successCount.get(), "성공적인 참가는 1회여야 합니다");
 		assertEquals(1, failCount.get(), "참가 실패는 1회여야 합니다");
 
-		// 최종 참가자 수 확인
+		// 최종 참가자 수 로깅
 		Long finalParticipantCount = meetingParticipantRepository.countByMeeting_Id(testMeeting.getId());
+		log.info("최종 참가자 수 - 기대값: {}, 실제값: {}", 2, finalParticipantCount);
 		assertEquals(2, finalParticipantCount, "최종 참가자 수는 2명이어야 합니다 (호스트 1명 + 성공한 참가자 1명)");
-
 	}
 }
