@@ -87,7 +87,6 @@ class MeetingServiceTest {
 			.pickupLocation("Test Location")
 			.orderDeadline(LocalDateTime.now().plusHours(1))
 			.accountNumber("1234-5678")
-			.accountHolder("Test Holder")
 			.build();
 
 		// 호스트 멤버 생성

@@ -34,7 +34,5 @@ public class UpdateDeliveryMeetingRequestDto {
 	@Pattern(regexp = "^[0-9-]*$", message = "올바른 계좌번호 형식이 아닙니다")
 	private String accountNumber;
 
-	private String accountHolder;
-
 	private MultipartFile backgroundImage;
 }

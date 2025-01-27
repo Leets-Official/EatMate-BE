@@ -54,9 +54,6 @@ public class CreateDeliveryMeetingRequestDto {
 	@Pattern(regexp = "^[0-9-]*$", message = "올바른 계좌번호 형식이 아닙니다")
 	private String accountNumber;
 
-	@NotBlank(message = "예금주명은 필수입니다")
-	private String accountHolder;
-
 	@NotBlank(message = "은행명은 필수입니다")
 	private BankName bankName;
 

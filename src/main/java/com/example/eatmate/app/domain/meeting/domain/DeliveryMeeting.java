@@ -38,9 +38,6 @@ public class DeliveryMeeting extends Meeting {
 	private String accountNumber;
 
 	@Column(nullable = false)
-	private String accountHolder;
-
-	@Column(nullable = false)
 	private BankName bankName;
 
 	public void updateDeliveryMeeting(
@@ -50,7 +47,6 @@ public class DeliveryMeeting extends Meeting {
 		String storeName,
 		String pickupLocation,
 		String accountNumber,
-		String accountHolder,
 		Image backgroundImage
 	) {
 		super.updateMeeting(meetingName, description, backgroundImage);
@@ -59,6 +55,5 @@ public class DeliveryMeeting extends Meeting {
 		this.storeName = storeName;
 		this.pickupLocation = pickupLocation;
 		this.accountNumber = accountNumber;
-		this.accountHolder = accountHolder;
 	}
 }

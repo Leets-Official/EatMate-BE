@@ -115,7 +115,6 @@ public class MeetingService {
 			.pickupLocation(createDeliveryMeetingRequestDto.getPickupLocation())
 			.orderDeadline(LocalDateTime.now().plusMinutes(createDeliveryMeetingRequestDto.getOrderDeadline()))
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
-			.accountHolder(createDeliveryMeetingRequestDto.getAccountHolder())
 			.bankName(createDeliveryMeetingRequestDto.getBankName())
 			.backgroundImage(backgroundImage)
 			.build();
@@ -535,7 +534,6 @@ public class MeetingService {
 			updateDeliveryMeetingRequestDto.getStoreName(),
 			updateDeliveryMeetingRequestDto.getPickupLocation(),
 			updateDeliveryMeetingRequestDto.getAccountNumber(),
-			updateDeliveryMeetingRequestDto.getAccountHolder(),
 			backgroundImage
 		);
 	}
