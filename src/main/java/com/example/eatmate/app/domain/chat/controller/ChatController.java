@@ -39,7 +39,7 @@ public class ChatController {
 	}
 
 	//보완적 함수 웹소켓 끊어졌을 경우
-	@PostMapping("/chat/{chatRoomId}")
+	@PostMapping("/api/chat/{chatRoomId}")
 	@Operation(summary = "채팅 메세지 전송 대체 수단", description = "채팅을 메세지를 대체 방안을 통해 전송합니다.")
 	public ResponseEntity<GlobalResponseDto<Void>> sendChatMessageAlter(
 		@PathVariable Long chatRoomId,
