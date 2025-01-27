@@ -87,9 +87,9 @@ class MeetingStatusSchedulerTest {
 	@DisplayName("오프라인 모임이 만료되면 상태가 INACTIVE로 변경되어야 한다")
 	void shouldUpdateExpiredOfflineMeetingStatus() {
 		// given
-		// when(offlineMeetingRepository.findByMeetingStatusAndMeetingDateBefore(
-		// 	eq(MeetingStatus.ACTIVE), any(LocalDateTime.class)))
-		// 	.thenReturn(List.of(expiredOfflineMeeting));
+		when(offlineMeetingRepository.findByMeetingStatusAndMeetingDateBefore(
+			eq(MeetingStatus.ACTIVE), any(LocalDateTime.class)))
+			.thenReturn(List.of(expiredOfflineMeeting));
 
 		// when
 		scheduler.updateOfflineMeetingStatus();
