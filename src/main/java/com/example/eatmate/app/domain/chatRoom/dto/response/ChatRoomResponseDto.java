@@ -53,17 +53,20 @@ public class ChatRoomResponseDto {
 	public static class ChatMemberResponseDto {
 		private String memberName;
 		private Mbti mbti;
+		private String profileUrl;
 
 		@Builder
-		private ChatMemberResponseDto(String memberName, Mbti mbti) {
+		private ChatMemberResponseDto(String memberName, Mbti mbti, String profileUrl) {
 			this.memberName = memberName;
 			this.mbti = mbti;
+			this.profileUrl = profileUrl;
 		}
 
 		public static ChatMemberResponseDto from(Member member) {
 			return ChatMemberResponseDto.builder()
 				.memberName(member.getName())
 				.mbti(member.getMbti())
+				.profileUrl(member.getProfileImage().toString())
 				.build();
 		}
 	}
