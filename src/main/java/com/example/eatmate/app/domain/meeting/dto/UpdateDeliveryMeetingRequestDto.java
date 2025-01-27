@@ -1,5 +1,7 @@
 package com.example.eatmate.app.domain.meeting.dto;
 
+import java.time.LocalDateTime;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
@@ -23,7 +25,7 @@ public class UpdateDeliveryMeetingRequestDto {
 	private FoodCategory foodCategory;
 
 	@Future
-	private String orderDeadline;
+	private LocalDateTime orderDeadline;
 
 	private String storeName;
 
