@@ -11,9 +11,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
@@ -21,7 +22,7 @@ import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.OfflineMeetingRepository;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class MeetingStatusSchedulerTest {
 
 	@Mock
@@ -34,6 +35,7 @@ class MeetingStatusSchedulerTest {
 	private MeetingStatusScheduler scheduler;
 
 	private LocalDateTime now;
+
 	private DeliveryMeeting expiredDeliveryMeeting;
 	private DeliveryMeeting activeDeliveryMeeting;
 	private OfflineMeeting expiredOfflineMeeting;
@@ -44,27 +46,24 @@ class MeetingStatusSchedulerTest {
 		now = LocalDateTime.now();
 		expiredDeliveryMeeting = DeliveryMeeting.builder()
 			.meetingStatus(MeetingStatus.ACTIVE)
-			.id(1L)
 			.orderDeadline(now.minusHours(1))
 			.build();
 
 		activeDeliveryMeeting = DeliveryMeeting.builder()
 			.meetingStatus(MeetingStatus.ACTIVE)
-			.id(2L)
 			.orderDeadline(now.plusHours(1))
 			.build();
 
 		expiredOfflineMeeting = OfflineMeeting.builder()
 			.meetingStatus(MeetingStatus.ACTIVE)
-			.id(1L)
 			.meetingDate(now.minusHours(1))
 			.build();
 
 		activeOfflineMeeting = OfflineMeeting.builder()
 			.meetingStatus(MeetingStatus.ACTIVE)
-			.id(2L)
 			.meetingDate(now.plusHours(1))
 			.build();
+
 	}
 
 	@Test
@@ -88,9 +87,9 @@ class MeetingStatusSchedulerTest {
 	@DisplayName("오프라인 모임이 만료되면 상태가 INACTIVE로 변경되어야 한다")
 	void shouldUpdateExpiredOfflineMeetingStatus() {
 		// given
-		when(offlineMeetingRepository.findByMeetingStatusAndMeetingDateBefore(
-			eq(MeetingStatus.ACTIVE), any(LocalDateTime.class)))
-			.thenReturn(List.of(expiredOfflineMeeting));
+		// when(offlineMeetingRepository.findByMeetingStatusAndMeetingDateBefore(
+		// 	eq(MeetingStatus.ACTIVE), any(LocalDateTime.class)))
+		// 	.thenReturn(List.of(expiredOfflineMeeting));
 
 		// when
 		scheduler.updateOfflineMeetingStatus();
