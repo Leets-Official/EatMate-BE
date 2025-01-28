@@ -3,6 +3,7 @@ package com.example.eatmate.global.config.error.exception;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,6 +128,21 @@ public class GlobalExceptionHandler {
 		String errorMessage = String.format("파라미터 '%s' 가 적절하지 않은 값을 가지고 있습니다.: %s",
 			paramName,
 			ex.getValue());
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(ConversionFailedException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleConversionFailedException(
+		ConversionFailedException ex) {
+		ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_TYPE;
+
+		String targetType = ex.getTargetType().getType().getSimpleName();
+		String value = String.valueOf(ex.getValue());
+		String errorMessage = String.format("ENUM '%s'에 '%s' 값이 존재하지 않습니다.",
+			targetType,
+			value);
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
