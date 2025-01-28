@@ -10,7 +10,6 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -28,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
 	private static final String ISSUE_CREATE_ENV = "dev";
-	private final View error;
 	private final GithubIssueGenerator githubIssueGenerator;
 	private final Environment environment;
 
