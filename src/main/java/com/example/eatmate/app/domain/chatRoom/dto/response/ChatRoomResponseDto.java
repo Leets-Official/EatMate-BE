@@ -68,7 +68,7 @@ public class ChatRoomResponseDto {
 			return ChatMemberResponseDto.builder()
 				.nickname(member.getNickname())
 				.mbti(member.getMbti())
-				.profileImageUrl(member.getProfileImage().toString())
+				.profileImageUrl(member.getProfileImage().getImageUrl())
 				.build();
 		}
 	}
