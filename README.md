@@ -33,10 +33,10 @@ EatMate의 목표는 바로 그들의 일상에 따뜻함과 편리함을 더하
     <td align="center"><img src="https://github.com/jj0526.png" width="160"></td>
   </tr>
   <tr>
-    <td align="center">은현수(Lead, PO)</td>
-    <td align="center">문석준</td>
-    <td align="center">김동윤</td>
-    <td align="center">전시현</td>
+    <td align="center"><a href="https://github.com/ehs208">은현수</td>
+    <td align="center"><a href="https://github.com/seokjun01">문석준</td>
+    <td align="center"><a href="https://github.com/dyk-im">김동윤</td>
+    <td align="center"><a href="https://github.com/jj0526">전시현</td>
   </tr>
   <tr>
     <td align="center">모임</td>
@@ -46,9 +46,39 @@ EatMate의 목표는 바로 그들의 일상에 따뜻함과 편리함을 더하
   </tr>
     <tr>
     <td align="center">PO, BE Lead</td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
+    <td align="center">BE</td>
+    <td align="center">BE</td>
+    <td align="center">BE</td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td align="center"><img src="https://github.com/JIN921.png" width="160"></td>
+    <td align="center"><img src="https://github.com/dalzzy.png" width="160"></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/JIN921">이유진</td>
+    <td align="center"><a href="https://github.com/dalzzy">계다현</td>
+  </tr>
+    <tr>
+    <td align="center">FE Lead</td>
+    <td align="center">FE</td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td align="center"><img src="https://placehold.co/160?text=Project Owner" width="160" height="160"></td>
+    <td align="center"><img src="https://placehold.co/160?text=Designer" width="160" height="160"></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://www.behance.net/6c6bd374">이예은</td>
+    <td align="center"><a href="https://spangle-ellipse-912.notion.site/f8be40236f9745cd9429f8f86c385e02">진소이</td>
+  </tr>
+    <tr>
+    <td align="center">Project Manager</td>
+    <td align="center">Designer</td>
   </tr>
 </table>
 
