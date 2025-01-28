@@ -42,7 +42,7 @@ EatMate의 목표는 바로 그들의 일상에 따뜻함과 편리함을 더하
     <td align="center">모임</td>
     <td align="center">회원</td>
     <td align="center">채팅</td>
-    <td align="center">Infra, 신고/차단/게시판/이미지</td>
+    <td align="center">인프라, 신고/차단/게시판/이미지</td>
   </tr>
     <tr>
     <td align="center">PO, BE Lead</td>
@@ -140,6 +140,7 @@ EatMate의 목표는 바로 그들의 일상에 따뜻함과 편리함을 더하
 ![JPA](https://img.shields.io/badge/JPA-007396?style=flat&logo=hibernate&logoColor=white)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=flat&logo=rabbitmq&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)
+![QueryDSL](https://img.shields.io/badge/QueryDSL-E74C3C?style=flat&logo=querydsl&logoColor=white)
 
 ### Infra
 
