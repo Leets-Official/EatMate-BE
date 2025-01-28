@@ -1,9 +1,10 @@
 package com.example.eatmate.app.domain.chat.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,14 +51,25 @@ public class ChatService {
 		chatRoom.updateLastChatAt(chat.getCreatedAt());
 	}
 
-	//불러오기(읽기 상태 없음)
-	public Page<ChatMessageResponseDto> loadChat(Long chatRoomId, Pageable pageable) {
+	//불러오기
+	public Slice<ChatMessageResponseDto> loadChat(Long chatRoomId, LocalDateTime cursor, Pageable pageable) {
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
-		Page<Chat> chats = chatRepository.findChatByChatRoom(chatRoom, pageable);
+		try{
+			if(cursor == null) {
+				Slice<Chat> chats = chatRepository.findChatByChatRoomOrderByCreatedAtDesc(chatRoom, pageable);
 
-		return chats.map(ChatMessageResponseDto::from);
+				return chats.map(ChatMessageResponseDto::from);
+			}
+			else {
+				Slice<Chat> chats = chatRepository.findChatByChatRoomAndCreatedAtLessThanOrderByCreatedAtDesc(chatRoom, cursor, pageable);
+
+				return chats.map(ChatMessageResponseDto::from);
+			}
+		} catch (Exception e) {
+			throw new CommonException(ErrorCode.CHAT_NOT_FOUND);
+		}
 	}
 
 	//채팅 삭제
