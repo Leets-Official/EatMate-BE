@@ -2,7 +2,7 @@ package com.example.eatmate.app.domain.chatRoom.dto.response;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 
 import com.example.eatmate.app.domain.chat.dto.response.ChatMessageResponseDto;
 import com.example.eatmate.app.domain.member.domain.Mbti;
@@ -23,7 +23,7 @@ public class ChatRoomResponseDto {
 	private boolean isLast;
 
 	@Builder
-	private ChatRoomResponseDto(Page<ChatMessageResponseDto> chats, List<ChatMemberResponseDto> participants,
+	private ChatRoomResponseDto(Slice<ChatMessageResponseDto> chats, List<ChatMemberResponseDto> participants,
 		ChatRoomDeliveryNoticeDto deliveryNotice, ChatRoomOfflineNoticeDto offlineNotice) {
 		this.chats = chats.getContent();
 		this.participants = participants;
@@ -33,40 +33,42 @@ public class ChatRoomResponseDto {
 		this.isLast = chats.isLast();
 	}
 
-	public static ChatRoomResponseDto ofWithDelivery(List<ChatMemberResponseDto> participants, Page<ChatMessageResponseDto> chatPage, ChatRoomDeliveryNoticeDto deliveryNotice) {
+	public static ChatRoomResponseDto ofWithDelivery(List<ChatMemberResponseDto> participants, Slice<ChatMessageResponseDto> chatPage, ChatRoomDeliveryNoticeDto deliveryNotice) {
 		return ChatRoomResponseDto.builder()
 			.chats(chatPage)
 			.participants(participants)
+			.offlineNotice(null)
 			.deliveryNotice(deliveryNotice)
 			.build();
 	}
 
-	public static ChatRoomResponseDto ofWithOffline(List<ChatMemberResponseDto> participants, Page<ChatMessageResponseDto> chatPage, ChatRoomOfflineNoticeDto offlineNotice) {
+	public static ChatRoomResponseDto ofWithOffline(List<ChatMemberResponseDto> participants, Slice<ChatMessageResponseDto> chatPage, ChatRoomOfflineNoticeDto offlineNotice) {
 		return ChatRoomResponseDto.builder()
 			.chats(chatPage)
 			.participants(participants)
 			.offlineNotice(offlineNotice)
+			.deliveryNotice(null)
 			.build();
 	}
 
 	@Getter
 	public static class ChatMemberResponseDto {
-		private String memberName;
+		private String nickname;
 		private Mbti mbti;
-		private String profileUrl;
+		private String profileImageUrl;
 
 		@Builder
-		private ChatMemberResponseDto(String memberName, Mbti mbti, String profileUrl) {
-			this.memberName = memberName;
+		private ChatMemberResponseDto(String nickname, Mbti mbti, String profileImageUrl) {
+			this.nickname = nickname;
 			this.mbti = mbti;
-			this.profileUrl = profileUrl;
+			this.profileImageUrl = profileImageUrl;
 		}
 
 		public static ChatMemberResponseDto from(Member member) {
 			return ChatMemberResponseDto.builder()
-				.memberName(member.getName())
+				.nickname(member.getNickname())
 				.mbti(member.getMbti())
-				.profileUrl(member.getProfileImage().toString())
+				.profileImageUrl(member.getProfileImage().toString())
 				.build();
 		}
 	}
