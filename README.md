@@ -69,12 +69,12 @@ EatMate의 목표는 바로 그들의 일상에 따뜻함과 편리함을 더하
 
 <table>
   <tr>
-    <td align="center"><img src="https://placehold.co/160?text=Project Owner" width="160" height="160"></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/ae4d7546-f82f-4890-b23c-03cffc779411" width="160" height="160"></td>
     <td align="center"><img src="https://placehold.co/160?text=Designer" width="160" height="160"></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://www.behance.net/6c6bd374">이예은</td>
-    <td align="center"><a href="https://spangle-ellipse-912.notion.site/f8be40236f9745cd9429f8f86c385e02">진소이</td>
+    <td align="center"><a href="https://spangle-ellipse-912.notion.site/f8be40236f9745cd9429f8f86c385e02">이예은</td>
+    <td align="center"><a href="https://www.behance.net/6c6bd374">진소이</td>
   </tr>
     <tr>
     <td align="center">Project Manager</td>
