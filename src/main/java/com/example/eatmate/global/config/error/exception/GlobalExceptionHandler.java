@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -143,6 +144,20 @@ public class GlobalExceptionHandler {
 		String errorMessage = String.format("ENUM '%s'에 '%s' 값이 존재하지 않습니다.",
 			targetType,
 			value);
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleMissingServletRequestParameterException(
+		MissingServletRequestParameterException ex) {
+		ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_TYPE;
+
+		String parameterName = ex.getParameterName();
+		String errorMessage = String.format("필수 파라미터 '%s'가 누락되었습니다.",
+			parameterName
+		);
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
