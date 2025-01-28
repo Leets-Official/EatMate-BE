@@ -12,6 +12,7 @@ public enum ErrorCode {
 	VALIDATION_FAILED(400, "VALIDATION_FAILED", "요청 값이 올바르지 않습니다."),
 	JSON_PARSING_ERROR(400, "JSON_PARSING_ERROR", "JSON 데이터 처리 중 오류가 발생했습니다"),
 	NO_RESOURCE_FOUND(404, "NO_RESOURCE_FOUND", "해당 리소스를 찾을 수 없습니다."),
+	INVALID_PARAMETER_TYPE(400, "INVALID_PARAMETER_TYPE", "적절하지 않은 파라미터 타입입니다."),
 
 	//회원
 	USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다."),

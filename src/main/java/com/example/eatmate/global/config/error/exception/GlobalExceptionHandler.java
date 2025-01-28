@@ -10,6 +10,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -115,6 +116,20 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorCode.getMessage()));
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleMethodArgumentTypeMismatchException(
+		MethodArgumentTypeMismatchException ex) {
+		ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_TYPE;
+
+		String paramName = ex.getName();
+		String errorMessage = String.format("파라미터 '%s' 가 적절하지 않은 값을 가지고 있습니다.: %s",
+			paramName,
+			ex.getValue());
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
 	}
 
 	public void handleUnexpectedError(Exception ex) {
