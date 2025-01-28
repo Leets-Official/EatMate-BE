@@ -1,21 +1,20 @@
 package com.example.eatmate.app.domain.report.domain;
 
-import java.util.List;
-
 import com.example.eatmate.app.domain.member.domain.Member;
-import com.example.eatmate.app.domain.report.converter.ReportTypeListConverter;
 import com.example.eatmate.app.domain.report.dto.ReportRequestDto;
 import com.example.eatmate.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,24 +39,29 @@ public class Report extends BaseTimeEntity {
 	private Member reported;
 
 	// 신고 유형 목록
-	@NotEmpty
-	@Convert(converter = ReportTypeListConverter.class)
-	private List<ReportType> reportTypes;
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	private ReportType reportType;
 
 	// 구체적인 신고 사유
 	@Column(nullable = false)
 	private String reportingReasonDescription;
+
+	@NotBlank
+	private String chatMessage;
 
 	// 처리 여부
 	@Column(nullable = false)
 	private boolean isProcessed = false;
 
 	@Builder
-	private Report(Member reporter, Member reported, List<ReportType> reportTypes, String reportingReasonDescription) {
+	private Report(Member reporter, Member reported, ReportType reportType, String reportingReasonDescription,
+		String chatMessage) {
 		this.reporter = reporter;
 		this.reported = reported;
-		this.reportTypes = reportTypes;
+		this.reportType = reportType;
 		this.reportingReasonDescription = reportingReasonDescription;
+		this.chatMessage = chatMessage;
 		this.isProcessed = false;
 	}
 
@@ -65,8 +69,9 @@ public class Report extends BaseTimeEntity {
 		return Report.builder()
 			.reporter(reporter)
 			.reported(reported)
-			.reportTypes(reportRequestDto.getReportTypes())
+			.reportType(reportRequestDto.getReportType())
 			.reportingReasonDescription(reportRequestDto.getReportingReasonDescription())
+			.chatMessage(reportRequestDto.getChatMessage())
 			.build();
 	}
 
