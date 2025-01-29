@@ -3,13 +3,16 @@ package com.example.eatmate.global.config.error.exception;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -115,6 +118,49 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorCode.getMessage()));
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleMethodArgumentTypeMismatchException(
+		MethodArgumentTypeMismatchException ex) {
+		ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_TYPE;
+
+		String paramName = ex.getName();
+		String errorMessage = String.format("파라미터 '%s' 가 적절하지 않은 값을 가지고 있습니다.: %s",
+			paramName,
+			ex.getValue());
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(ConversionFailedException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleConversionFailedException(
+		ConversionFailedException ex) {
+		ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_TYPE;
+
+		String targetType = ex.getTargetType().getType().getSimpleName();
+		String value = String.valueOf(ex.getValue());
+		String errorMessage = String.format("ENUM '%s'에 '%s' 값이 존재하지 않습니다.",
+			targetType,
+			value);
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleMissingServletRequestParameterException(
+		MissingServletRequestParameterException ex) {
+		ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_TYPE;
+
+		String parameterName = ex.getParameterName();
+		String errorMessage = String.format("필수 파라미터 '%s'가 누락되었습니다.",
+			parameterName
+		);
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
 	}
 
 	public void handleUnexpectedError(Exception ex) {
