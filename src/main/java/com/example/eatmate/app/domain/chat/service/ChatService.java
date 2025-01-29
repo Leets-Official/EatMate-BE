@@ -57,18 +57,23 @@ public class ChatService {
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
 		try{
-			if(cursor == null) {
+			if (cursor == null) {
 				Slice<Chat> chats = chatRepository.findChatByChatRoomOrderByCreatedAtDesc(chatRoom, pageable);
-
 				return chats.map(ChatMessageResponseDto::from);
 			}
-			else {
-				Slice<Chat> chats = chatRepository.findChatByChatRoomAndCreatedAtLessThanOrderByCreatedAtDesc(chatRoom, cursor, pageable);
-
-				return chats.map(ChatMessageResponseDto::from);
+			if (cursor.isAfter(LocalDateTime.now())) {
+				throw new CommonException(ErrorCode.INVALID_CURSOR);
 			}
+			Slice<Chat> chats = chatRepository.findChatByChatRoomAndCreatedAtLessThanOrderByCreatedAtDesc(chatRoom, cursor, pageable);
+
+			return chats.map(ChatMessageResponseDto::from);
+
+		} catch (CommonException e) {
+			throw e;
+
 		} catch (Exception e) {
-			throw new CommonException(ErrorCode.CHAT_NOT_FOUND);
+			throw new CommonException(ErrorCode.CHAT_LOAD_FAIL);
+
 		}
 	}
 
