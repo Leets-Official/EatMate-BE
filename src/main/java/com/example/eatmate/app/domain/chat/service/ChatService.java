@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.eatmate.app.domain.chat.domain.Chat;
 import com.example.eatmate.app.domain.chat.domain.repository.ChatRepository;
 import com.example.eatmate.app.domain.chat.dto.request.ChatMessageRequestDto;
+import com.example.eatmate.app.domain.chat.dto.response.ChatMessageListDto;
 import com.example.eatmate.app.domain.chat.dto.response.ChatMessageResponseDto;
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
 import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
@@ -81,5 +82,11 @@ public class ChatService {
 	public void deleteChat(ChatRoom chatRoom) {
 		List<Chat> chatList = chatRepository.findChatByChatRoomAndDeletedStatusNot(chatRoom, DeletedStatus.NOT_DELETED);
 		chatList.forEach(Chat::deleteChat);
+	}
+
+	public ChatMessageListDto convertChatList(Long chatRoomId, LocalDateTime cursor, Pageable pageable) {
+		Slice<ChatMessageResponseDto> chatDtos = loadChat(chatRoomId, cursor, pageable);
+
+		return ChatMessageListDto.from(chatDtos);
 	}
 }
