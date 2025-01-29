@@ -17,15 +17,17 @@ public class ChatMessageListDto {
 	private boolean isLast;
 
 	@Builder
-	private ChatMessageListDto(Slice<ChatMessageResponseDto> chatList) {
-		this.chats = chatList.getContent();
-		this.pageNumber = chatList.getNumber();
-		this.isLast = chatList.isLast();
+	private ChatMessageListDto(List<ChatMessageResponseDto> chats, int pageNumber, boolean isLast) {
+		this.chats = chats;
+		this.pageNumber = pageNumber;
+		this.isLast = isLast;
 	}
 
 	public static ChatMessageListDto from(Slice<ChatMessageResponseDto> chatList) {
 		return ChatMessageListDto.builder()
-			.chatList(chatList)
+			.chats(chatList.getContent())
+			.pageNumber(chatList.getNumber())
+			.isLast(chatList.isLast())
 			.build();
 	}
 }
