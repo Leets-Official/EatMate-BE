@@ -53,7 +53,7 @@ public class ChatRoomController {
 		@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(ChatMessageListDto.from(chatService.loadChat(chatRoomId, cursor, pageable))));
+			.body(GlobalResponseDto.success(chatService.convertChatList(chatRoomId, cursor, pageable)));
 	}
 
 	@PatchMapping("/{chatRoomId}")
