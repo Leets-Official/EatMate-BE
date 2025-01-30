@@ -47,7 +47,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 			}
 			logTokens(accessToken, refreshToken);
 			setTokensInCookie(response, accessToken, refreshToken);
-			response.sendRedirect("http://localhost:3000/oauth2/callback");
+			response.sendRedirect("https://develop.d4u0qurydeei4.amplifyapp.com/oauth2/callback");
 		} catch (Exception e) {
 			log.error("OAuth2 로그인 처리 중 오류 발생: {} ", e.getMessage());
 			throw e;
