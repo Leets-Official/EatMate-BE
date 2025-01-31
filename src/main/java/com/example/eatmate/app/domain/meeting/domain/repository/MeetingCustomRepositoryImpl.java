@@ -313,7 +313,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			meeting.participantLimit.maxParticipants,
 			deliveryMeeting.storeName.as("location"),
 			meeting.createdAt,
-			deliveryMeeting.orderDeadline.as("dueDateTime")
+			deliveryMeeting.orderDeadline.as("dueDateTime"),
+			meeting.chatRoom.lastChatAt
 		);
 	}
 
@@ -326,7 +327,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 			meeting.participantLimit.maxParticipants,
 			offlineMeeting.meetingPlace.as("location"),
 			meeting.createdAt,
-			offlineMeeting.meetingDate.as("dueDateTime")
+			offlineMeeting.meetingDate.as("dueDateTime"),
+			meeting.chatRoom.lastChatAt
 		);
 	}
 
