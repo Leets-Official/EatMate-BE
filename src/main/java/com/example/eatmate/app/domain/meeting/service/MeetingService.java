@@ -272,9 +272,9 @@ public class MeetingService {
 		Meeting meeting = meetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
-		Long currentUserId = securityUtils.getMember(userDetails).getMemberId();
+		Member member = securityUtils.getMember(userDetails);
 
-		List<MeetingDetailResponseDto.ParticipantDto> participants = getParticipants(meeting, currentUserId);
+		List<MeetingDetailResponseDto.ParticipantDto> participants = getParticipants(meeting, member.getMemberId());
 
 		return MeetingDetailResponseDto.builder()
 			.meetingType(meeting.getType())
@@ -284,7 +284,8 @@ public class MeetingService {
 			.location(getLocation(meeting))
 			.dueDateTime(getDueDateTime(meeting))
 			.backgroundImage(Optional.ofNullable(meeting.getBackgroundImage()).map(Image::getImageUrl).orElse(null))
-			.isOwner(isOwner(meeting, currentUserId))
+			.isOwner(isOwner(meeting, member.getMemberId()))
+			.isCurrentUser(isCurrentUser(meeting, member))
 			.participants(participants)
 			.build();
 	}
@@ -313,6 +314,10 @@ public class MeetingService {
 			.orElse(false);
 	}
 
+	private Boolean isCurrentUser(Meeting meeting, Member member) {
+		return meetingParticipantRepository.existsByMeetingAndMember(meeting, member);
+	}
+
 	private List<MeetingDetailResponseDto.ParticipantDto> getParticipants(Meeting meeting, Long currentUserId) {
 		return meetingParticipantRepository.findByMeeting(meeting).stream()
 			.sorted((p1, p2) -> {
@@ -327,6 +332,9 @@ public class MeetingService {
 			.map(participant -> MeetingDetailResponseDto.ParticipantDto.createParticipantDto(
 				participant.getMember().getMemberId(),
 				participant.getMember().getNickname(),
+				Optional.ofNullable(participant.getMember().getProfileImage())
+					.map(Image::getImageUrl)
+					.orElse(null),
 				participant.getRole() == ParticipantRole.HOST,
 				participant.getMember().getMemberId().equals(currentUserId)
 			))
@@ -534,6 +542,7 @@ public class MeetingService {
 			updateDeliveryMeetingRequestDto.getStoreName(),
 			updateDeliveryMeetingRequestDto.getPickupLocation(),
 			updateDeliveryMeetingRequestDto.getAccountNumber(),
+			updateDeliveryMeetingRequestDto.getBankName(),
 			backgroundImage
 		);
 	}
