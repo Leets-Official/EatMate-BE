@@ -4,9 +4,13 @@ import static com.example.eatmate.app.domain.meeting.domain.BankName.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -220,5 +224,98 @@ class MeetingServiceTest {
 		Long finalParticipantCount = meetingParticipantRepository.countByMeeting_Id(testMeeting.getId());
 		log.info("최종 참가자 수 - 기대값: {}, 실제값: {}", 2, finalParticipantCount);
 		assertEquals(2, finalParticipantCount, "최종 참가자 수는 2명이어야 합니다 (호스트 1명 + 성공한 참가자 1명)");
+	}
+
+	@Test
+	@DisplayName("동시에 마지막 자리 참여 시도 테스트")
+	void massiveConcurrentRequestTest() throws InterruptedException {
+		int totalRequests = 100;  // 총 100개 요청
+		int concurrentUsers = 10; // 10명의 사용자
+
+		// 테스트용 유저들 생성
+		List<Member> testMembers = new ArrayList<>();
+		List<UserDetails> testUserDetails = new ArrayList<>();
+
+		for (int i = 0; i < concurrentUsers; i++) {
+			Member member = Member.builder()
+				.email("mocktest" + i + "@test.com")
+				.nickname("tester" + i)
+				.gender(Gender.MALE)
+				.build();
+			memberRepository.save(member);
+			testMembers.add(member);
+
+			UserDetails userDetails = User.withUsername(member.getEmail())
+				.password("password")
+				.roles("USER")
+				.build();
+			testUserDetails.add(userDetails);
+		}
+
+		AtomicInteger successCount = new AtomicInteger(0);
+		AtomicInteger failCount = new AtomicInteger(0);
+		AtomicInteger timeoutCount = new AtomicInteger(0);
+		AtomicInteger deadlockCount = new AtomicInteger(0);
+		AtomicInteger normalFailCount = new AtomicInteger(0);
+
+		ExecutorService executorService = Executors.newFixedThreadPool(concurrentUsers);
+		CountDownLatch latch = new CountDownLatch(totalRequests);
+
+		// 시작 시간 기록
+		long startTime = System.currentTimeMillis();
+
+		// 100개 요청 시뮬레이션
+		for (int i = 0; i < totalRequests; i++) {
+			final int userIndex = i % concurrentUsers;  // 유저 순환
+			executorService.submit(() -> {
+				try {
+					meetingService.joinDeliveryMeeting(testMeeting.getId(),
+						testUserDetails.get(userIndex));
+					successCount.incrementAndGet();
+				} catch (CommonException e) {
+					if (e.getErrorCode() == ErrorCode.PARTICIPANT_LIMIT_EXCEEDED) {
+						normalFailCount.incrementAndGet();
+					}
+					failCount.incrementAndGet();
+				} catch (Exception e) {
+					if (e instanceof TimeoutException) {
+						timeoutCount.incrementAndGet();
+					} else {
+						log.warn("데드락/기타 오류 발생: {}", e.getMessage());
+						deadlockCount.incrementAndGet();
+					}
+					failCount.incrementAndGet();
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		// 10초 타임아웃 설정
+		boolean completed = latch.await(10, TimeUnit.SECONDS);
+
+		// 종료 시간 기록
+		long endTime = System.currentTimeMillis();
+		long totalTime = endTime - startTime;
+
+		executorService.shutdown();
+
+		// 결과 로깅
+		log.info("총 요청 수: {}", totalRequests);
+		log.info("성공한 요청 수: {}", successCount.get());
+		log.info("실패한 요청 수: {}", failCount.get());
+		log.info("일반 실패 (인원초과): {}", normalFailCount.get());
+		log.info("타임아웃: {}", timeoutCount.get());
+		log.info("데드락/기타: {}", deadlockCount.get());
+		log.info("타임아웃 발생여부: {}", !completed);
+		log.info("총 소요 시간: {}ms", totalTime);
+		log.info("초당 처리량: {} requests/second",
+			(double)totalRequests / (totalTime / 1000.0));
+
+		// 검증
+		assertEquals(1, successCount.get(), "정원(2)에서 호스트(1)를 제외하고 1명만 성공해야 함");
+		assertEquals(totalRequests - 1, failCount.get(), "나머지는 모두 실패해야 함");
+		assertEquals(0, timeoutCount.get(), "타임아웃이 발생하면 안됨");
+		assertEquals(0, deadlockCount.get(), "데드락이 발생하면 안됨");
 	}
 }
