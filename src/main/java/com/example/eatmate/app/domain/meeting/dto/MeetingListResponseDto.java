@@ -14,10 +14,11 @@ public class MeetingListResponseDto {
 	private String location;
 	private LocalDateTime createdAt;
 	private LocalDateTime dueDateTime;
+	private LocalDateTime lastChatAt;
 
 	public MeetingListResponseDto(Long meetingId, String meetingName, String meetingDescription,
 		Long currentParticipantCount, Long maxParticipants, String location, LocalDateTime createdAt,
-		LocalDateTime dueDateTime) {
+		LocalDateTime dueDateTime, LocalDateTime lastChatAt) {
 		this.meetingId = meetingId;
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
@@ -26,6 +27,7 @@ public class MeetingListResponseDto {
 		this.location = location;
 		this.createdAt = createdAt;
 		this.dueDateTime = dueDateTime;
+		this.lastChatAt = lastChatAt;
 	}
 }
 
