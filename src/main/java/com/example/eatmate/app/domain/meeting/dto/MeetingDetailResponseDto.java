@@ -18,12 +18,13 @@ public class MeetingDetailResponseDto {
 	private LocalDateTime dueDateTime;
 	private String backgroundImage;
 	private Boolean isOwner;
+	private Boolean isCurrentUser;
 	private List<ParticipantDto> participants;
 
 	@Builder
 	private MeetingDetailResponseDto(String meetingType, String meetingName, String meetingDescription,
 		GenderRestriction genderRestriction, String location, LocalDateTime dueDateTime,
-		String backgroundImage, Boolean isOwner, List<ParticipantDto> participants) {
+		String backgroundImage, Boolean isOwner, Boolean isCurrentUser, List<ParticipantDto> participants) {
 		this.meetingType = meetingType;
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
@@ -32,6 +33,7 @@ public class MeetingDetailResponseDto {
 		this.dueDateTime = dueDateTime;
 		this.backgroundImage = backgroundImage;
 		this.isOwner = isOwner;
+		this.isCurrentUser = isCurrentUser;
 		this.participants = participants;
 	}
 
@@ -39,22 +41,27 @@ public class MeetingDetailResponseDto {
 	public static class ParticipantDto {
 		private Long userId;
 		private String name;
+		private String userProfileImage;
 		private Boolean isOwner;
 		private Boolean isCurrentUser;
 
 		@Builder
-		private ParticipantDto(Long userId, String name, Boolean isOwner, Boolean isCurrentUser) {
+		private ParticipantDto(Long userId, String name, Boolean isOwner, Boolean isCurrentUser,
+			String userProfileImage) {
 			this.userId = userId;
 			this.name = name;
+			this.userProfileImage = userProfileImage;
 			this.isOwner = isOwner;
 			this.isCurrentUser = isCurrentUser;
 		}
 
-		public static ParticipantDto createParticipantDto(Long userId, String name, Boolean isOwner,
+		public static ParticipantDto createParticipantDto(Long userId, String name, String userProfileImage,
+			Boolean isOwner,
 			Boolean isCurrentUser) {
 			return ParticipantDto.builder()
 				.userId(userId)
 				.name(name)
+				.userProfileImage(userProfileImage)
 				.isOwner(isOwner)
 				.isCurrentUser(isCurrentUser)
 				.build();
