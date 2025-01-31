@@ -107,20 +107,22 @@ public class MemberService {
 		Member member = memberRepository.findByEmailWithProfileImage(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
-		// 닉네임 중복 확인
-		if (myInfoUpdateRequestDto.getNickname() != null &&
-			memberRepository.existsByNickname(myInfoUpdateRequestDto.getNickname())) {
-			throw new CommonException(ErrorCode.DUPLICATE_NICKNAME);
-		}
+		if (myInfoUpdateRequestDto != null) {
+			// 닉네임 중복 확인
+			if (myInfoUpdateRequestDto.getNickname() != null &&
+				memberRepository.existsByNickname(myInfoUpdateRequestDto.getNickname())) {
+				throw new CommonException(ErrorCode.DUPLICATE_NICKNAME);
+			}
 
-		// 닉네임 업데이트
-		if (myInfoUpdateRequestDto.getNickname() != null) {
-			member.updateNickname(myInfoUpdateRequestDto.getNickname());
-		}
+			// 닉네임 업데이트
+			if (myInfoUpdateRequestDto.getNickname() != null) {
+				member.updateNickname(myInfoUpdateRequestDto.getNickname());
+			}
 
-		// MBTI 업데이트
-		if (myInfoUpdateRequestDto.getMbti() != null) {
-			member.updateMbti(myInfoUpdateRequestDto.getMbti());
+			// MBTI 업데이트
+			if (myInfoUpdateRequestDto.getMbti() != null) {
+				member.updateMbti(myInfoUpdateRequestDto.getMbti());
+			}
 		}
 
 		// 프로필 이미지 업로드 처리

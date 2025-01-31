@@ -63,7 +63,7 @@ public class MemberController {
 	@PatchMapping("/myinfo")
 	@Operation(summary = "프로필 수정", description = "사용자의 닉네임, 전화번호, MBTI, 생년월일을 일부 수정합니다.")
 	public ResponseEntity<GlobalResponseDto<MyInfoResponseDto>> updateMyProfile(
-		@RequestPart(value = "data") @Valid MyInfoUpdateRequestDto updateRequestDto,
+		@RequestPart(value = "data", required = false) @Valid MyInfoUpdateRequestDto updateRequestDto,
 		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
