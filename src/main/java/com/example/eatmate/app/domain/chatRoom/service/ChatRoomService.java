@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,7 +79,7 @@ public class ChatRoomService {
 			.map(memberChatRoom -> ChatRoomResponseDto.ChatMemberResponseDto.from(memberChatRoom.getMember()))
 			.collect(Collectors.toList());
 
-		Page<ChatMessageResponseDto> chatList = chatService.loadChat(chatRoomId, pageable);
+		Slice<ChatMessageResponseDto> chatList = chatService.loadChat(chatRoomId, null, pageable);
 
 		//채팅방 공지 처리
 		Meeting meeting = chatRoom.getMeeting();

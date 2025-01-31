@@ -1,5 +1,6 @@
 package com.example.eatmate.app.domain.meeting.service;
 
+import static com.example.eatmate.app.domain.meeting.domain.BankName.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,30 +18,33 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
+import com.example.eatmate.app.domain.chatRoom.domain.repository.MemberChatRoomRepository;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
+import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.domain.repository.DeliveryMeetingRepository;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
+import com.example.eatmate.app.domain.meeting.domain.repository.MeetingRepository;
 import com.example.eatmate.app.domain.member.domain.Gender;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.exception.CommonException;
 
-import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
+@Slf4j
 class MeetingServiceTest {
 
 	@Autowired
 	private MeetingService meetingService;
-
-	@Autowired
-	private EntityManager entityManager;
 
 	@Autowired
 	private DeliveryMeetingRepository deliveryMeetingRepository;
@@ -50,10 +55,19 @@ class MeetingServiceTest {
 	@Autowired
 	private MemberRepository memberRepository;
 
+	@Autowired
+	private ChatRoomRepository chatRoomRepository;
+
 	private DeliveryMeeting testMeeting;
 	private Member hostMember;    // 호스트 멤버
 	private Member member2;       // 참여 시도할 첫 번째 멤버
-	private Member member3;       // 참여 시도할 두 번째 멤버
+	private Member member3;  // 참여 시도할 두 번째 멤버
+	private UserDetails member2Details;  // 첫 번째 멤버의 UserDetails
+	private UserDetails member3Details;  // 두 번째 멤버의 UserDetails
+	@Autowired
+	private MemberChatRoomRepository memberChatRoomRepository;
+	@Autowired
+	private MeetingRepository meetingRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -68,10 +82,11 @@ class MeetingServiceTest {
 				.build())
 			.foodCategory(FoodCategory.CHICKEN)
 			.storeName("Test Store")
+			.meetingStatus(MeetingStatus.ACTIVE)
+			.bankName(국민은행)
 			.pickupLocation("Test Location")
 			.orderDeadline(LocalDateTime.now().plusHours(1))
 			.accountNumber("1234-5678")
-			.accountHolder("Test Holder")
 			.build();
 
 		// 호스트 멤버 생성
@@ -95,32 +110,52 @@ class MeetingServiceTest {
 			.gender(Gender.MALE)
 			.build();
 
+		member2Details = User.withUsername(member2.getEmail())
+			.password("password")
+			.roles("USER")
+			.build();
+
+		member3Details = User.withUsername(member3.getEmail())
+			.password("password")
+			.roles("USER")
+			.build();
+
 		// 데이터 저장
-		memberRepository.save(hostMember);
-		memberRepository.save(member2);
-		memberRepository.save(member3);
+		memberRepository.saveAndFlush(hostMember);
+		memberRepository.saveAndFlush(member2);
+		memberRepository.saveAndFlush(member3);
+		deliveryMeetingRepository.saveAndFlush(testMeeting);
+
+		// 채팅방 생성
+		ChatRoom chatRoom = ChatRoom.createChatRoom(hostMember.getMemberId(), testMeeting);
+		chatRoomRepository.save(chatRoom);
+
+		// Meeting에 채팅방 연결
+		testMeeting.setChatRoom(chatRoom);
 		deliveryMeetingRepository.save(testMeeting);
 
 		// 호스트를 참가자로 등록
 		MeetingParticipant hostParticipant = MeetingParticipant.createMeetingParticipant(
 			hostMember, testMeeting, ParticipantRole.HOST);
 		meetingParticipantRepository.save(hostParticipant);
+
+	}
+
+	@AfterEach
+	void tearDown() {
+		// 테스트 종료 후 데이터 초기화
+		meetingParticipantRepository.deleteAll();
+		deliveryMeetingRepository.deleteAll();
+		meetingRepository.deleteAll();
+		memberChatRoomRepository.deleteAll();
+		chatRoomRepository.deleteAll();
+		memberRepository.deleteAll();
 	}
 
 	@Test
 	@DisplayName("동시에 마지막 자리 참여 시도 테스트")
 	void concurrentJoinTest() throws InterruptedException {
 
-		UserDetails member2Details = User.withUsername(member2.getEmail())
-			.password("")
-			.roles("USER")
-			.build();
-
-		UserDetails member3Details = User.withUsername(member3.getEmail())
-			.password("")
-			.roles("USER")
-			.build();
-		
 		// 동시에 실행할 스레드 개수 설정 (2개: member2, member3의 요청)
 		int numberOfThreads = 2;
 
@@ -143,9 +178,10 @@ class MeetingServiceTest {
 				meetingService.joinDeliveryMeeting(testMeeting.getId(), member2Details);
 				// 참여 성공시 successCount 증가
 				successCount.incrementAndGet();
-			} catch (CommonException e) {
+			} catch (Exception e) {
 				// 인원 초과로 실패시 failCount 증가
-				if (e.getErrorCode() == ErrorCode.PARTICIPANT_LIMIT_EXCEEDED) {
+				if (e instanceof CommonException &&
+					((CommonException)e).getErrorCode() == ErrorCode.PARTICIPANT_LIMIT_EXCEEDED) {
 					failCount.incrementAndGet();
 				}
 			} finally {
@@ -174,12 +210,15 @@ class MeetingServiceTest {
 		// 더 이상 필요없는 스레드 풀 종료
 		executorService.shutdown();
 
-		// 검증
+		// 성공/실패 카운트 로깅
+		log.info("성공 참가 횟수 - 기대값: {}, 실제값: {}", 1, successCount.get());
+		log.info("실패 참가 횟수 - 기대값: {}, 실제값: {}", 1, failCount.get());
 		assertEquals(1, successCount.get(), "성공적인 참가는 1회여야 합니다");
 		assertEquals(1, failCount.get(), "참가 실패는 1회여야 합니다");
 
-		// 최종 참가자 수 확인
+		// 최종 참가자 수 로깅
 		Long finalParticipantCount = meetingParticipantRepository.countByMeeting_Id(testMeeting.getId());
+		log.info("최종 참가자 수 - 기대값: {}, 실제값: {}", 2, finalParticipantCount);
 		assertEquals(2, finalParticipantCount, "최종 참가자 수는 2명이어야 합니다 (호스트 1명 + 성공한 참가자 1명)");
 	}
 }

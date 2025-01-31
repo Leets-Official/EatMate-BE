@@ -13,6 +13,8 @@ public enum ErrorCode {
 	JSON_PARSING_ERROR(400, "JSON_PARSING_ERROR", "JSON 데이터 처리 중 오류가 발생했습니다"),
 	NO_RESOURCE_FOUND(404, "NO_RESOURCE_FOUND", "해당 리소스를 찾을 수 없습니다."),
 	INVALID_EMAIL_DOMAIN(400, "INVALID_EMAIL_DOMAIN", "가천대학교 이메일이 아닙니다."),
+	INVALID_PARAMETER_TYPE(400, "INVALID_PARAMETER_TYPE", "적절하지 않은 파라미터 타입입니다."),
+
 
 	//회원
 	USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다."),
@@ -55,6 +57,8 @@ public enum ErrorCode {
 	MEMBER_CHATROOM_NOT_FOUND(404, "MEMBER_CHATROOM_NOT_FOUND", "멤버채팅방을 찾을 수 없습니다."),
 	CHAT_NOT_FOUND(404, "CHAT_NOT_FOUND", "채팅을 찾을 수 없습니다."),
 	QUEUE_NOT_EXIST(404, "QUEUE_NOT_EXIST", "큐를 찾을 수 없습니다."),
+	CHAT_LOAD_FAIL(400, "CHAT_LOAD_FAIL", "채팅 로드를 실패했습니다."),
+	INVALID_CURSOR(400, "INVALID_CURSOR", "잘못된 커서 값입니다."),
 
 	// 이미지
 	WRONG_IMAGE_FORMAT(400, "WRONG_IMAGE_FORMAT", "지원되지 않는 확장자 입니다. jpg, jpeg, png 파일만 업로드할 수 있습니다"),
