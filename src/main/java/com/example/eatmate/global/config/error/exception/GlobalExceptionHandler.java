@@ -12,11 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -60,7 +57,7 @@ public class GlobalExceptionHandler {
 		// 이메일 도메인 에러일 경우 리다이렉트
 		if (errorCode == ErrorCode.INVALID_EMAIL_DOMAIN) {
 			redirectAttributes.addFlashAttribute("errorMessage", errorCode.getMessage());
-			return "redirect:/error/invalid-email";
+			return "redirect:https://develop.d4u0qurydeei4.amplifyapp.com/intro/oauth2/invalid-account";
 		}
 
 		// 그 외의 경우 API 응답
