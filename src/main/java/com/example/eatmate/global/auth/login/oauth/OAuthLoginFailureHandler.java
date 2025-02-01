@@ -30,7 +30,7 @@ public class OAuthLoginFailureHandler implements AuthenticationFailureHandler {
 			CommonException commonException = (CommonException)cause;
 			if (commonException.getErrorCode() == ErrorCode.INVALID_EMAIL_DOMAIN) {
 				log.error("가천대 이메일이 아님: {}", exception.getMessage());
-				response.sendRedirect("/invalid-email.html");
+				response.sendRedirect("https://develop.d4u0qurydeei4.amplifyapp.com/intro/oauth2/invalid-account");
 				return;
 			}
 		}
