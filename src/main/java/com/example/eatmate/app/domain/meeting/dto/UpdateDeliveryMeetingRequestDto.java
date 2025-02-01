@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.eatmate.app.domain.meeting.domain.BankName;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 
 import jakarta.validation.constraints.Future;
@@ -33,6 +34,8 @@ public class UpdateDeliveryMeetingRequestDto {
 
 	@Pattern(regexp = "^[0-9-]*$", message = "올바른 계좌번호 형식이 아닙니다")
 	private String accountNumber;
+
+	private BankName bankName;
 
 	private MultipartFile backgroundImage;
 }

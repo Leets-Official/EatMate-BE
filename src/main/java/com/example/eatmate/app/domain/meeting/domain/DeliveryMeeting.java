@@ -38,6 +38,7 @@ public class DeliveryMeeting extends Meeting {
 	private String accountNumber;
 
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private BankName bankName;
 
 	public void updateDeliveryMeeting(
@@ -47,13 +48,14 @@ public class DeliveryMeeting extends Meeting {
 		String storeName,
 		String pickupLocation,
 		String accountNumber,
+		BankName bankName,
 		Image backgroundImage
 	) {
 		super.updateMeeting(meetingName, description, backgroundImage);
-
 		this.foodCategory = foodCategory;
 		this.storeName = storeName;
 		this.pickupLocation = pickupLocation;
 		this.accountNumber = accountNumber;
+		this.bankName = bankName;
 	}
 }
