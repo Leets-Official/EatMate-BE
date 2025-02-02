@@ -13,4 +13,8 @@ public class MyInfoUpdateRequestDto {
 
 	private Mbti mbti;
 
+	public void setMbti(String mbti) {
+		this.mbti = mbti != null ? Mbti.valueOf(mbti.toUpperCase()) : null;
+	}
+
 }

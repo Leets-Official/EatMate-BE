@@ -13,6 +13,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -49,13 +50,19 @@ public class GlobalExceptionHandler {
 			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
 	}
 
-	@ExceptionHandler(CommonException.class) // Custom Exception을 포괄적으로 처리
-	public ResponseEntity<GlobalResponseDto<String>> handleCommonException(CommonException ex) {
-		ErrorCode errorCode = ex.getErrorCode(); // 전달된 예외에서 에러 코드 가져오기
-		ErrorResponse errorResponse = new ErrorResponse(errorCode);
-		showErrorLog(errorCode);
+	@ExceptionHandler(CommonException.class)
+	public Object handleCommonException(CommonException ex, RedirectAttributes redirectAttributes) {
+		ErrorCode errorCode = ex.getErrorCode();
+
+		// 이메일 도메인 에러일 경우 리다이렉트
+		if (errorCode == ErrorCode.INVALID_EMAIL_DOMAIN) {
+			redirectAttributes.addFlashAttribute("errorMessage", errorCode.getMessage());
+			return "redirect:https://develop.d4u0qurydeei4.amplifyapp.com/intro/oauth2/invalid-account";
+		}
+
+		// 그 외의 경우 API 응답
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
-			.body(GlobalResponseDto.fail(errorCode, errorResponse.getMessage()));
+			.body(GlobalResponseDto.fail(errorCode, new ErrorResponse(errorCode).getMessage()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class) // Valid 검증 실패시 예외처리
