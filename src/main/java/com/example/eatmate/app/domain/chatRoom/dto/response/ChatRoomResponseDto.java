@@ -5,8 +5,9 @@ import java.util.List;
 import org.springframework.data.domain.Slice;
 
 import com.example.eatmate.app.domain.chat.dto.response.ChatMessageResponseDto;
+import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
+import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.member.domain.Mbti;
-import com.example.eatmate.app.domain.member.domain.Member;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -53,22 +54,28 @@ public class ChatRoomResponseDto {
 
 	@Getter
 	public static class ChatMemberResponseDto {
+		private Long memberId;
 		private String nickname;
 		private Mbti mbti;
 		private String profileImageUrl;
+		private ParticipantRole role;
 
 		@Builder
-		private ChatMemberResponseDto(String nickname, Mbti mbti, String profileImageUrl) {
+		private ChatMemberResponseDto(Long memberId, String nickname, Mbti mbti, String profileImageUrl, ParticipantRole role) {
+			this.memberId = memberId;
 			this.nickname = nickname;
 			this.mbti = mbti;
 			this.profileImageUrl = profileImageUrl;
+			this.role = role;
 		}
 
-		public static ChatMemberResponseDto from(Member member) {
+		public static ChatMemberResponseDto from(MeetingParticipant participant) {
 			return ChatMemberResponseDto.builder()
-				.nickname(member.getNickname())
-				.mbti(member.getMbti())
-				.profileImageUrl(member.getProfileImage().getImageUrl())
+				.memberId(participant.getMember().getMemberId())
+				.nickname(participant.getMember().getNickname())
+				.mbti(participant.getMember().getMbti())
+				.profileImageUrl(participant.getMember().getProfileImage().getImageUrl())
+				.role(participant.getRole())
 				.build();
 		}
 	}
