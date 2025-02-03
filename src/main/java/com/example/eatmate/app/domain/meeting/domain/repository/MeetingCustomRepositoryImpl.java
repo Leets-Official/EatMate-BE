@@ -65,9 +65,22 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 				meeting.id,
 				meeting.meetingName,
 				meeting.meetingStatus,
+				meeting.meetingDescription,
+				meeting.participantLimit.maxParticipants,
 				ExpressionUtils.as(
 					new CaseBuilder()
-						.when(meeting.type.eq("DELIVERY"))
+						.when(isDelivery)
+						.then(Expressions.nullExpression(OfflineMeetingCategory.class))
+						.otherwise(JPAExpressions
+							.select(offlineMeeting.offlineMeetingCategory)
+							.from(offlineMeeting)
+							.where(offlineMeeting.id.eq(meeting.id))),
+					"offlineMeetingCategory"
+				),
+				meeting.createdAt,
+				ExpressionUtils.as(
+					new CaseBuilder()
+						.when(isDelivery)
 						.then(JPAExpressions
 							.select(deliveryMeeting.storeName)
 							.from(deliveryMeeting)
@@ -79,7 +92,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 					"location"),
 				ExpressionUtils.as(
 					new CaseBuilder()
-						.when(meeting.type.eq("DELIVERY"))
+						.when(isDelivery)
 						.then(JPAExpressions
 							.select(deliveryMeeting.orderDeadline)
 							.from(deliveryMeeting)
