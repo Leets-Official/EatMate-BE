@@ -130,10 +130,7 @@ public class MemberService {
 			Image profileImageEntity = uploadProfileImage(profileImage);
 			member.updateProfileImage(profileImageEntity);
 		}
-		// 기존 이미지가 null이 아닐 경우 유지 (새로운 이미지가 업로드되지 않았을 때)
-		else if (member.getProfileImage() != null) {
-			member.updateProfileImage(member.getProfileImage()); // 기존 이미지 유지
-		}
+	
 		// 업데이트된 Member 정보 반환
 		return MyInfoResponseDto.from(member);
 	}
