@@ -47,7 +47,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 			OAuthAttributes extractAttributes = OAuthAttributes.of(userNameAttributeName, attributes);
 
 			// 이메일 도메인 필터링
-			validateEmailDomain(extractAttributes.getEmail());
+			// validateEmailDomain(extractAttributes.getEmail());
 
 			// 사용자 정보 조회 또는 저장
 			Member member = getMember(extractAttributes);
