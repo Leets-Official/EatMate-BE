@@ -1,6 +1,8 @@
 package com.example.eatmate.app.domain.chatRoom.service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,6 +28,7 @@ import com.example.eatmate.app.domain.chatRoom.event.ParticipantChatRoomLeftEven
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
+import com.example.eatmate.app.domain.meeting.domain.repository.MeetingParticipantRepository;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.global.common.util.SecurityUtils;
 import com.example.eatmate.global.config.error.ErrorCode;
@@ -46,6 +49,7 @@ public class ChatRoomService {
 	private final QueueManager queueManager;
 	private final SecurityUtils securityUtils;
 	private final ApplicationEventPublisher eventPublisher;
+	private final MeetingParticipantRepository meetingParticipantRepository;
 
 	//채팅방 생성 + 호스트 채팅방 참가
 	public ChatRoom createChatRoom(Member host, Meeting meeting) {
@@ -70,19 +74,23 @@ public class ChatRoomService {
 
 	//채팅방 입장(지난 로딩 위치는 클라이언트에서 조절)
 	public ChatRoomResponseDto enterChatRoomAndLoadMessage(Long chatRoomId, UserDetails userDetails, Pageable pageable) {
-		securityUtils.getMember(userDetails);
+		Member mine = securityUtils.getMember(userDetails);
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
+		Meeting meeting = chatRoom.getMeeting();
 
-		List<ChatRoomResponseDto.ChatMemberResponseDto> participants = chatRoom.getParticipant()
+		List<ChatRoomResponseDto.ChatMemberResponseDto> participants = Optional.ofNullable(meetingParticipantRepository.findByMeeting(meeting))
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND))
 			.stream()
-			.map(memberChatRoom -> ChatRoomResponseDto.ChatMemberResponseDto.from(memberChatRoom.getMember()))
+			.map(meetingParticipant -> {
+				Boolean isMine = Objects.equals(mine.getMemberId(), meetingParticipant.getMember().getMemberId());
+				return ChatRoomResponseDto.ChatMemberResponseDto.of(meetingParticipant, isMine);
+			})
 			.collect(Collectors.toList());
 
 		Slice<ChatMessageResponseDto> chatList = chatService.loadChat(chatRoomId, null, pageable);
 
 		//채팅방 공지 처리
-		Meeting meeting = chatRoom.getMeeting();
 		if (meeting instanceof OfflineMeeting) {
 			OfflineMeeting offlineMeeting = (OfflineMeeting) meeting;
 			ChatRoomOfflineNoticeDto notice = ChatRoomOfflineNoticeDto.of(offlineMeeting.getMeetingPlace(), offlineMeeting.getMeetingDate());

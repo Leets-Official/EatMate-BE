@@ -287,6 +287,7 @@ public class MeetingService {
 			.isOwner(isOwner(meeting, member.getMemberId()))
 			.isCurrentUser(isCurrentUser(meeting, member))
 			.participants(participants)
+			.chatRoomId(meeting.getChatRoom().getId())
 			.build();
 	}
 

@@ -20,11 +20,12 @@ public class MeetingDetailResponseDto {
 	private Boolean isOwner;
 	private Boolean isCurrentUser;
 	private List<ParticipantDto> participants;
+	private Long chatRoomId;
 
 	@Builder
 	private MeetingDetailResponseDto(String meetingType, String meetingName, String meetingDescription,
 		GenderRestriction genderRestriction, String location, LocalDateTime dueDateTime,
-		String backgroundImage, Boolean isOwner, Boolean isCurrentUser, List<ParticipantDto> participants) {
+		String backgroundImage, Boolean isOwner, Boolean isCurrentUser, List<ParticipantDto> participants, Long chatRoomId) {
 		this.meetingType = meetingType;
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
@@ -35,6 +36,7 @@ public class MeetingDetailResponseDto {
 		this.isOwner = isOwner;
 		this.isCurrentUser = isCurrentUser;
 		this.participants = participants;
+		this.chatRoomId = chatRoomId;
 	}
 
 	@Getter
