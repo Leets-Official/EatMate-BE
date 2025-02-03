@@ -59,23 +59,26 @@ public class ChatRoomResponseDto {
 		private Mbti mbti;
 		private String profileImageUrl;
 		private ParticipantRole role;
+		private Boolean isMine;
 
 		@Builder
-		private ChatMemberResponseDto(Long memberId, String nickname, Mbti mbti, String profileImageUrl, ParticipantRole role) {
+		private ChatMemberResponseDto(Long memberId, String nickname, Mbti mbti, String profileImageUrl, ParticipantRole role, Boolean isMine) {
 			this.memberId = memberId;
 			this.nickname = nickname;
 			this.mbti = mbti;
 			this.profileImageUrl = profileImageUrl;
 			this.role = role;
+			this.isMine = isMine;
 		}
 
-		public static ChatMemberResponseDto from(MeetingParticipant participant) {
+		public static ChatMemberResponseDto of(MeetingParticipant participant, Boolean isMine) {
 			return ChatMemberResponseDto.builder()
 				.memberId(participant.getMember().getMemberId())
 				.nickname(participant.getMember().getNickname())
 				.mbti(participant.getMember().getMbti())
 				.profileImageUrl(participant.getMember().getProfileImage().getImageUrl())
 				.role(participant.getRole())
+				.isMine(isMine)
 				.build();
 		}
 	}

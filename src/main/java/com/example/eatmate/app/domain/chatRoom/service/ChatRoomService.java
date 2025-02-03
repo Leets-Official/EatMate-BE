@@ -1,6 +1,8 @@
 package com.example.eatmate.app.domain.chatRoom.service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -72,14 +74,18 @@ public class ChatRoomService {
 
 	//채팅방 입장(지난 로딩 위치는 클라이언트에서 조절)
 	public ChatRoomResponseDto enterChatRoomAndLoadMessage(Long chatRoomId, UserDetails userDetails, Pageable pageable) {
-		securityUtils.getMember(userDetails);
+		Member mine = securityUtils.getMember(userDetails);
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 		Meeting meeting = chatRoom.getMeeting();
 
-		List<ChatRoomResponseDto.ChatMemberResponseDto> participants = meetingParticipantRepository.findByMeeting(meeting)
+		List<ChatRoomResponseDto.ChatMemberResponseDto> participants = Optional.ofNullable(meetingParticipantRepository.findByMeeting(meeting))
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND))
 			.stream()
-			.map(ChatRoomResponseDto.ChatMemberResponseDto::from)
+			.map(meetingParticipant -> {
+				Boolean isMine = Objects.equals(mine.getMemberId(), meetingParticipant.getMember().getMemberId());
+				return ChatRoomResponseDto.ChatMemberResponseDto.of(meetingParticipant, isMine);
+			})
 			.collect(Collectors.toList());
 
 		Slice<ChatMessageResponseDto> chatList = chatService.loadChat(chatRoomId, null, pageable);
