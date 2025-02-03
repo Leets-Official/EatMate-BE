@@ -11,6 +11,7 @@ import lombok.Getter;
 // 구글이메일, 닉네임, 학번, 전화번호, MBTI, 생년월일 , 프로필사진정보(추후구현)
 @Getter
 public class MyInfoResponseDto {
+	private Long memberId;
 	private String email;
 	private String nickname;
 	private Long studentNumber;
@@ -20,8 +21,10 @@ public class MyInfoResponseDto {
 	private String profileImageUrl;
 
 	@Builder
-	private MyInfoResponseDto(String email, String nickname, Long studentNumber, Mbti mbti, String phoneNumber,
+	private MyInfoResponseDto(Long memberId, String email, String nickname, Long studentNumber, Mbti mbti,
+		String phoneNumber,
 		BirthDate birthDate, String profileImageUrl) {
+		this.memberId = memberId;
 		this.email = email;
 		this.nickname = nickname;
 		this.studentNumber = studentNumber;
@@ -33,6 +36,7 @@ public class MyInfoResponseDto {
 
 	public static MyInfoResponseDto from(Member member) {
 		return MyInfoResponseDto.builder()
+			.memberId(member.getMemberId())
 			.email(member.getEmail())
 			.nickname(member.getNickname())
 			.studentNumber(member.getStudentNumber())
