@@ -15,7 +15,6 @@ public enum ErrorCode {
 	INVALID_EMAIL_DOMAIN(400, "INVALID_EMAIL_DOMAIN", "가천대학교 이메일이 아닙니다."),
 	INVALID_PARAMETER_TYPE(400, "INVALID_PARAMETER_TYPE", "적절하지 않은 파라미터 타입입니다."),
 
-
 	//회원
 	USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다."),
 	TOKEN_NOT_FOUND(404, "TOKEN_NOT_FOUND", "토큰를 찾을 수 없습니다."),
@@ -46,7 +45,6 @@ public enum ErrorCode {
 
 	// 신고
 	SELF_REPORT_NOT_ALLOWED(400, "SELF_REPORT_NOT_ALLOWED", "자기 자신을 신고할 수 없습니다."),
-	INVALID_REPORT_TYPE_LIST(400, "INVALID_REPORT_TYPE_LIST", "올바르지 않은 신고 사유 리스트입니다."),
 	DUPLICATE_REPORT_NOT_ALLOWED(400, "DUPLICATE_REPORT_NOT_ALLOWED", "같은 유저를 연속적으로 신고할 수 없습니다."),
 
 	// 공지사항

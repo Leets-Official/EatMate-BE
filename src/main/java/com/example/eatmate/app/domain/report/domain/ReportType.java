@@ -1,5 +1,9 @@
 package com.example.eatmate.app.domain.report.domain;
 
+import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import lombok.Getter;
 
 @Getter
@@ -12,5 +16,16 @@ public enum ReportType {
 
 	ReportType(String description) {
 		this.description = description;
+	}
+
+	@JsonCreator
+	public static ReportType parsing(String inputValue) {
+		if (inputValue == null) {
+			return null;
+		}
+		return Stream.of(ReportType.values())
+			.filter(category -> category.toString().equals(inputValue.toUpperCase()))
+			.findFirst()
+			.orElse(null);
 	}
 }
