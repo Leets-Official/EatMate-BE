@@ -1,12 +1,10 @@
 package com.example.eatmate.app.domain.chat.service;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +45,7 @@ public class ChatService {
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatMessageDto.getChatRoomId(), DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 		Member member = memberRepository.findById(chatMessageDto.getSenderId())
-			.orElseThrow(() -> new CommonException(ErrorCode.MEMBER_CHATROOM_NOT_FOUND));//error 변경
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
 		Chat chat = Chat.createChat(chatMessageDto.getContent(), member, chatRoom);
 		chatRepository.save(chat);

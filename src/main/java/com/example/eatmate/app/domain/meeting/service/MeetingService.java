@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
-import com.example.eatmate.app.domain.chatRoom.event.HostChatRoomLeftEvent;
 import com.example.eatmate.app.domain.chatRoom.event.NoticeMemberLeftEvent;
 import com.example.eatmate.app.domain.image.domain.Image;
 import com.example.eatmate.app.domain.image.service.ImageSaveService;
