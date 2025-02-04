@@ -35,4 +35,14 @@ public class ChatMessageResponseDto {
 			.regDate(chat.getCreatedAt())
 			.build();
 	}
+
+	public static ChatMessageResponseDto of(Long memberId, Long chatRoomId, String content, LocalDateTime regDate) {
+		return ChatMessageResponseDto.builder()
+			.chatId(null)
+			.chatRoomId(chatRoomId)
+			.senderId(memberId)
+			.content(content)
+			.regDate(regDate)
+			.build();
+	}
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.eatmate.app.domain.block.domain.Block;
 import com.example.eatmate.app.domain.block.domain.repository.BlockRepository;
+import com.example.eatmate.app.domain.chatRoom.event.NoticeMemberLeftEvent;
 import com.example.eatmate.app.domain.image.domain.Image;
 import com.example.eatmate.app.domain.image.service.ImageSaveService;
 import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
@@ -490,6 +491,8 @@ public class MeetingService {
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
 
 		meetingParticipantRepository.delete(meetingParticipant);
+
+		eventPublisher.publishEvent(new NoticeMemberLeftEvent(meeting.getChatRoom(), member));
 	}
 
 	// 오프라인 모임 수정

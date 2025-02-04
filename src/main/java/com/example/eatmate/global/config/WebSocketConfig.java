@@ -8,8 +8,13 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import com.example.eatmate.global.auth.jwt.JwtHandshakeInterceptor;
+
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Value("${spring.rabbitmq.host}")
@@ -24,6 +29,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Value("${spring.rabbitmq.password}")
 	private String userPw;
 
+	private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 
@@ -37,9 +44,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		registry.setApplicationDestinationPrefixes("/pub");
 	}
 
-	@Override //소켓연결 엔드포인트 경로와 cors설정
+	@Override //소켓연결 엔드포인트 경로
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws/chat")
 			.setAllowedOriginPatterns("*");
+			//.addInterceptors(jwtHandshakeInterceptor);
+			//.withSockJS();
 	}
 }
