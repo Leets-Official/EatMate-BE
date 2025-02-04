@@ -163,13 +163,6 @@ public class ChatRoomService {
 			chatRoom.removeParticipant(target);
 			memberChatRoomRepository.delete(target);
 			eventPublisher.publishEvent(new ParticipantChatRoomLeftEvent(chatRoom.getMeeting().getId(), userDetails));
-
-			ChatMessageResponseDto leaveMessage = ChatMessageResponseDto.of(
-				member.getMemberId(),
-				chatRoom.getId(),
-				member.getNickname()+"님이 퇴장하셨습니다.",
-				LocalDateTime.now());
-
 		}
 		return null;
 	}
