@@ -50,6 +50,11 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response); // /login 요청은 필터 제외
 			return;
 		}
+		if (request.getRequestURI().startsWith("/ws/chat")) {
+			log.info("WebSocket 핸드셰이크 요청 감지: 필터를 통과시킴 : {}",  request.getRequestURI());
+			filterChain.doFilter(request, response);
+			return;
+		}
 
 		// 요청에서 쿠키 추출 및 디버깅 로그
 		log.info("Request Cookies: {}", Arrays.toString(request.getCookies()));
