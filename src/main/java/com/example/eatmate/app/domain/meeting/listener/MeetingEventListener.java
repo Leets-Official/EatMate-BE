@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.event.NoticeMemberLeftEvent;
 import com.example.eatmate.app.domain.chatRoom.service.ChatRoomService;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
 import com.example.eatmate.app.domain.meeting.domain.repository.MeetingRepository;
@@ -39,6 +40,11 @@ public class MeetingEventListener {
 	@TransactionalEventListener(phase = BEFORE_COMMIT)
 	public void handleHostMeetingDeletedEvent(HostMeetingDeleteEvent event) {
 		chatRoomService.leaveChatRoom(event.getChatRoomId(), event.getUserDetails());
+	}
+
+	@TransactionalEventListener(phase = AFTER_COMMIT)
+	public void handleMemberLeftMeetingAndNotice(NoticeMemberLeftEvent event) {
+		chatRoomService.sendLeveMessage(event.getChatRoom(), event.getMember());
 	}
 
 }
