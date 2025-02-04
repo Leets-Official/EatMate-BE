@@ -20,6 +20,9 @@ public enum ReportType {
 
 	@JsonCreator
 	public static ReportType parsing(String inputValue) {
+		if (inputValue == null) {
+			return null;
+		}
 		return Stream.of(ReportType.values())
 			.filter(category -> category.toString().equals(inputValue.toUpperCase()))
 			.findFirst()
