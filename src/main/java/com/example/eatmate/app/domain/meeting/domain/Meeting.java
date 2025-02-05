@@ -63,6 +63,10 @@ public abstract class Meeting {
 	@Enumerated(EnumType.STRING)
 	private MeetingStatus meetingStatus;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private MeetingBackgroundType backgroundType;
+
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "background_image_id")
 	private Image backgroundImage;

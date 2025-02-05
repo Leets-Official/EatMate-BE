@@ -24,6 +24,7 @@ import com.example.eatmate.app.domain.meeting.domain.DeliveryMeeting;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
 import com.example.eatmate.app.domain.meeting.domain.Meeting;
+import com.example.eatmate.app.domain.meeting.domain.MeetingBackgroundType;
 import com.example.eatmate.app.domain.meeting.domain.MeetingParticipant;
 import com.example.eatmate.app.domain.meeting.domain.MeetingStatus;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
@@ -98,10 +99,13 @@ public class MeetingService {
 			createDeliveryMeetingRequestDto.getIsLimited()
 		);
 
-		Image backgroundImage = Optional.ofNullable(createDeliveryMeetingRequestDto.getBackgroundImage())
-			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
-			.orElse(null);
+		Image backgroundImage = null;
 
+		if (createDeliveryMeetingRequestDto.getBackgroundImageType() == MeetingBackgroundType.CUSTOM) {
+			backgroundImage = Optional.ofNullable(createDeliveryMeetingRequestDto.getBackgroundImage())
+				.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+				.orElseThrow(() -> new CommonException(ErrorCode.IMAGE_REQUIRED_FOR_CUSTOM));
+		}
 		DeliveryMeeting deliveryMeeting = DeliveryMeeting.builder()
 			.meetingName(createDeliveryMeetingRequestDto.getMeetingName())
 			.meetingDescription(createDeliveryMeetingRequestDto.getMeetingDescription())
@@ -118,6 +122,7 @@ public class MeetingService {
 			.accountNumber(createDeliveryMeetingRequestDto.getAccountNumber())
 			.bankName(createDeliveryMeetingRequestDto.getBankName())
 			.backgroundImage(backgroundImage)
+			.backgroundType(createDeliveryMeetingRequestDto.getBackgroundImageType())
 			.build();
 
 		deliveryMeeting = deliveryMeetingRepository.save(deliveryMeeting);
@@ -144,10 +149,13 @@ public class MeetingService {
 			createOfflineMeetingRequestDto.getIsLimited()
 		);
 
-		Image backgroundImage = Optional.ofNullable(createOfflineMeetingRequestDto.getBackgroundImage())
-			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
-			.orElse(null);
+		Image backgroundImage = null;
 
+		if (createOfflineMeetingRequestDto.getBackgroundImageType() == MeetingBackgroundType.CUSTOM) {
+			backgroundImage = Optional.ofNullable(createOfflineMeetingRequestDto.getBackgroundImage())
+				.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+				.orElseThrow(() -> new CommonException(ErrorCode.IMAGE_REQUIRED_FOR_CUSTOM));
+		}
 		OfflineMeeting offlineMeeting = OfflineMeeting.builder()
 			.meetingName(createOfflineMeetingRequestDto.getMeetingName())
 			.meetingDescription(createOfflineMeetingRequestDto.getMeetingDescription())
@@ -161,6 +169,7 @@ public class MeetingService {
 			.meetingDate(createOfflineMeetingRequestDto.getMeetingDate())
 			.offlineMeetingCategory(createOfflineMeetingRequestDto.getOfflineMeetingCategory())
 			.backgroundImage(backgroundImage)
+			.backgroundType(createOfflineMeetingRequestDto.getBackgroundImageType())
 			.build();
 
 		offlineMeeting = offlineMeetingRepository.save(offlineMeeting);
@@ -284,7 +293,7 @@ public class MeetingService {
 			.genderRestriction(meeting.getGenderRestriction())
 			.location(getLocation(meeting))
 			.dueDateTime(getDueDateTime(meeting))
-			.backgroundImage(Optional.ofNullable(meeting.getBackgroundImage()).map(Image::getImageUrl).orElse(null))
+			.backgroundImage(getBackgroundImageUrl(meeting))
 			.isOwner(isOwner(meeting, member.getMemberId()))
 			.isCurrentUser(isCurrentUser(meeting, member))
 			.participants(participants)
@@ -292,6 +301,15 @@ public class MeetingService {
 				meeting instanceof OfflineMeeting ? ((OfflineMeeting)meeting).getOfflineMeetingCategory() : null)
 			.chatRoomId(meeting.getChatRoom().getId())
 			.build();
+	}
+
+	private String getBackgroundImageUrl(Meeting meeting) {
+		if (meeting.getBackgroundType() == MeetingBackgroundType.CUSTOM) {
+			return Optional.ofNullable(meeting.getBackgroundImage())
+				.map(Image::getImageUrl)
+				.orElse(null);
+		}
+		return meeting.getBackgroundType().getImageUrl();
 	}
 
 	private String getLocation(Meeting meeting) {
