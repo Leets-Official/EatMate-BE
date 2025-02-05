@@ -288,6 +288,8 @@ public class MeetingService {
 			.isOwner(isOwner(meeting, member.getMemberId()))
 			.isCurrentUser(isCurrentUser(meeting, member))
 			.participants(participants)
+			.offlineMeetingCategory(
+				meeting instanceof OfflineMeeting ? ((OfflineMeeting)meeting).getOfflineMeetingCategory() : null)
 			.chatRoomId(meeting.getChatRoom().getId())
 			.build();
 	}

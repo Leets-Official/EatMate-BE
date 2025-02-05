@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
+import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -20,12 +21,14 @@ public class MeetingDetailResponseDto {
 	private Boolean isOwner;
 	private Boolean isCurrentUser;
 	private List<ParticipantDto> participants;
+	private OfflineMeetingCategory offlineMeetingCategory;
 	private Long chatRoomId;
 
 	@Builder
 	private MeetingDetailResponseDto(String meetingType, String meetingName, String meetingDescription,
 		GenderRestriction genderRestriction, String location, LocalDateTime dueDateTime,
-		String backgroundImage, Boolean isOwner, Boolean isCurrentUser, List<ParticipantDto> participants, Long chatRoomId) {
+		String backgroundImage, Boolean isOwner, Boolean isCurrentUser, List<ParticipantDto> participants,
+		OfflineMeetingCategory offlineMeetingCategory, Long chatRoomId) {
 		this.meetingType = meetingType;
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
@@ -36,6 +39,7 @@ public class MeetingDetailResponseDto {
 		this.isOwner = isOwner;
 		this.isCurrentUser = isCurrentUser;
 		this.participants = participants;
+		this.offlineMeetingCategory = offlineMeetingCategory;
 		this.chatRoomId = chatRoomId;
 	}
 
