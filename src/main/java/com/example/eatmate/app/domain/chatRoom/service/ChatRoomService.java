@@ -142,7 +142,7 @@ public class ChatRoomService {
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 
-		MemberChatRoom target = memberChatRoomRepository.findByMember_MemberId(member.getMemberId())
+		MemberChatRoom target = memberChatRoomRepository.findByMemberAndChatRoom(member, chatRoom)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEMBER_CHATROOM_NOT_FOUND));
 
 		if (chatRoom.getOwnerId().equals(member.getMemberId())) {
