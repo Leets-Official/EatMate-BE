@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -19,6 +21,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.example.eatmate.global.config.error.ErrorCode;
 import com.example.eatmate.global.config.error.ErrorResponse;
 import com.example.eatmate.global.response.GlobalResponseDto;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -165,6 +168,32 @@ public class GlobalExceptionHandler {
 		String errorMessage = String.format("필수 파라미터 '%s'가 누락되었습니다.",
 			parameterName
 		);
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleDataIntegrityViolationException(
+		DataIntegrityViolationException ex) {
+		ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
+		String errorMessage = "필수 입력 필드가 누락되었습니다.";
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(HttpMessageConversionException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleHttpMessageConversionException(
+		HttpMessageConversionException ex) {
+		ErrorCode errorCode = ErrorCode.INVALID_REQUEST_FORMAT;
+		String errorMessage = "잘못된 요청 형식입니다. multipart/form-data 형식으로 요청해주세요.";
+
+		// MultipartFile 변환 실패 관련 에러인 경우
+		if (ex.getCause() instanceof InvalidDefinitionException
+			&& ex.getMessage().contains("MultipartFile")) {
+			errorMessage = "파일 업로드는 multipart/form-data 형식으로 요청해주세요.";
+		}
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
