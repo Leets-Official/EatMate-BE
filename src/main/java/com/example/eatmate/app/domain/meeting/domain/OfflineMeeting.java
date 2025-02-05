@@ -36,10 +36,10 @@ public class OfflineMeeting extends Meeting {
 		String meetingPlace,
 		LocalDateTime meetingDate,
 		OfflineMeetingCategory offlineMeetingCategory,
+		MeetingBackgroundType backgroundType,
 		Image backgroundImage) {
 
-		super.updateMeeting(meetingName, description, backgroundImage);
-
+		super.updateMeeting(meetingName, description, backgroundImage, backgroundType);
 		this.meetingPlace = meetingPlace;
 		this.meetingDate = meetingDate;
 		this.offlineMeetingCategory = offlineMeetingCategory;

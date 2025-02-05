@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.eatmate.app.domain.meeting.domain.MeetingBackgroundType;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 
 import jakarta.validation.constraints.Future;
@@ -26,6 +27,8 @@ public class UpdateOfflineMeetingRequestDto {
 	private LocalDateTime meetingDate;
 
 	private OfflineMeetingCategory offlineMeetingCategory;
+
+	private MeetingBackgroundType backgroundImageType;
 
 	private MultipartFile backgroundImage;
 }

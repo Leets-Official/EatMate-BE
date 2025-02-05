@@ -521,9 +521,12 @@ public class MeetingService {
 		UserDetails userDetails) {
 		Member member = securityUtils.getMember(userDetails);
 
-		Image backgroundImage = Optional.ofNullable(updateOfflineMeetingRequestDto.getBackgroundImage())
-			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
-			.orElse(null);
+		Image backgroundImage = null;
+		if (updateOfflineMeetingRequestDto.getBackgroundImageType() == MeetingBackgroundType.CUSTOM) {
+			backgroundImage = Optional.ofNullable(updateOfflineMeetingRequestDto.getBackgroundImage())
+				.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+				.orElseThrow(() -> new CommonException(ErrorCode.IMAGE_REQUIRED_FOR_CUSTOM));
+		}
 
 		OfflineMeeting offlineMeeting = offlineMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
@@ -538,6 +541,7 @@ public class MeetingService {
 			updateOfflineMeetingRequestDto.getMeetingPlace(),
 			updateOfflineMeetingRequestDto.getMeetingDate(),
 			updateOfflineMeetingRequestDto.getOfflineMeetingCategory(),
+			updateOfflineMeetingRequestDto.getBackgroundImageType(),
 			backgroundImage
 		);
 	}
@@ -548,9 +552,12 @@ public class MeetingService {
 		UserDetails userDetails) {
 		Member member = securityUtils.getMember(userDetails);
 
-		Image backgroundImage = Optional.ofNullable(updateDeliveryMeetingRequestDto.getBackgroundImage())
-			.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
-			.orElse(null);
+		Image backgroundImage = null;
+		if (updateDeliveryMeetingRequestDto.getBackgroundImageType() == MeetingBackgroundType.CUSTOM) {
+			backgroundImage = Optional.ofNullable(updateDeliveryMeetingRequestDto.getBackgroundImage())
+				.map(image -> imageSaveService.uploadImage(image, MEETING_BACKGROUND))
+				.orElseThrow(() -> new CommonException(ErrorCode.IMAGE_REQUIRED_FOR_CUSTOM));
+		}
 
 		DeliveryMeeting deliveryMeeting = deliveryMeetingRepository.findById(meetingId)
 			.orElseThrow(() -> new CommonException(ErrorCode.MEETING_NOT_FOUND));
@@ -567,6 +574,7 @@ public class MeetingService {
 			updateDeliveryMeetingRequestDto.getPickupLocation(),
 			updateDeliveryMeetingRequestDto.getAccountNumber(),
 			updateDeliveryMeetingRequestDto.getBankName(),
+			updateDeliveryMeetingRequestDto.getBackgroundImageType(),
 			backgroundImage
 		);
 	}

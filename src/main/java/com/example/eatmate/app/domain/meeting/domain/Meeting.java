@@ -84,10 +84,12 @@ public abstract class Meeting {
 	private LocalDateTime updatedAt;
 
 	// 모임 수정
-	public void updateMeeting(String meetingName, String meetingDescription, Image backgroundImage) {
+	public void updateMeeting(String meetingName, String meetingDescription, Image backgroundImage,
+		MeetingBackgroundType backgroundImageType) {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
 		this.backgroundImage = backgroundImage;
+		this.backgroundType = backgroundImageType;
 	}
 
 	// 모임 삭제
