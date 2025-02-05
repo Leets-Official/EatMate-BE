@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -194,6 +195,16 @@ public class GlobalExceptionHandler {
 			&& ex.getMessage().contains("MultipartFile")) {
 			errorMessage = "파일 업로드는 multipart/form-data 형식으로 요청해주세요.";
 		}
+
+		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
+			.body(GlobalResponseDto.fail(errorCode, errorMessage));
+	}
+
+	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+	public ResponseEntity<GlobalResponseDto<String>> handleHttpMediaTypeNotSupportedException(
+		HttpMediaTypeNotSupportedException ex) {
+		ErrorCode errorCode = ErrorCode.UNSUPPORTED_MEDIA_TYPE;
+		String errorMessage = "지원하지 않는 Content-Type입니다. multipart/form-data 형식으로 요청해주세요.";
 
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
