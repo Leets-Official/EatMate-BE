@@ -76,7 +76,7 @@ public class ChatRoomResponseDto {
 				.memberId(participant.getMember().getMemberId())
 				.nickname(participant.getMember().getNickname())
 				.mbti(participant.getMember().getMbti())
-				.profileImageUrl(participant.getMember().getProfileImage().getImageUrl())
+				.profileImageUrl(participant.getMember().getProfileImage() != null ? participant.getMember().getProfileImage().getImageUrl() : null)
 				.role(participant.getRole())
 				.isMine(isMine)
 				.build();
