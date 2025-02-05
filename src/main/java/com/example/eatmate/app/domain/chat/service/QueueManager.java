@@ -128,7 +128,7 @@ public class QueueManager {
 			for (ChatRoom chatRoom : activeChatRoom) {
 				startChatRoomListener(chatRoom.getId());
 			}
-			log.info("✅ Restored {} chat room listeners from DB", activeChatRoom.size());
+			log.info("Restored {} chat room listeners from DB", activeChatRoom.size());
 		};
 	}
 
