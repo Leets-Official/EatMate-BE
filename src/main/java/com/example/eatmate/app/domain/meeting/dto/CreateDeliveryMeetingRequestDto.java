@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.eatmate.app.domain.meeting.domain.BankName;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
+import com.example.eatmate.app.domain.meeting.domain.MeetingBackgroundType;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -56,6 +57,9 @@ public class CreateDeliveryMeetingRequestDto {
 
 	@NotNull(message = "은행명은 필수입니다")
 	private BankName bankName;
+
+	@NotNull(message = "배경 이미지 타입은 필수입니다")
+	private MeetingBackgroundType backgroundImageType;
 
 	private MultipartFile backgroundImage;
 }

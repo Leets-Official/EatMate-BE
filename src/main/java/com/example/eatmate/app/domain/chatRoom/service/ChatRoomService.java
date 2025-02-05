@@ -79,7 +79,7 @@ public class ChatRoomService {
 		ChatMessageResponseDto enterMessage = ChatMessageResponseDto.of(
 			participant.getMemberId(),
 			chatRoom.getId(),
-			participant.getNickname()+"님이 입장하셨습니다.",
+			participant.getNickname() + "님이 입장하셨습니다.",
 			LocalDateTime.now());
 
 		List<MeetingParticipant> participants = meetingParticipantRepository.findByMeeting(chatRoom.getMeeting());
@@ -89,21 +89,22 @@ public class ChatRoomService {
 			.map(member -> ChatMemberListDto.of(member.getId(), member.getMember().getNickname()))
 			.collect(Collectors.toList());
 
-
 		//실시간 유저 입장 메세지
-		messagingTemplate.convertAndSend("/topic/chat."+chatRoom.getId(), enterMessage);
+		messagingTemplate.convertAndSend("/topic/chat." + chatRoom.getId(), enterMessage);
 		//실시간 유저 업데이트 메세지
 		messagingTemplate.convertAndSend("/topic/chat." + chatRoom.getId() + ".members", participantDTOs);
 	}
 
 	//채팅방 입장(지난 로딩 위치는 클라이언트에서 조절)
-	public ChatRoomResponseDto enterChatRoomAndLoadMessage(Long chatRoomId, UserDetails userDetails, Pageable pageable) {
+	public ChatRoomResponseDto enterChatRoomAndLoadMessage(Long chatRoomId, UserDetails userDetails,
+		Pageable pageable) {
 		Member mine = securityUtils.getMember(userDetails);
 		ChatRoom chatRoom = chatRoomRepository.findByIdAndDeletedStatus(chatRoomId, DeletedStatus.NOT_DELETED)
 			.orElseThrow(() -> new CommonException(ErrorCode.CHATROOM_NOT_FOUND));
 		Meeting meeting = chatRoom.getMeeting();
 
-		List<ChatRoomResponseDto.ChatMemberResponseDto> participants = Optional.ofNullable(meetingParticipantRepository.findByMeeting(meeting))
+		List<ChatRoomResponseDto.ChatMemberResponseDto> participants = Optional.ofNullable(
+				meetingParticipantRepository.findByMeeting(meeting))
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND))
 			.stream()
 			.map(meetingParticipant -> {
@@ -116,18 +117,20 @@ public class ChatRoomService {
 
 		//채팅방 공지 처리
 		if (meeting instanceof OfflineMeeting) {
-			OfflineMeeting offlineMeeting = (OfflineMeeting) meeting;
-			ChatRoomOfflineNoticeDto notice = ChatRoomOfflineNoticeDto.of(offlineMeeting.getMeetingPlace(), offlineMeeting.getMeetingDate());
+			OfflineMeeting offlineMeeting = (OfflineMeeting)meeting;
+			ChatRoomOfflineNoticeDto notice = ChatRoomOfflineNoticeDto.of(offlineMeeting.getMeetingPlace(),
+				offlineMeeting.getMeetingDate());
 
-			return ChatRoomResponseDto.ofWithOffline(participants, chatList, notice);
+			return ChatRoomResponseDto.ofWithOffline(offlineMeeting.getMeetingName(), participants, chatList, notice);
 		}
 
 		if (meeting instanceof DeliveryMeeting) {
-			DeliveryMeeting deliveryMeeting = (DeliveryMeeting) meeting;
+			DeliveryMeeting deliveryMeeting = (DeliveryMeeting)meeting;
 			ChatRoomDeliveryNoticeDto notice = ChatRoomDeliveryNoticeDto
-				.of(deliveryMeeting.getStoreName(), deliveryMeeting.getAccountNumber(), deliveryMeeting.getBankName().toString(), deliveryMeeting.getPickupLocation());
+				.of(deliveryMeeting.getStoreName(), deliveryMeeting.getAccountNumber(),
+					deliveryMeeting.getBankName().toString(), deliveryMeeting.getPickupLocation());
 
-			return ChatRoomResponseDto.ofWithDelivery(participants, chatList, notice);
+			return ChatRoomResponseDto.ofWithDelivery(deliveryMeeting.getMeetingName(), participants, chatList, notice);
 		}
 
 		throw new CommonException(ErrorCode.INVALID_MEETING_TYPE);
@@ -142,7 +145,7 @@ public class ChatRoomService {
 		MemberChatRoom target = memberChatRoomRepository.findByMember_MemberId(member.getMemberId())
 			.orElseThrow(() -> new CommonException(ErrorCode.MEMBER_CHATROOM_NOT_FOUND));
 
-		if(chatRoom.getOwnerId().equals(member.getMemberId())) {
+		if (chatRoom.getOwnerId().equals(member.getMemberId())) {
 			chatRoom.deleteChatRoom();
 			chatRoom.getParticipant().forEach(memberChatRoomRepository::delete);
 			chatService.deleteChat(chatRoom);
@@ -153,13 +156,12 @@ public class ChatRoomService {
 			ChatMessageResponseDto leaveMessage = ChatMessageResponseDto.of(
 				member.getMemberId(),
 				chatRoom.getId(),
-				member.getNickname()+"님(호스트)이 퇴장하셨습니다. 모임이 종료되었습니다.",
+				member.getNickname() + "님(호스트)이 퇴장하셨습니다. 모임이 종료되었습니다.",
 				LocalDateTime.now());
 
 			//실시간 호스트 퇴장 메세지
-			messagingTemplate.convertAndSend("/topic/chat."+chatRoom.getId(), leaveMessage);
-		}
-		else {
+			messagingTemplate.convertAndSend("/topic/chat." + chatRoom.getId(), leaveMessage);
+		} else {
 			chatRoom.removeParticipant(target);
 			memberChatRoomRepository.delete(target);
 			eventPublisher.publishEvent(new ParticipantChatRoomLeftEvent(chatRoom.getMeeting().getId(), userDetails));
@@ -172,7 +174,7 @@ public class ChatRoomService {
 		ChatMessageResponseDto leaveMessage = ChatMessageResponseDto.of(
 			member.getMemberId(),
 			chatRoom.getId(),
-			member.getNickname()+"님이 퇴장하셨습니다.",
+			member.getNickname() + "님이 퇴장하셨습니다.",
 			LocalDateTime.now());
 
 		List<MeetingParticipant> participants = meetingParticipantRepository.findByMeeting(chatRoom.getMeeting());
@@ -183,7 +185,7 @@ public class ChatRoomService {
 			.collect(Collectors.toList());
 
 		//실시간 유저 퇴장 메세지
-		messagingTemplate.convertAndSend("/topic/chat."+chatRoom.getId(), leaveMessage);
+		messagingTemplate.convertAndSend("/topic/chat." + chatRoom.getId(), leaveMessage);
 		//실시간 유저 업데이트 메세지
 		messagingTemplate.convertAndSend("/topic/chat." + chatRoom.getId() + ".members", participantDTOs);
 	}

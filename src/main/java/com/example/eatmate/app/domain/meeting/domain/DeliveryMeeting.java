@@ -49,9 +49,10 @@ public class DeliveryMeeting extends Meeting {
 		String pickupLocation,
 		String accountNumber,
 		BankName bankName,
+		MeetingBackgroundType BackgroundType,
 		Image backgroundImage
 	) {
-		super.updateMeeting(meetingName, description, backgroundImage);
+		super.updateMeeting(meetingName, description, backgroundImage, BackgroundType);
 		this.foodCategory = foodCategory;
 		this.storeName = storeName;
 		this.pickupLocation = pickupLocation;

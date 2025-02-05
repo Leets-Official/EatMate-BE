@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.eatmate.app.domain.meeting.domain.BankName;
 import com.example.eatmate.app.domain.meeting.domain.FoodCategory;
+import com.example.eatmate.app.domain.meeting.domain.MeetingBackgroundType;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Pattern;
@@ -36,6 +37,8 @@ public class UpdateDeliveryMeetingRequestDto {
 	private String accountNumber;
 
 	private BankName bankName;
+
+	private MeetingBackgroundType backgroundImageType;
 
 	private MultipartFile backgroundImage;
 }
