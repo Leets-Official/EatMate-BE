@@ -203,6 +203,7 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 
 		return queryFactory
 			.select(Projections.constructor(UpcomingMeetingResponseDto.class,
+				meeting.id, //id 추가
 				meetingParticipant.member.nickname,
 				// 모임 시간 (배달/오프라인 구분하여 조회)
 				ExpressionUtils.as(
@@ -234,7 +235,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 					.select(offlineMeeting.offlineMeetingCategory)
 					.from(offlineMeeting)
 					.where(offlineMeeting.id.eq(meeting.id)),
-				meeting.type
+				meeting.type,
+				meeting.meetingName //모임 이름 추가
 			))
 			.from(meeting)
 			.join(meetingParticipant).on(

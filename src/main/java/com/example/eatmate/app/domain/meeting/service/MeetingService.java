@@ -44,6 +44,7 @@ import com.example.eatmate.app.domain.meeting.dto.MeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResultDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.event.HostMeetingDeleteEvent;
@@ -453,7 +454,7 @@ public class MeetingService {
 
 	// 가장 최근 미팅 조회
 	@Transactional(readOnly = true)
-	public UpcomingMeetingResponseDto getUpcomingMeeting(UserDetails userDetails) {
+	public UpcomingMeetingResultDto getUpcomingMeeting(UserDetails userDetails) {
 		Member member = securityUtils.getMember(userDetails);
 
 		// 임박한 미팅 조회
@@ -464,7 +465,19 @@ public class MeetingService {
 			throw new CommonException(ErrorCode.MEETING_NOT_FOUND);
 		}
 
-		return upcomingMeeting;
+		//dto 필드 추가
+		MeetingParticipant my = meetingParticipantRepository.findByMeetingIdAndMember(upcomingMeeting.getId(), member)
+			.orElseThrow( () -> new CommonException(ErrorCode.USER_NOT_FOUND));
+
+		if (my.getRole() == ParticipantRole.HOST) {
+			Boolean isOwn = true;
+			return new UpcomingMeetingResultDto(upcomingMeeting, isOwn);
+		}
+		else {
+			Boolean isOwn = false;
+			return new UpcomingMeetingResultDto(upcomingMeeting, isOwn);
+		}
+
 	}
 
 	// 모임 주인의 모임 삭제(나가기) / 컨트롤러에서 직접 사용할 메소드

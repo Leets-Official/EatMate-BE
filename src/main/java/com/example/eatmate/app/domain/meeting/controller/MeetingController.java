@@ -30,7 +30,7 @@ import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingRequestDto
 import com.example.eatmate.app.domain.meeting.dto.CreateOfflineMeetingResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MeetingDetailResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
-import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResultDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateDeliveryMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.dto.UpdateOfflineMeetingRequestDto;
 import com.example.eatmate.app.domain.meeting.service.MeetingService;
@@ -209,11 +209,11 @@ public class MeetingController {
 
 	@GetMapping("/my/upcoming")
 	@Operation(summary = "가장 임박한 모임 조회", description = "내가 참여중인 활성화된 모임 중 가장 임박한 모임을 조회합니다.")
-	public ResponseEntity<GlobalResponseDto<UpcomingMeetingResponseDto>> getUpcomingMeeting(
+	public ResponseEntity<GlobalResponseDto<UpcomingMeetingResultDto>> getUpcomingMeeting(
 		@AuthenticationPrincipal UserDetails userDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(
-				meetingService.getUpcomingMeeting(userDetails)));
+				meetingService.getUpcomingMeeting(userDetails))); //반환 DTO 수정
 	}
 
 	@PatchMapping("/{meetingId}")
