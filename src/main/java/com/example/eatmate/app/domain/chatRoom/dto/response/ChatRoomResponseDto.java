@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatRoomResponseDto {
 	private List<ChatMessageResponseDto> chats;
+	private String meetingName;
 	private List<ChatMemberResponseDto> participants;
 	private ChatRoomDeliveryNoticeDto deliveryNotice;
 	private ChatRoomOfflineNoticeDto offlineNotice;
@@ -24,9 +25,11 @@ public class ChatRoomResponseDto {
 	private boolean isLast;
 
 	@Builder
-	private ChatRoomResponseDto(Slice<ChatMessageResponseDto> chats, List<ChatMemberResponseDto> participants,
+	private ChatRoomResponseDto(Slice<ChatMessageResponseDto> chats, String meetingName,
+		List<ChatMemberResponseDto> participants,
 		ChatRoomDeliveryNoticeDto deliveryNotice, ChatRoomOfflineNoticeDto offlineNotice) {
 		this.chats = chats.getContent();
+		this.meetingName = meetingName;
 		this.participants = participants;
 		this.deliveryNotice = deliveryNotice;
 		this.offlineNotice = offlineNotice;
@@ -34,18 +37,22 @@ public class ChatRoomResponseDto {
 		this.isLast = chats.isLast();
 	}
 
-	public static ChatRoomResponseDto ofWithDelivery(List<ChatMemberResponseDto> participants, Slice<ChatMessageResponseDto> chatPage, ChatRoomDeliveryNoticeDto deliveryNotice) {
+	public static ChatRoomResponseDto ofWithDelivery(String meetingName, List<ChatMemberResponseDto> participants,
+		Slice<ChatMessageResponseDto> chatPage, ChatRoomDeliveryNoticeDto deliveryNotice) {
 		return ChatRoomResponseDto.builder()
 			.chats(chatPage)
+			.meetingName(meetingName)
 			.participants(participants)
 			.offlineNotice(null)
 			.deliveryNotice(deliveryNotice)
 			.build();
 	}
 
-	public static ChatRoomResponseDto ofWithOffline(List<ChatMemberResponseDto> participants, Slice<ChatMessageResponseDto> chatPage, ChatRoomOfflineNoticeDto offlineNotice) {
+	public static ChatRoomResponseDto ofWithOffline(String meetingName, List<ChatMemberResponseDto> participants,
+		Slice<ChatMessageResponseDto> chatPage, ChatRoomOfflineNoticeDto offlineNotice) {
 		return ChatRoomResponseDto.builder()
 			.chats(chatPage)
+			.meetingName(meetingName)
 			.participants(participants)
 			.offlineNotice(offlineNotice)
 			.deliveryNotice(null)
@@ -62,7 +69,8 @@ public class ChatRoomResponseDto {
 		private Boolean isMine;
 
 		@Builder
-		private ChatMemberResponseDto(Long memberId, String nickname, Mbti mbti, String profileImageUrl, ParticipantRole role, Boolean isMine) {
+		private ChatMemberResponseDto(Long memberId, String nickname, Mbti mbti, String profileImageUrl,
+			ParticipantRole role, Boolean isMine) {
 			this.memberId = memberId;
 			this.nickname = nickname;
 			this.mbti = mbti;
@@ -76,7 +84,8 @@ public class ChatRoomResponseDto {
 				.memberId(participant.getMember().getMemberId())
 				.nickname(participant.getMember().getNickname())
 				.mbti(participant.getMember().getMbti())
-				.profileImageUrl(participant.getMember().getProfileImage() != null ? participant.getMember().getProfileImage().getImageUrl() : null)
+				.profileImageUrl(participant.getMember().getProfileImage() != null ?
+					participant.getMember().getProfileImage().getImageUrl() : null)
 				.role(participant.getRole())
 				.isMine(isMine)
 				.build();
