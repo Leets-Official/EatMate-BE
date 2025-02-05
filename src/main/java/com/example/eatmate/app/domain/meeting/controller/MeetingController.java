@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -226,8 +226,11 @@ public class MeetingController {
 			.body(GlobalResponseDto.success());
 	}
 
-	@PatchMapping("/{meetingId}/offline")
+	@PutMapping("/{meetingId}/offline")
 	@Operation(summary = "오프라인 모임 수정", description = "오프라인 모임을 수정합니다.")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(
+		mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+		schema = @Schema(implementation = UpdateOfflineMeetingRequestDto.class)))
 	public ResponseEntity<GlobalResponseDto<Void>> updateOfflineMeeting(
 		@PathVariable Long meetingId,
 		@ModelAttribute @Valid UpdateOfflineMeetingRequestDto updateOfflineMeetingRequestDto,
@@ -238,11 +241,14 @@ public class MeetingController {
 			.body(GlobalResponseDto.success());
 	}
 
-	@PatchMapping("/{meetingId}/delivery")
+	@PutMapping("/{meetingId}/delivery")
 	@Operation(summary = "배달 모임 수정", description = "배달 모임을 수정합니다.")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(
+		mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+		schema = @Schema(implementation = UpdateDeliveryMeetingRequestDto.class)))
 	public ResponseEntity<GlobalResponseDto<Void>> updateDeliveryMeeting(
 		@PathVariable Long meetingId,
-		@RequestBody @Valid UpdateDeliveryMeetingRequestDto UpdateDeliveryMeetingRequestDto,
+		@ModelAttribute @Valid UpdateDeliveryMeetingRequestDto UpdateDeliveryMeetingRequestDto,
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
 		meetingService.updateDeliveryMeeting(meetingId, UpdateDeliveryMeetingRequestDto, userDetails);

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.eatmate.app.domain.meeting.domain.GenderRestriction;
+import com.example.eatmate.app.domain.meeting.domain.MeetingBackgroundType;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 
 import jakarta.validation.constraints.Future;
@@ -45,6 +46,9 @@ public class CreateOfflineMeetingRequestDto {
 
 	@NotNull(message = "오프라인 모임 종류는 필수입니다")
 	private OfflineMeetingCategory offlineMeetingCategory;
+
+	@NotNull(message = "배경 이미지 타입은 필수입니다")
+	private MeetingBackgroundType backgroundImageType;
 
 	private MultipartFile backgroundImage;
 }

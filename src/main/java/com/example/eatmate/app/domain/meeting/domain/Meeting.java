@@ -63,6 +63,10 @@ public abstract class Meeting {
 	@Enumerated(EnumType.STRING)
 	private MeetingStatus meetingStatus;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private MeetingBackgroundType backgroundType;
+
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "background_image_id")
 	private Image backgroundImage;
@@ -80,10 +84,12 @@ public abstract class Meeting {
 	private LocalDateTime updatedAt;
 
 	// 모임 수정
-	public void updateMeeting(String meetingName, String meetingDescription, Image backgroundImage) {
+	public void updateMeeting(String meetingName, String meetingDescription, Image backgroundImage,
+		MeetingBackgroundType backgroundImageType) {
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
 		this.backgroundImage = backgroundImage;
+		this.backgroundType = backgroundImageType;
 	}
 
 	// 모임 삭제
