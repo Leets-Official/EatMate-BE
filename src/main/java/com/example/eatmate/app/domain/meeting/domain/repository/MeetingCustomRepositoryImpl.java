@@ -228,7 +228,12 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 							.select(offlineMeeting.meetingPlace)
 							.from(offlineMeeting)
 							.where(offlineMeeting.id.eq(meeting.id))),
-					"meetingLocation")
+					"meetingLocation"),
+				JPAExpressions
+					.select(offlineMeeting.offlineMeetingCategory)
+					.from(offlineMeeting)
+					.where(offlineMeeting.id.eq(meeting.id)),
+				meeting.type
 			))
 			.from(meeting)
 			.join(meetingParticipant).on(
