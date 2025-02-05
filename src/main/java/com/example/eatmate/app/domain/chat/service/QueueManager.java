@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.chat.service;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,9 +22,13 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.chat.dto.request.ChatMessageRequestDto;
+import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
+import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +43,7 @@ public class QueueManager {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final Map<Long, SimpleMessageListenerContainer> activeListeners = new ConcurrentHashMap<>();
+	private final ChatRoomRepository chatRoomRepository;
 	@Value("${rabbitmq.queue-prefix}")
 	private String queuePrefix;
 	@Value("${rabbitmq.binding-key-prefix}")
@@ -111,6 +117,16 @@ public class QueueManager {
 		} else {
 			log.warn("No active listener found for chat room {}", chatRoomId);
 		}
+	}
+
+	//서버 다운 이후 복구했을 경우 채팅방의 컨슈머 복구
+	@PostConstruct
+	public void restoreChatRoomListeners() {
+		List<ChatRoom> activeChatRoom = chatRoomRepository.findAllByDeletedStatus(DeletedStatus.NOT_DELETED); // DB에서 활성화된 채팅방 ID 조회
+		for (ChatRoom chatRoom : activeChatRoom) {
+			startChatRoomListener(chatRoom.getId()); // 리스너 다시 시작
+		}
+		log.info("Restored {} chat room listeners from DB", activeChatRoom.size());
 	}
 
 	@PreDestroy
