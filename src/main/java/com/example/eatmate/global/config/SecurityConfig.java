@@ -80,7 +80,7 @@ public class SecurityConfig {
 			"https://develop.d4u0qurydeei4.amplifyapp.com"
 		));
 		configuration.addAllowedOriginPattern("*");
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS", "PUT"));
 		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "Cookie"));
 		configuration.setExposedHeaders(
 			Arrays.asList("Role", "accept")); //헤더에 노출할 정보 Role 포함
