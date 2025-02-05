@@ -129,7 +129,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository {
 						.select(meetingParticipant.count())
 						.from(meetingParticipant)
 						.where(meetingParticipant.meeting.id.eq(meeting.id)),
-					"participantCount")
+					"participantCount"),
+				meeting.chatRoom.lastChatAt
 			))
 			.from(meeting)
 			// 배달/오프라인 모임 테이블과 left join

@@ -20,6 +20,7 @@ public class MyMeetingListResponseDto {
 	private String location;
 	private LocalDateTime dueDateTime;
 	private Long participantCount;
+	private LocalDateTime lastChatAt;
 
 	public MyMeetingListResponseDto(
 		String meetingType,
@@ -32,8 +33,9 @@ public class MyMeetingListResponseDto {
 		LocalDateTime createdAt,
 		String location,
 		LocalDateTime dueDateTime,
-		Long participantCount) {
-		
+		Long participantCount,
+		LocalDateTime lastChatAt) {
+
 		this.meetingType = meetingType;
 		this.id = id;
 		this.meetingName = meetingName;
@@ -45,5 +47,6 @@ public class MyMeetingListResponseDto {
 		this.location = location;
 		this.dueDateTime = dueDateTime;
 		this.participantCount = participantCount;
+		this.lastChatAt = lastChatAt;
 	}
 }
