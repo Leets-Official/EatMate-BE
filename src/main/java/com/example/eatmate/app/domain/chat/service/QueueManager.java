@@ -18,6 +18,8 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +30,6 @@ import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomReposit
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,13 +121,15 @@ public class QueueManager {
 	}
 
 	//서버 다운 이후 복구했을 경우 채팅방의 컨슈머 복구
-	@PostConstruct
-	public void restoreChatRoomListeners() {
-		List<ChatRoom> activeChatRoom = chatRoomRepository.findAllByDeletedStatus(DeletedStatus.NOT_DELETED); // DB에서 활성화된 채팅방 ID 조회
-		for (ChatRoom chatRoom : activeChatRoom) {
-			startChatRoomListener(chatRoom.getId()); // 리스너 다시 시작
-		}
-		log.info("Restored {} chat room listeners from DB", activeChatRoom.size());
+	@Bean
+	public ApplicationRunner restoreChatRoomListenersRunner() {
+		return args -> {
+			List<ChatRoom> activeChatRoom = chatRoomRepository.findAllByDeletedStatus(DeletedStatus.NOT_DELETED);
+			for (ChatRoom chatRoom : activeChatRoom) {
+				startChatRoomListener(chatRoom.getId());
+			}
+			log.info("✅ Restored {} chat room listeners from DB", activeChatRoom.size());
+		};
 	}
 
 	@PreDestroy
