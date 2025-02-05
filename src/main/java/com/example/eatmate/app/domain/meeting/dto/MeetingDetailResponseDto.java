@@ -23,12 +23,13 @@ public class MeetingDetailResponseDto {
 	private List<ParticipantDto> participants;
 	private OfflineMeetingCategory offlineMeetingCategory;
 	private Long chatRoomId;
+	private LocalDateTime lastChatAt;
 
 	@Builder
 	private MeetingDetailResponseDto(String meetingType, String meetingName, String meetingDescription,
 		GenderRestriction genderRestriction, String location, LocalDateTime dueDateTime,
 		String backgroundImage, Boolean isOwner, Boolean isCurrentUser, List<ParticipantDto> participants,
-		OfflineMeetingCategory offlineMeetingCategory, Long chatRoomId) {
+		OfflineMeetingCategory offlineMeetingCategory, Long chatRoomId, LocalDateTime lastChatAt) {
 		this.meetingType = meetingType;
 		this.meetingName = meetingName;
 		this.meetingDescription = meetingDescription;
@@ -41,6 +42,7 @@ public class MeetingDetailResponseDto {
 		this.participants = participants;
 		this.offlineMeetingCategory = offlineMeetingCategory;
 		this.chatRoomId = chatRoomId;
+		this.lastChatAt = lastChatAt;
 	}
 
 	@Getter

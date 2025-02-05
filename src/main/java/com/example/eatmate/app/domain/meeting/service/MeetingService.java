@@ -300,6 +300,7 @@ public class MeetingService {
 			.offlineMeetingCategory(
 				meeting instanceof OfflineMeeting ? ((OfflineMeeting)meeting).getOfflineMeetingCategory() : null)
 			.chatRoomId(meeting.getChatRoom().getId())
+			.lastChatAt(meeting.getChatRoom().getLastChatAt())
 			.build();
 	}
 
