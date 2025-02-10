@@ -77,7 +77,9 @@ public class SecurityConfig {
 
 		configuration.setAllowedOrigins(Arrays.asList(
 			"http://localhost:3000/",
-			"https://develop.d4u0qurydeei4.amplifyapp.com"
+			"https://develop.d4u0qurydeei4.amplifyapp.com",
+			"https://www.eatmate.site",
+			"https://eatmate.site"
 		));
 		configuration.addAllowedOriginPattern("*");
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
