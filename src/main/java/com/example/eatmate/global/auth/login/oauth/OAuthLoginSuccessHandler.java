@@ -26,6 +26,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 	private static final String COOKIE_PATH = "/";
 	private static final int ACCESS_TOKEN_MAX_AGE = 60 * 60; // 1시간
 	private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7일
+	private static final String domain = ".eatmate.site";
 	private final JwtService jwtService;
 
 	@Override
@@ -47,7 +48,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 			}
 			logTokens(accessToken, refreshToken);
 			setTokensInCookie(response, accessToken, refreshToken);
-			response.sendRedirect("https://develop.d4u0qurydeei4.amplifyapp.com/intro/oauth2/callback");
+			response.sendRedirect("https://www.eatmate.site/intro/oauth2/callback");
 		} catch (Exception e) {
 			log.error("OAuth2 로그인 처리 중 오류 발생: {} ", e.getMessage());
 			throw e;
@@ -58,12 +59,14 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 	private void setTokensInCookie(HttpServletResponse response, String accessToken, String refreshToken) {
 		// Access Token 쿠키 설정
 		String accessTokenCookieString = String.format("AccessToken=%s; " +
+				"Domain=%s;" +
 				"Path=%s; " +
 				"Max-Age=%d; " +
 				"HttpOnly; " +
 				"Secure; " +
 				"SameSite=None",
 			accessToken,
+			domain,
 			COOKIE_PATH,
 			ACCESS_TOKEN_MAX_AGE);
 
@@ -72,12 +75,14 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 		// Refresh Token 쿠키 설정
 		if (refreshToken != null) {
 			String refreshTokenCookieString = String.format("RefreshToken=%s; " +
+					"Domain=%s;" +
 					"Path=%s; " +
 					"Max-Age=%d; " +
 					"HttpOnly; " +
 					"Secure; " +
 					"SameSite=None",
 				refreshToken,
+				domain,
 				COOKIE_PATH,
 				REFRESH_TOKEN_MAX_AGE);
 
