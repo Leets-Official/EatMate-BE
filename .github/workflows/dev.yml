@@ -145,7 +145,12 @@ jobs:
             fi
 
             sudo docker pull ${{ secrets.DOCKER_USER_NAME }}/eatmate
-            sudo docker run --name spring -d -p 8080:8080 -e  TZ=Asia/Seoul --memory=1.5g ${{ secrets.DOCKER_USER_NAME }}/eatmate
+            sudo docker run --name spring \
+              -d \
+              -p 8080:8080 \
+              -e TZ=Asia/Seoul \
+              -e JAVA_OPTS="-Xms256m -Xmx1g" \
+              ${{ secrets.DOCKER_USER_NAME }}/eatmate
             sudo docker image prune -a -f
           debug: true  # Enable debugging output
 
