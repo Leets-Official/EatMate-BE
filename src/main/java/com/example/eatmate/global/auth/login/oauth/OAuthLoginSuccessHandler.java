@@ -21,9 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-	private static final boolean COOKIE_HTTP_ONLY = true;
-	private static final boolean COOKIE_SECURE = true; // https 환경에서는 true
-	private static final String COOKIE_PATH = "/";
+	//private static final boolean COOKIE_HTTP_ONLY = true;
+	//private static final boolean COOKIE_SECURE = true; // https 환경에서는 true
+	//private static final String COOKIE_PATH = "/";
 	private static final int ACCESS_TOKEN_MAX_AGE = 60 * 60; // 1시간
 	private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7일
 	private final JwtService jwtService;
@@ -34,26 +34,36 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 		log.info("OAuth2 Login 성공");
 		try {
 			CustomOAuth2User oAuth2User = (CustomOAuth2User)authentication.getPrincipal();
-			// 사용자 Role 확인
 			Role userRole = oAuth2User.getRole();
 			Gender userGender = oAuth2User.getGender();
-			//토큰 생성
-			String accessToken = jwtService.createAccessToken(oAuth2User.getEmail(), oAuth2User.getRole().name(),
-				userRole == Role.USER ? userGender.name() : null);
+
+			//  Access Token 생성
+			String accessToken = jwtService.createAccessToken(
+				oAuth2User.getEmail(),
+				userRole.name(),
+				userRole == Role.USER ? userGender.name() : null
+			);
+
+			//  Refresh Token 생성 (일반 사용자에게만 부여)
 			String refreshToken = null;
 			if (userRole == Role.USER) {
 				refreshToken = jwtService.createRefreshToken();
 				jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
 			}
-			logTokens(accessToken, refreshToken);
-			setTokensInCookie(response, accessToken, refreshToken);
+
+			// JWT를 **응답 헤더에 추가**
+			jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+
+			// 클라이언트로 리디렉트 (토큰은 헤더에 포함됨)
 			response.sendRedirect("https://develop.d4u0qurydeei4.amplifyapp.com/intro/oauth2/callback");
+
 		} catch (Exception e) {
 			log.error("OAuth2 로그인 처리 중 오류 발생: {} ", e.getMessage());
 			throw e;
 		}
 	}
 
+/*
 	// 쿠키 설정 메소드 생성
 	private void setTokensInCookie(HttpServletResponse response, String accessToken, String refreshToken) {
 		// Access Token 쿠키 설정
@@ -92,5 +102,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 			log.info("RefreshToken: {}", refreshToken);
 		}
 	}
+	*/
+
 }
 
