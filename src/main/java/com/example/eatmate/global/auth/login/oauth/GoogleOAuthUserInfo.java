@@ -6,14 +6,13 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleOAuthUserInfo {
 
 	private Map<String, Object> attributes = new HashMap<>();
-
-	// 기본 생성자가 있어야 Jackson이 객체 생성 후, setter로 값을 주입할 수 있음.
-	public GoogleOAuthUserInfo() {
-	}
 
 	// 기존 생성자 유지 (선택 사항)
 	public GoogleOAuthUserInfo(Map<String, Object> attributes) {
