@@ -16,7 +16,7 @@ import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.app.domain.member.dto.MemberSignUpRequestDto;
 import com.example.eatmate.app.domain.member.service.MemberService;
 import com.example.eatmate.global.auth.jwt.JwtService;
-import com.example.eatmate.global.auth.login.dto.OAuthToken;
+import com.example.eatmate.global.auth.login.dto.OAuthTokenResponseDto;
 import com.example.eatmate.global.auth.login.dto.UserLoginResponseDto;
 import com.example.eatmate.global.auth.login.oauth.GoogleOAuth2Service;
 import com.example.eatmate.global.auth.login.service.LoginService;
@@ -74,7 +74,7 @@ public class AuthController {
 
 		log.info("Google OAuth2 로그인 요청, 원본 인가코드: {}", code);
 
-		OAuthToken tokenResponse = googleOAuth2Service.getGoogleAccessToken(code);
+		OAuthTokenResponseDto tokenResponse = googleOAuth2Service.getGoogleAccessToken(code);
 		String googleAccessToken = tokenResponse.getAccessToken(); // 정상적으로 접근 가능
 
 		log.info("Google Access Token 발급 완료: {}", googleAccessToken);

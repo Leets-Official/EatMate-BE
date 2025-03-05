@@ -14,7 +14,7 @@ import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.Role;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.auth.jwt.JwtService;
-import com.example.eatmate.global.auth.login.dto.OAuthToken;
+import com.example.eatmate.global.auth.login.dto.OAuthTokenResponseDto;
 import com.example.eatmate.global.auth.login.dto.UserLoginResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,7 +34,7 @@ public class GoogleOAuth2Service {
 	private final JwtService jwtService;
 	private final GoogleOAuth2Properties googleOAuth2Properties; // 주입받음
 
-	public OAuthToken getGoogleAccessToken(String authCode) {
+	public OAuthTokenResponseDto getGoogleAccessToken(String authCode) {
 		String decodedCode = URLDecoder.decode(authCode, StandardCharsets.UTF_8);
 
 		MultiValueMap<String, String> bodyParams = new LinkedMultiValueMap<>();
@@ -60,7 +60,7 @@ public class GoogleOAuth2Service {
 			log.info(" [Google OAuth 원본 응답] {}", responseBody);
 
 			ObjectMapper objectMapper = new ObjectMapper();
-			OAuthToken tokenResponse = objectMapper.readValue(responseBody, OAuthToken.class);
+			OAuthTokenResponseDto tokenResponse = objectMapper.readValue(responseBody, OAuthTokenResponseDto.class);
 
 			if (tokenResponse == null || tokenResponse.getAccessToken() == null || tokenResponse.getAccessToken()
 				.isEmpty()) {
