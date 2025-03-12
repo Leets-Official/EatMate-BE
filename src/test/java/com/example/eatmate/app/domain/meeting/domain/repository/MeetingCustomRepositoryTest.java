@@ -28,6 +28,7 @@ import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
+import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.QueryDslConfig;
@@ -165,6 +166,20 @@ class MeetingCustomRepositoryTest {
 				(i < 5 ? testMember1 : testMember2), offlineMeetings.get(i), ParticipantRole.PARTICIPANT);
 			meetingParticipantRepository.save(offlineParticipant2);
 		}
+	}
+
+	@Test
+	@DisplayName("다가오는 모임 조회를 할 시 가장 빠른 모임을 조회할 수 있다")
+	void findUpcomingMeeting() {
+		// given
+		Long memberId = testMember1.getMemberId();
+
+		// when
+		UpcomingMeetingResponseDto result = meetingRepository.findUpcomingMeeting(memberId);
+
+		// then
+		Assertions.assertThat(result).isNotNull();
+		Assertions.assertThat(result.getMeetingName()).isEqualTo("배달 모임 1");
 	}
 
 	@Nested
