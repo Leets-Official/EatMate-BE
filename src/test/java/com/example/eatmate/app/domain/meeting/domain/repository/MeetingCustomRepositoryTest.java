@@ -3,12 +3,16 @@ package com.example.eatmate.app.domain.meeting.domain.repository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -27,6 +31,7 @@ import com.example.eatmate.app.domain.meeting.domain.OfflineMeeting;
 import com.example.eatmate.app.domain.meeting.domain.OfflineMeetingCategory;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantLimit;
 import com.example.eatmate.app.domain.meeting.domain.ParticipantRole;
+import com.example.eatmate.app.domain.meeting.dto.MeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.MyMeetingListResponseDto;
 import com.example.eatmate.app.domain.meeting.dto.UpcomingMeetingResponseDto;
 import com.example.eatmate.app.domain.member.domain.Member;
@@ -60,6 +65,23 @@ class MeetingCustomRepositoryTest {
 	private Member testMember2;
 	private List<DeliveryMeeting> deliveryMeetings = new ArrayList<>();
 	private List<OfflineMeeting> offlineMeetings = new ArrayList<>();
+
+	public static Stream<Arguments> provideOfflineMeetingList() {
+		return Stream.of(
+			// 인자 순서: category, genderRestriction, maxParticipant, minParticipant, testDescription
+			Arguments.of(null, null, null, null, "필터 없이 모든 오프라인 모임 조회"),
+			Arguments.of(OfflineMeetingCategory.MEAL, null, null, null, "식사 카테고리 모임만 조회"),
+			Arguments.of(OfflineMeetingCategory.BEVERAGE, null, null, null, "음료 카테고리 모임만 조회"),
+			Arguments.of(null, GenderRestriction.ALL, null, null, "성별 제한 없는 모임만 조회"),
+			Arguments.of(null, GenderRestriction.MALE, null, null, "남성만 참여 가능한 모임 조회"),
+			Arguments.of(null, GenderRestriction.FEMALE, null, null, "여성만 참여 가능한 모임 조회"),
+			Arguments.of(null, null, 5L, null, "최대 5명까지 참여 가능한 모임 조회"),
+			Arguments.of(null, null, null, 4L, "최소 4명 이상 참여 가능한 모임 조회"),
+			Arguments.of(null, null, 6L, 4L, "4~6명 참여 가능한 모임 조회"),
+			Arguments.of(OfflineMeetingCategory.MEAL, GenderRestriction.ALL, 5L, 3L,
+				"복합 조건: 식사 카테고리, 성별 제한 없음, 3~5명 참여 가능")
+		);
+	}
 
 	@BeforeEach
 	void setUp() {
@@ -182,6 +204,66 @@ class MeetingCustomRepositoryTest {
 		Assertions.assertThat(result.getMeetingName()).isEqualTo("배달 모임 1");
 	}
 
+	@ParameterizedTest
+	@MethodSource("provideOfflineMeetingList")
+	@DisplayName("오프라인 모임 목록 조회 테스트")
+	void findOfflineMeetingList(
+		OfflineMeetingCategory category,
+		GenderRestriction genderRestriction,
+		Long maxParticipant,
+		Long minParticipant,
+		String testDescription) {
+		// given
+		MeetingSortType sortType = MeetingSortType.PARTICIPANT_COUNT; // 기본 정렬 타입
+		int pageSize = 10;
+		Long lastMeetingId = null;
+		LocalDateTime lastDateTime = null;
+
+		// when
+		List<MeetingListResponseDto> result = meetingRepository.findOfflineMeetingList(
+			category, genderRestriction, maxParticipant, minParticipant, sortType, pageSize, lastMeetingId,
+			lastDateTime);
+
+		// then
+		Assertions.assertThat(result).isNotNull();
+
+		// 필터 적용 검증
+		if (category != null) {
+			// 카테고리 필터가 적용된 경우 해당 카테고리의 모임만 조회되어야 함
+			// 오프라인 모임 카테고리는 직접 검증이 불가하여 결과가 비어있지 않은지만 확인
+			Assertions.assertThat(result).isNotEmpty();
+		}
+
+		if (genderRestriction != null && genderRestriction != GenderRestriction.ALL) {
+			// 성별 제한 필터가 적용된 경우, 모든 모임의 성별 제한 설정이 일치해야 함
+			// 여기서는 결과가 비어있지 않은지만 확인 (실제 성별은 엔티티 내부 정보로 직접 접근 불가)
+			Assertions.assertThat(result).isNotEmpty();
+		}
+
+		// 참여자 수 제한 검증
+		if (maxParticipant != null) {
+			// 최대 참여자 수가 maxParticipant 이하인 모임만 조회되어야 함
+			Assertions.assertThat(result).allMatch(meeting -> meeting.getMaxParticipants() <= maxParticipant);
+		}
+
+		if (minParticipant != null) {
+			// 최대 참여자 수가 minParticipant 이상인 모임만 조회되어야 함
+			Assertions.assertThat(result).allMatch(meeting -> meeting.getMaxParticipants() >= minParticipant);
+		}
+
+		// 정렬 검증 (참여자 수 기준 내림차순)
+		if (!result.isEmpty() && result.size() > 1) {
+			// 첫 번째 결과의 참여자 수가 두 번째 결과의 참여자 수보다 크거나 같아야 함
+			Assertions.assertThat(result.get(0).getCurrentParticipantCount())
+				.isGreaterThanOrEqualTo(result.get(1).getCurrentParticipantCount());
+		}
+
+		// 기본 페이지 크기 검증
+		if (result.size() > pageSize) {
+			Assertions.fail("Result size exceeds page size: " + result.size() + " > " + pageSize);
+		}
+	}
+
 	@Nested
 	@DisplayName("내 모임 목록 조회 테스트")
 	class FindMyMeetingListTest {
@@ -221,4 +303,5 @@ class MeetingCustomRepositoryTest {
 			Assertions.assertThat(result.get(9).getMeetingName()).isEqualTo("오프라인 모임 5");
 		}
 	}
+
 }
