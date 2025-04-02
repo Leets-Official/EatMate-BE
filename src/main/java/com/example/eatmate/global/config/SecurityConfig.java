@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,20 +37,17 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
-			.cors(Customizer.withDefaults())
-			.headers(
-				headersConfigurer -> headersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(
-				authorize -> authorize
-					.requestMatchers("/api/admin/**").hasRole("ADMIN")
-					//.requestMatchers("/ws/chat/**").permitAll()
-					// 아이콘, css, js 관련
-					// 기본 페이지, css, image, js 하위 폴더에 있는 자료들은 모두 접근 가능, h2-console에 접근 가능
-					// 			.requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
-					// 			.requestMatchers("/v3/api-docs", "/v3/api-docs/", "/swagger-ui.html", "/swagger-ui/", "/swagger/**").permitAll()
-					// 			.requestMatchers("/register").permitAll()
-					.anyRequest().permitAll()
+			.cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ CORS 설정 추가
+			.headers(headersConfigurer -> headersConfigurer.frameOptions(
+				HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+			.sessionManagement(
+				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ✅ 세션을 사용하지 않음 (JWT 기반)
+			.authorizeHttpRequests(authorize -> authorize
+				.requestMatchers("/api/admin/**").hasRole("ADMIN")
+				.requestMatchers("/login/oauth2/code/google").permitAll()
+				.requestMatchers("/api/auth/**").permitAll() // ✅ OAuth 로그인 엔드포인트는 인증 필요 없음
+				.requestMatchers("/ws/chat/**").permitAll() // ✅ WebSocket 연결 허용
+				.anyRequest().authenticated() // ✅ 모든 요청은 인증 필요
 			)
 			.exceptionHandling(exceptionHandling ->
 				exceptionHandling
@@ -62,11 +58,12 @@ public class SecurityConfig {
 						response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
 					})
 			)
-			.addFilterBefore(jwtAuthenticationProcessingFilter, UsernamePasswordAuthenticationFilter.class)  // 필터 순서 확인
-			//== 소셜 로그인 설정 ==//
-			.oauth2Login(oauth2 -> oauth2.successHandler(oAuthLoginSuccessHandler)
-				.failureHandler(oAuthLoginFailureHandler)); // 소셜 로그인 실패 시 핸들러 설정
-		//.userInfoEndpoint().userService(customOAuth2UserService)); // customUserService 설정
+			.addFilterBefore(jwtAuthenticationProcessingFilter,
+				UsernamePasswordAuthenticationFilter.class)  // ✅ JWT 필터 추가
+			.oauth2Login(oauth2 -> oauth2
+				.successHandler(oAuthLoginSuccessHandler) // ✅ OAuth2 로그인 성공 시 JWT 발급
+				.failureHandler(oAuthLoginFailureHandler)
+			);
 
 		return http.build();
 	}
@@ -76,15 +73,17 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		configuration.setAllowedOrigins(Arrays.asList(
-			"http://localhost:3000/",
-			"https://develop.d4u0qurydeei4.amplifyapp.com"
+			"http://localhost:3000",
+			"https://develop.d4u0qurydeei4.amplifyapp.com",
+			"https://www.eatmate.site",
+			"https://eatmate.site"
 		));
-		configuration.addAllowedOriginPattern("*");
+		configuration.addAllowedOriginPattern("*"); // 모든 도메인 허용 (필요하면 제거)
+
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS", "PUT"));
-		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "Cookie"));
-		configuration.setExposedHeaders(
-			Arrays.asList("Role", "accept")); //헤더에 노출할 정보 Role 포함
-		configuration.setAllowCredentials(true);
+		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization")); // "Cookie" 제거
+
+		configuration.setExposedHeaders(Arrays.asList("Authorization")); // JWT가 담긴 Authorization 헤더를 노출
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);

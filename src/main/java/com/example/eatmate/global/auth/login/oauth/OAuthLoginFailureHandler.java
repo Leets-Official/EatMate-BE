@@ -37,7 +37,7 @@ public class OAuthLoginFailureHandler implements AuthenticationFailureHandler {
 
 		// 그 외의 소셜 로그인 실패
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setHeader("Error-Message", "소셜 로그인 실패");
+		response.setHeader("Error-Message", "fail to login");
 		response.setHeader("Error-Detail", exception.getMessage());
 		log.error("소셜 로그인 실패: {}", exception.getMessage());
 	}

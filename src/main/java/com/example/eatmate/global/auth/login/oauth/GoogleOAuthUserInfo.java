@@ -1,29 +1,40 @@
 package com.example.eatmate.global.auth.login.oauth;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleOAuthUserInfo {
 
-	private final Map<String, Object> attributes; // Google OAuth 사용자 정보 저장
+	private Map<String, Object> attributes = new HashMap<>();
 
+	// 기존 생성자 유지 (선택 사항)
 	public GoogleOAuthUserInfo(Map<String, Object> attributes) {
-		this.attributes = attributes; // 생성자를 통해 attributes 초기화
+		this.attributes = attributes;
 	}
 
-	/**
-	 * Google에서 반환된 사용자 정보에서 이메일 추출
-	 */
-	public String getEmail() {
-		return (String)attributes.get("email"); // "email" 키로 이메일 반환
+	@JsonAnySetter
+	public void setAttribute(String key, Object value) {
+		attributes.put(key, value);
 	}
 
-	// attributes 반환
 	public Map<String, Object> getAttributes() {
 		return attributes;
 	}
 
-	// 이름 반환
+	public String getEmail() {
+		Object email = attributes.get("email");
+		return email != null ? email.toString() : null;
+	}
+
 	public String getName() {
-		return (String)attributes.get("name");
+		Object name = attributes.get("name");
+		return name != null ? name.toString() : null;
 	}
 }

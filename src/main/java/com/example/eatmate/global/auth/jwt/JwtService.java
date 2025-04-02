@@ -1,6 +1,5 @@
 package com.example.eatmate.global.auth.jwt;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
@@ -17,8 +16,8 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.eatmate.app.domain.member.domain.repository.MemberRepository;
 import com.example.eatmate.global.config.error.exception.custom.UserNotFoundException;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +32,7 @@ public class JwtService {
 	private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
 	private static final String EMAIL_CLAIM = "email";
 	private static final String ROLE_CLAIM = "role";
+	private static final String BEARER = "Bearer";
 	private final MemberRepository memberRepository;
 	@Value("${jwt.secretKey}")
 	private String secretKey;
@@ -40,6 +40,11 @@ public class JwtService {
 	private Long accessTokenExpirationPeriod;
 	@Value("${jwt.refresh.expiration}")
 	private Long refreshTokenExpirationPeriod;
+	@Value("${jwt.access.header}")
+	private String accessHeader;
+
+	@Value("${jwt.refresh.header}")
+	private String refreshHeader;
 
 	/**
 	 * 토큰 생성 메서드
@@ -75,30 +80,6 @@ public class JwtService {
 	 */
 	public String createRefreshToken() {
 		return createToken(REFRESH_TOKEN_SUBJECT, refreshTokenExpirationPeriod, null, null, null);
-	}
-
-	/**
-	 * 공통: 쿠키에서 토큰 추출
-	 */
-	private Optional<String> extractTokenFromCookie(HttpServletRequest request, String cookieName) {
-		return Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
-			.filter(cookie -> cookie.getName().equals(cookieName))
-			.map(Cookie::getValue)
-			.findFirst();
-	}
-
-	/**
-	 * 쿠키에서 Access Token 추출
-	 */
-	public Optional<String> extractAccessTokenFromCookie(HttpServletRequest request) {
-		return extractTokenFromCookie(request, "AccessToken");
-	}
-
-	/**
-	 * 쿠키에서 Refresh Token 추출
-	 */
-	public Optional<String> extractRefreshTokenFromCookie(HttpServletRequest request) {
-		return extractTokenFromCookie(request, "RefreshToken");
 	}
 
 	/**
@@ -168,4 +149,63 @@ public class JwtService {
 				throw new UserNotFoundException();
 			});
 	}
+
+	/**
+	 * AccessToken 헤더에 실어서 보내기
+	 */
+	public void sendAccessToken(HttpServletResponse response, String accessToken) {
+		response.setStatus(HttpServletResponse.SC_OK);
+
+		response.setHeader(accessHeader, accessToken);
+		log.info("재발급된 Access Token : {}", accessToken);
+	}
+
+	/**
+	 * AccessToken + RefreshToken 헤더에 실어서 보내기
+	 */
+	public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
+		response.setStatus(HttpServletResponse.SC_OK);
+
+		setAccessTokenHeader(response, accessToken);
+		setRefreshTokenHeader(response, refreshToken);
+		log.info("Access Token, Refresh Token 헤더 설정 완료");
+	}
+
+	/**
+	 * 헤더에서 RefreshToken 추출
+	 * 토큰 형식 : Bearer XXX에서 Bearer를 제외하고 순수 토큰만 가져오기 위해서
+	 * 헤더를 가져온 후 "Bearer"를 삭제(""로 replace)
+	 */
+	public Optional<String> extractRefreshToken(HttpServletRequest request) {
+		return Optional.ofNullable(request.getHeader(refreshHeader))
+			.filter(refreshToken -> refreshToken.startsWith(BEARER))
+			.map(refreshToken -> refreshToken.replace(BEARER, ""));
+	}
+
+	/**
+	 * 헤더에서 AccessToken 추출
+	 * 토큰 형식 : Bearer XXX에서 Bearer를 제외하고 순수 토큰만 가져오기 위해서
+	 * 헤더를 가져온 후 "Bearer"를 삭제(""로 replace)
+	 */
+	public Optional<String> extractAccessToken(HttpServletRequest request) {
+		return Optional.ofNullable(request.getHeader(accessHeader))
+			.filter(refreshToken -> refreshToken.startsWith(BEARER))
+			.map(refreshToken -> refreshToken.replace(BEARER + " ", ""));
+
+	}
+
+	/**
+	 * AccessToken 헤더 설정 (Bearer 포함)
+	 */
+	public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
+		response.setHeader(accessHeader, "Bearer " + accessToken);
+	}
+
+	/**
+	 * RefreshToken 헤더 설정 (Bearer 포함)
+	 */
+	public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
+		response.setHeader(refreshHeader, "Bearer " + refreshToken);
+	}
+
 }

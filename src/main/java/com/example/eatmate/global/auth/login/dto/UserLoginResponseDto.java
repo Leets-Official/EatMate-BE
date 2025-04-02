@@ -15,4 +15,6 @@ public class UserLoginResponseDto {
 	private String email;
 	private Role role;
 	private Gender gender;
+	private String accessToken;
+	private String refreshToken;
 }

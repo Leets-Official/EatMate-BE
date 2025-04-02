@@ -5,6 +5,7 @@ import static org.springframework.security.core.userdetails.User.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.example.eatmate.app.domain.member.domain.Member;
 import com.example.eatmate.app.domain.member.domain.Role;
@@ -24,6 +25,7 @@ public class LoginService implements UserDetailsService {
 
 	private final MemberRepository memberRepository;
 	private final JwtService jwtService;
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UserNotFoundException {
@@ -36,8 +38,8 @@ public class LoginService implements UserDetailsService {
 	}
 
 	public UserLoginResponseDto getUserInfoFromRequest(HttpServletRequest request) {
-		// 쿠키에서 AccessToken 추출
-		String accessToken = jwtService.extractAccessTokenFromCookie(request)
+		// 쿠키 또는 헤더에서 AccessToken 추출
+		String accessToken = jwtService.extractAccessToken(request)
 			.orElseThrow(() -> new CommonException(ErrorCode.TOKEN_NOT_FOUND));
 
 		// AccessToken 유효성 검증 및 사용자 정보 조회
@@ -49,6 +51,7 @@ public class LoginService implements UserDetailsService {
 		if (!jwtService.isTokenValid(accessToken)) {
 			throw new CommonException(ErrorCode.INVALID_TOKEN);
 		}
+
 		// AccessToken에서 이메일과 역할(Role) 추출
 		String email = jwtService.extractEmail(accessToken)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVALID_TOKEN));
@@ -59,8 +62,18 @@ public class LoginService implements UserDetailsService {
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 
-		// 사용자 정보 반환
-		return new UserLoginResponseDto(email, Role.valueOf(role), member.getGender());
-	}
+		//  Refresh Token 발급
+		String refreshToken = jwtService.createRefreshToken();
+		member.updateRefreshToken(refreshToken);
+		memberRepository.save(member);
 
+		//  UserLoginResponseDto 수정된 버전 적용
+		return new UserLoginResponseDto(
+			email,
+			Role.valueOf(role),
+			member.getGender(),
+			accessToken,
+			refreshToken
+		);
+	}
 }
