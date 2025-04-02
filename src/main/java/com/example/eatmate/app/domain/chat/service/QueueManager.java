@@ -3,6 +3,7 @@ package com.example.eatmate.app.domain.chat.service;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,10 +18,15 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.eatmate.app.domain.chat.dto.request.ChatMessageRequestDto;
+import com.example.eatmate.app.domain.chatRoom.domain.ChatRoom;
+import com.example.eatmate.app.domain.chatRoom.domain.DeletedStatus;
+import com.example.eatmate.app.domain.chatRoom.domain.repository.ChatRoomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 
@@ -38,6 +44,7 @@ public class QueueManager {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final Map<Long, SimpleMessageListenerContainer> activeListeners = new ConcurrentHashMap<>();
+	private final ChatRoomRepository chatRoomRepository;
 	@Value("${rabbitmq.queue-prefix}")
 	private String queuePrefix;
 	@Value("${rabbitmq.binding-key-prefix}")
@@ -111,6 +118,18 @@ public class QueueManager {
 		} else {
 			log.warn("No active listener found for chat room {}", chatRoomId);
 		}
+	}
+
+	//서버 다운 이후 복구했을 경우 채팅방의 컨슈머 복구
+	@Bean
+	public ApplicationRunner restoreChatRoomListenersRunner() {
+		return args -> {
+			List<ChatRoom> activeChatRoom = chatRoomRepository.findAllByDeletedStatus(DeletedStatus.NOT_DELETED);
+			for (ChatRoom chatRoom : activeChatRoom) {
+				startChatRoomListener(chatRoom.getId());
+			}
+			log.info("Restored {} chat room listeners from DB", activeChatRoom.size());
+		};
 	}
 
 	@PreDestroy
